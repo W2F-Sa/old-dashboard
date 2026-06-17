@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت دستگاه کشاورزی | Agriculture Device Management</title>
+    
+    <!-- External Libraries -->
+    <!-- jQuery First -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    
+    <!-- Other CSS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://my.giot.ir/fonts/css/fontiran.css" rel="stylesheet">
+    
+    <!-- Bootstrap JavaScript (after jQuery) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Other JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+    
+    <!-- Import map to resolve bare specifiers used inside three.js addons (e.g., OrbitControls) -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    
+    <script type="module">
+import { OrbitControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/OrbitControls.js?module';
+window.OrbitControls = OrbitControls;
+</script>
+    
+    <!-- MQTT.js -->
+    <script src="https://cdn.giot.ir/js/mqtt.min.js"></script>
+    
+    <!-- Config API -->
+    <script src="https://my.giot.ir/js/config.min.js"></script>
+    
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="https://my.giot.ir/dashboard/css/style.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/agriculture.css">
+    
+    <!-- Audio Files -->
+    <audio id="OKnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_simple-02.ogg" muted preload="none"></audio>
+    <audio id="AlarmnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_ambient.ogg" muted preload="none"></audio>
+</head>
+<body>
+    <div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; z-index: 9999999; font-weight: 500; max-width: 90%; word-wrap: break-word;">
+        <!-- Notification message will be inserted here -->
+    </div>
+    
+    <header class="header navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-microchip me-2"></i>
+                داشبورد IoT شرکت ماهان الکترونیک پرنیا
+            </a>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button class="navbar-toggler mobile-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNavMenu" aria-controls="mobileNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon">
+                    <i class="fas fa-bars"></i>
+                </span>
+            </button>
+
+            <!-- Collapsible Mobile Menu -->
+            <div class="collapse navbar-collapse" id="mobileNavMenu">
+                <!-- Mobile Menu Items (visible only on mobile) -->
+                <div class="mobile-menu-items d-lg-none">
+                    <!-- Device Management Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-cogs me-2"></i>مدیریت دستگاه‌ها</h6>
+                        <a href="../dashboard/add-device.html" class="mobile-menu-item">
+                            <i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید
+                        </a>
+                        <a href="../dashboard/devices-list.html" class="mobile-menu-item">
+                            <i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها
+                        </a>
+                        <a href="../dashboard/rename-device.html" class="mobile-menu-item">
+                            <i class="fas fa-edit me-2"></i>تغییر نام دستگاه
+                        </a>
+                        <a href="../dashboard/remove-device.html" class="mobile-menu-item text-danger">
+                            <i class="fas fa-trash me-2"></i>حذف دستگاه
+                        </a>
+                    </div>
+                    
+                    <!-- Access Management Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-users-cog me-2"></i>مدیریت دسترسی</h6>
+                        <a href="../dashboard/manage-access.html" class="mobile-menu-item">
+                            <i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی
+                        </a>
+                        <a href="../dashboard/edit-access.html" class="mobile-menu-item">
+                            <i class="fas fa-user-edit me-2"></i>ویرایش سطوح دسترسی
+                        </a>
+                    </div>
+                    
+                    <!-- User Account Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-user me-2"></i>حساب کاربری</h6>
+                        <a href="../dashboard/edit-profile.html" class="mobile-menu-item">
+                            <i class="fas fa-user-edit me-2"></i>ویرایش کاربری
+                        </a>
+                        <a href="../dashboard/changepassword.html" class="mobile-menu-item">
+                            <i class="fas fa-key me-2"></i>تغییر رمز عبور
+                        </a>
+                        <a href="#" id="mobileSignOut" class="mobile-menu-item text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i>خروج
+                        </a>
+                    </div>
+                    
+                    <!-- Support Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-headset me-2"></i>پشتیبانی</h6>
+                        <a href="../crm/index.html" class="mobile-menu-item">
+                            <i class="fas fa-ticket-alt me-2"></i>سامانه پشتیبانی و Crm
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Desktop Menu (visible only on desktop) -->
+                <div class="d-none d-lg-flex ms-auto">
+
+                    
+                    <div class="header-actions">
+                        <div class="theme-toggle-container">
+                            <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
+                            <label for="theme-toggle" class="theme-toggle-label">
+                                <span class="theme-toggle-slider">
+                                    <i class="fas fa-sun theme-icon sun-icon"></i>
+                                    <i class="fas fa-moon theme-icon moon-icon"></i>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle user-menu-btn" href="#" id="mainMenuDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-bars me-1"></i> منوی اصلی
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end glass-dropdown" aria-labelledby="mainMenuDropdown">
+                                <h6 class="dropdown-header"><i class="fas fa-cogs me-2"></i>مدیریت دستگاه‌ها</h6>
+                                <a class="dropdown-item glass-item" href="../dashboard/add-device.html"><i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید</a>
+                                <a class="dropdown-item glass-item" href="../dashboard/devices-list.html"><i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها</a>
+                                <a class="dropdown-item glass-item" href="../dashboard/rename-device.html"><i class="fas fa-edit me-2"></i>تغییر نام دستگاه</a>
+                                <a class="dropdown-item glass-item text-danger" href="../dashboard/remove-device.html"><i class="fas fa-trash me-2"></i>حذف دستگاه</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header"><i class="fas fa-users-cog me-2"></i>مدیریت دسترسی</h6>
+                                <a class="dropdown-item glass-item" href="../dashboard/manage-access.html"><i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی</a>
+                                <a class="dropdown-item glass-item" href="../dashboard/edit-access.html"><i class="fas fa-user-edit me-2"></i>ویرایش سطوح دسترسی</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header"><i class="fas fa-user me-2"></i>حساب کاربری</h6>
+                                <a class="dropdown-item glass-item" href="../dashboard/edit-profile.html"><i class="fas fa-user-edit me-2"></i>ویرایش کاربری</a>
+                                <a class="dropdown-item glass-item" href="../dashboard/changepassword.html"><i class="fas fa-key me-2"></i>تغییر رمز عبور</a>
+                                <a class="dropdown-item glass-item text-danger" id="signOut" href="#"><i class="fas fa-sign-out-alt me-2"></i>خروج</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header"><i class="fas fa-headset me-2"></i>پشتیبانی</h6>
+                                <a class="dropdown-item glass-item" href="../crm/index.html"><i class="fas fa-ticket-alt me-2"></i>سامانه پشتیبانی و Crm</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Agriculture Navigation Header -->
+    <div class="azan-navigation">
+        <div class="container-fluid">
+            <ul class="nav nav-tabs nav-tabs-custom" id="agricultureTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="water-status-tab" data-bs-toggle="tab" data-bs-target="#water-status" type="button" role="tab" aria-controls="water-status" aria-selected="true">
+                        <i class="fas fa-tint me-2"></i>
+                        وضعیت آب چاه
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pool-status-tab" data-bs-toggle="tab" data-bs-target="#pool-status" type="button" role="tab" aria-controls="pool-status" aria-selected="false">
+                        <i class="fas fa-swimming-pool me-2"></i>
+                        وضعیت آب استخر
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="motor-settings-tab" data-bs-toggle="tab" data-bs-target="#motor-settings" type="button" role="tab" aria-controls="motor-settings" aria-selected="false">
+                        <i class="fas fa-cog me-2"></i>
+                        تنظیمات موتور
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="general-settings-tab" data-bs-toggle="tab" data-bs-target="#general-settings" type="button" role="tab" aria-controls="general-settings" aria-selected="false">
+                        <i class="fas fa-sliders-h me-2"></i>
+                        تنظیمات کلی
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Tab Content -->
+        <div class="tab-content" id="agricultureTabContent">
+
+            <!-- Water Status Tab -->
+            <div class="tab-pane fade show active" id="water-status" role="tabpanel" aria-labelledby="water-status-tab">
+                <main role="main" class="px-4" style="margin-top: 10px;">
+                <div class="glass-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-tint"></i>
+                        وضعیت آب چاه
+                    </h3>
+                    
+                    <!-- Data Count Selection -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">انتخاب تعداد داده‌های نمایشی</h5>
+                            <div class="data-count-buttons">
+                                <button class="btn btn-outline-primary data-count-btn active" data-count="5">
+                                    <i class="fas fa-chart-line me-2"></i>5 داده اخیر
+                                </button>
+                                <button class="btn btn-outline-primary data-count-btn" data-count="10">
+                                    <i class="fas fa-chart-area me-2"></i>10 داده اخیر
+                                </button>
+                                <button class="btn btn-outline-primary data-count-btn" data-count="20">
+                                    <i class="fas fa-chart-bar me-2"></i>20 داده اخیر
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Time Range Selection -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">انتخاب بازه زمانی سفارشی</h5>
+                            <div class="time-range-container">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="startDateTime" class="form-label">از تاریخ و ساعت:</label>
+                                        <input type="datetime-local" class="form-control" id="startDateTime">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="endDateTime" class="form-label">تا تاریخ و ساعت:</label>
+                                        <input type="datetime-local" class="form-control" id="endDateTime">
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <button class="btn btn-info me-2" id="loadTimeRangeBtn">
+                                            <i class="fas fa-search me-2"></i>جستجو در بازه
+                                        </button>
+                                        <button class="btn btn-secondary" id="loadTodayBtn">
+                                            <i class="fas fa-calendar-day me-2"></i>امروز
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <div class="quick-time-buttons">
+                                            <button class="btn btn-outline-info btn-sm quick-time-btn" data-days="1">
+                                                <i class="fas fa-clock me-1"></i>24 ساعت گذشته
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm quick-time-btn" data-days="3">
+                                                <i class="fas fa-calendar-week me-1"></i>3 روز گذشته
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm quick-time-btn" data-days="7">
+                                                <i class="fas fa-calendar-alt me-1"></i>هفته گذشته
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm quick-time-btn" data-days="30">
+                                                <i class="fas fa-calendar me-1"></i>ماه گذشته
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Water Level Display -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="current-water-display">
+                                <div class="water-level-card">
+                                    <div class="water-icon">
+                                        <i class="fas fa-tint"></i>
+                                    </div>
+                                    <div class="water-info">
+                                        <h4>سطح آب فعلی</h4>
+                                        <div class="water-level-value" id="currentWaterLevel">-- متر</div>
+                                        <div class="water-status-text" id="waterStatusText">در حال بارگذاری...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- View Mode Toggle -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="view-mode-toggle">
+                                <button class="btn btn-outline-primary view-mode-btn" data-mode="2d">
+                                    <i class="fas fa-chart-line me-2"></i>نمایش نمودار
+                                </button>
+                                <button class="btn btn-outline-primary view-mode-btn" data-mode="cross-section">
+                                    <i class="fas fa-eye me-2"></i>نمای مقطعی
+                                </button>
+                                <button class="btn btn-primary view-mode-btn active" data-mode="3d">
+                                    <i class="fas fa-cube me-2"></i>نمایش 3 بعدی
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2D Chart Display -->
+                    <div id="chart2d-container" class="chart-container" style="display: none;">
+                        <canvas id="waterLevelChart" width="400" height="200"></canvas>
+                    </div>
+                    
+                    <!-- Cross-sectional View -->
+                    <div id="cross-section-container" class="chart-container" style="display: none;">
+                        <div class="well-cross-section">
+                            <div class="well-container">
+                                <div class="ground-surface">
+                                    <div class="grass-texture"></div>
+                                </div>
+                                <div class="well-shaft">
+                                    <div class="well-interior">
+                                        <div class="water" id="wellWater"></div>
+                                        <div class="water-surface-animation" id="wellWaterSurface"></div>
+                                    </div>
+                                </div>
+                                <div class="well-top">
+                                    <div class="well-rim"></div>
+                                </div>
+                                <div class="rope"></div>
+                                <div class="bucket" id="wellBucket"></div>
+                                <div class="soil-layers">
+                                    <div class="layer topsoil">
+                                        <span class="layer-label">خاک سطحی</span>
+                                    </div>
+                                    <div class="layer clay">
+                                        <span class="layer-label">رس</span>
+                                    </div>
+                                    <div class="layer sand">
+                                        <span class="layer-label">شن</span>
+                                    </div>
+                                    <div class="layer rock">
+                                        <span class="layer-label">سنگ</span>
+                                    </div>
+                                </div>
+                                <div class="measurements">
+                                    <div class="depth-marker" style="top: 80px;">0m</div>
+                                    <div class="depth-marker" style="top: 140px;">2m</div>
+                                    <div class="depth-marker" style="top: 200px;">4m</div>
+                                    <div class="depth-marker" style="top: 260px;">6m</div>
+                                    <div class="depth-marker" style="top: 320px;">8m</div>
+                                    <div class="depth-marker" style="top: 380px;">10m</div>
+                                </div>
+                                <div class="water-level-info">
+                                    <div class="water-level-indicator" id="wellWaterLevelIndicator">
+                                        سطح آب: -- متر
+                                    </div>
+                                    <div class="well-status" id="wellStatusIndicator">
+                                        وضعیت: در حال بارگذاری...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 3D Visualization -->
+                    <div id="chart3d-container" class="chart-container">
+                        <header>
+                            <h1>نمای سه‌بعدی چاه آب (با بافت، برش نمایشی، خط‌کش عمقی و سطح ایستایی)</h1>
+                        </header>
+
+                        <!-- Controls removed - managed by agriculture.js -->
+                        <section class="panel" style="display: none;">
+                            <div class="controls">
+                                <!-- Water level and bucket depth controls removed -->
+                            </div>
+                        </section>
+
+                        <section id="stageWrap">
+                            <canvas id="stage"></canvas>
+                            <div class="legend">
+                                <div class="chip"><span class="dot" style="background:#8B4513"></span>خاک سطحی</div>
+                                <div class="chip"><span class="dot" style="background:#CD853F"></span>رس</div>
+                                <div class="chip"><span class="dot" style="background:#DEB887"></span>ماسه</div>
+                                <div class="chip"><span class="dot" style="background:#808080"></span>سنگ</div>
+                                <div class="chip"><span class="dot" style="background:#64748b"></span>لاینینگ چاه (برش‌خورده)</div>
+                                <div class="chip"><span class="dot" style="background:#29B6F6"></span>آب + سطح ایستایی</div>
+                                <div class="chip"><span class="dot" style="background:#0f172a"></span>خط‌کش عمقی</div>
+                            </div>
+                        </section>
+
+                        <footer>چرخش: درَگ با دکمه چپ | زوم: اسکرول | جابه‌جایی: درَگ با راست | عددها بر حسب متر</footer>
+                    </div>
+                    
+                    <!-- Water Level History Table -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">تاریخچه سطح آب</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="waterHistoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ردیف</th>
+                                            <th>زمان ثبت</th>
+                                            <th>سطح آب (متر)</th>
+                                            <th>وضعیت</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="waterHistoryBody">
+                                        <tr>
+                                            <td colspan="4" class="text-center">در حال بارگذاری...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </main>
+            </div>
+            
+            <!-- Pool Status Tab -->
+            <div class="tab-pane fade" id="pool-status" role="tabpanel" aria-labelledby="pool-status-tab">
+                <main role="main" class="px-4" style="margin-top: 10px;">
+                <div class="glass-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-swimming-pool"></i>
+                        وضعیت آب استخر
+                    </h3>
+                    
+                    <!-- Data Count Selection -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">انتخاب تعداد داده‌های نمایشی</h5>
+                            <div class="data-count-buttons">
+                                <button class="btn btn-outline-primary data-count-btn-pool active" data-count="5">
+                                    <i class="fas fa-chart-line me-2"></i>5 داده اخیر
+                                </button>
+                                <button class="btn btn-outline-primary data-count-btn-pool" data-count="10">
+                                    <i class="fas fa-chart-area me-2"></i>10 داده اخیر
+                                </button>
+                                <button class="btn btn-outline-primary data-count-btn-pool" data-count="20">
+                                    <i class="fas fa-chart-bar me-2"></i>20 داده اخیر
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Time Range Selection -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">انتخاب بازه زمانی سفارشی</h5>
+                            <div class="time-range-container">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="startDateTimePool" class="form-label">از تاریخ و ساعت:</label>
+                                        <input type="datetime-local" class="form-control" id="startDateTimePool">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="endDateTimePool" class="form-label">تا تاریخ و ساعت:</label>
+                                        <input type="datetime-local" class="form-control" id="endDateTimePool">
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <button class="btn btn-info me-2" id="loadTimeRangeBtnPool">
+                                            <i class="fas fa-search me-2"></i>جستجو در بازه
+                                        </button>
+                                        <button class="btn btn-secondary" id="loadTodayBtnPool">
+                                            <i class="fas fa-calendar-day me-2"></i>امروز
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <div class="quick-time-buttons">
+                                            <button class="btn btn-outline-info btn-sm quick-time-btn-pool" data-days="1">
+                                                <i class="fas fa-clock me-1"></i>24 ساعت گذشته
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm quick-time-btn-pool" data-days="3">
+                                                <i class="fas fa-calendar-week me-1"></i>3 روز گذشته
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm quick-time-btn-pool" data-days="7">
+                                                <i class="fas fa-calendar-alt me-1"></i>هفته گذشته
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm quick-time-btn-pool" data-days="30">
+                                                <i class="fas fa-calendar me-1"></i>ماه گذشته
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Pool Level Display -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="current-water-display">
+                                <div class="water-level-card">
+                                    <div class="water-icon">
+                                        <i class="fas fa-swimming-pool"></i>
+                                    </div>
+                                    <div class="water-info">
+                                        <h4>سطح آب فعلی</h4>
+                                        <div class="water-level-value" id="currentPoolLevel">-- متر</div>
+                                        <div class="water-status-text" id="poolStatusText">در حال بارگذاری...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- View Mode Toggle -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="view-mode-toggle">
+                                <button class="btn btn-primary pool-view-mode-btn active" data-mode="2d">
+                                    <i class="fas fa-chart-line me-2"></i>نمایش نمودار
+                                </button>
+                                <button class="btn btn-outline-primary pool-view-mode-btn" data-mode="cross-section">
+                                    <i class="fas fa-eye me-2"></i>نمای مقطعی
+                                </button>
+                                <button class="btn btn-outline-primary pool-view-mode-btn" data-mode="3d">
+                                    <i class="fas fa-cube me-2"></i>نمایش 3 بعدی
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2D Chart Display -->
+                    <div id="chart2d-container-pool" class="chart-container">
+                        <canvas id="poolLevelChart" width="400" height="200"></canvas>
+                    </div>
+                    
+                    <!-- Cross-sectional View -->
+                    <div id="cross-section-container-pool" class="chart-container" style="display: none;">
+                        <div class="pool-cross-section">
+                            <div class="pool-container">
+                                <div class="pool-ground">
+                                    <div class="pool-deck"></div>
+                                </div>
+                                <div class="pool-structure">
+                                    <div class="pool-interior">
+                                        <div class="pool-water" id="poolWater"></div>
+                                        <div class="pool-water-surface" id="poolWaterSurface"></div>
+                                    </div>
+                                    <div class="pool-walls">
+                                        <div class="pool-wall left"></div>
+                                        <div class="pool-wall right"></div>
+                                        <div class="pool-wall bottom"></div>
+                                    </div>
+                                </div>
+                                <div class="pool-equipment">
+                                    <div class="pool-ladder"></div>
+                                    <div class="pool-drain"></div>
+                                </div>
+                                <div class="pool-measurements">
+                                    <div class="pool-depth-marker" style="top: 100px;">0m</div>
+                                    <div class="pool-depth-marker" style="top: 150px;">0.5m</div>
+                                    <div class="pool-depth-marker" style="top: 200px;">1m</div>
+                                    <div class="pool-depth-marker" style="top: 250px;">1.5m</div>
+                                    <div class="pool-depth-marker" style="top: 300px;">2m</div>
+                                    <div class="pool-depth-marker" style="top: 350px;">2.5m</div>
+                                </div>
+                                <div class="pool-level-info">
+                                    <div class="pool-level-indicator" id="poolWaterLevelIndicator">
+                                        سطح آب: -- متر
+                                    </div>
+                                    <div class="pool-status" id="poolStatusIndicator">
+                                        وضعیت: در حال بارگذاری...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 3D Visualization -->
+                    <div id="chart3d-container-pool" class="chart-container" style="display: none;">
+                        <div id="threejs-container-pool" style="width: 100%; height: 550px; border-radius: 15px; overflow: hidden;"></div>
+                    </div>
+                    
+                    <!-- Pool Level History Table -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">تاریخچه سطح آب</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="poolHistoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ردیف</th>
+                                            <th>زمان ثبت</th>
+                                            <th>سطح آب (متر)</th>
+                                            <th>وضعیت</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="poolHistoryBody">
+                                        <tr>
+                                            <td colspan="4" class="text-center">در حال بارگذاری...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </main>
+            </div>
+            
+            <!-- Motor Settings Tab -->
+            <div class="tab-pane fade" id="motor-settings" role="tabpanel" aria-labelledby="motor-settings-tab">
+                <main role="main" class="px-4" style="margin-top: 10px;">
+                <div class="glass-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-cog"></i>
+                        تنظیمات موتور
+                    </h3>
+                    
+                    <!-- Motor Control -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="motor-control-card">
+                                <div class="motor-status">
+                                    <div class="motor-icon">
+                                        <i class="fas fa-cog" id="motor1Icon"></i>
+                                    </div>
+                                    <div class="motor-info">
+                                        <h4>موتور اول</h4>
+                                        <div class="motor-status-text" id="motor1StatusText">خاموش</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="motor-controls">
+                                    <button class="btn btn-success motor-btn" id="motor1OnBtn" onclick="controlMotor('motor1', 'on')">
+                                        <i class="fas fa-play me-2"></i>روشن کردن
+                                    </button>
+                                    <button class="btn btn-danger motor-btn" id="motor1OffBtn" onclick="controlMotor('motor1', 'off')">
+                                        <i class="fas fa-stop me-2"></i>خاموش کردن
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="motor-control-card">
+                                <div class="motor-status">
+                                    <div class="motor-icon">
+                                        <i class="fas fa-cog" id="motor2Icon"></i>
+                                    </div>
+                                    <div class="motor-info">
+                                        <h4>موتور دوم</h4>
+                                        <div class="motor-status-text" id="motor2StatusText">خاموش</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="motor-controls">
+                                    <button class="btn btn-success motor-btn" id="motor2OnBtn" onclick="controlMotor('motor2', 'on')">
+                                        <i class="fas fa-play me-2"></i>روشن کردن
+                                    </button>
+                                    <button class="btn btn-danger motor-btn" id="motor2OffBtn" onclick="controlMotor('motor2', 'off')">
+                                        <i class="fas fa-stop me-2"></i>خاموش کردن
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                </div>
+                </main>
+            </div>
+            
+            <!-- General Settings Tab -->
+            <div class="tab-pane fade" id="general-settings" role="tabpanel" aria-labelledby="general-settings-tab">
+                <main role="main" class="px-4" style="margin-top: 10px;">
+                <div class="glass-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        اطلاعات دستگاه
+                    </h3>
+                    
+                    <!-- Device Status Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="fw-bold text-primary">
+                                    <i class="fas fa-clock me-2"></i>
+                                    آخرین بار مشاهده شده:
+                                </label>
+                                <div class="mt-2">
+                                    <div class="device-datetime-container">
+                                        <div class="datetime-item">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span>تاریخ:</span>
+                                            <span id="deviceLastSeenDate" class="badge bg-primary">در حال بارگذاری...</span>
+                                        </div>
+                                        <div class="datetime-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span>ساعت:</span>
+                                            <span id="deviceLastSeenTime" class="badge bg-success">در حال بارگذاری...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="fw-bold text-primary">
+                                    <i class="fas fa-signal me-2"></i>
+                                    وضعیت دستگاه:
+                                </label>
+                                <div class="mt-2">
+                                    <span id="deviceStatus" class="badge bg-success fs-6">در حال بارگذاری...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Battery and Power Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="fw-bold text-primary">
+                                    <i class="fas fa-battery-half me-2"></i>
+                                    سطح باتری:
+                                </label>
+                                <div class="mt-2 d-flex align-items-center">
+                                    <div class="battery-container me-3">
+                                        <div class="battery-body">
+                                            <div id="batteryFill" class="battery-fill"></div>
+                                        </div>
+                                        <div class="battery-tip"></div>
+                                    </div>
+                                    <span id="batteryLevel" class="badge bg-info fs-6">در حال بارگذاری...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="fw-bold text-primary">
+                                    <i class="fas fa-plug me-2"></i>
+                                    منبع تغذیه:
+                                </label>
+                                <div class="mt-2">
+                                    <span id="externalPowerSource" class="badge bg-warning fs-6">در حال بارگذاری...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Refresh Button -->
+                    <div class="row mt-4">
+                        <div class="col-md-12 text-center">
+                            <button class="btn btn-primary" onclick="saveGeneralSettings()">
+                                <i class="fas fa-sync-alt me-2"></i>به‌روزرسانی اطلاعات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Device Configuration Management Section -->
+                <div class="glass-card mt-4">
+                    <h3 class="section-title">
+                        <i class="fas fa-cogs"></i>
+                        مدیریت پیکربندی دستگاه
+                    </h3>
+                    
+                    <!-- Device Configuration Status -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="config-status-card">
+                                <div class="config-status-header">
+                                    <i class="fas fa-info-circle text-primary me-2"></i>
+                                    <span>وضعیت پیکربندی:</span>
+                                    <span id="configStatus" class="badge bg-secondary">در انتظار بارگذاری...</span>
+                                </div>
+                                <div class="config-status-details mt-2">
+                                    <small class="text-muted">
+                                        آخرین بروزرسانی: <span id="configLastUpdate">--</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuration Actions -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="config-action-card">
+                                <div class="action-icon">
+                                    <i class="fas fa-download text-primary"></i>
+                                </div>
+                                <h5>دریافت پیکربندی</h5>
+                                <p class="text-muted">دریافت پیکربندی فعلی دستگاه از سرور</p>
+                                <button class="btn btn-outline-primary w-100" onclick="getDeviceConfig()">
+                                    <i class="fas fa-download me-2"></i>دریافت
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="config-action-card">
+                                <div class="action-icon">
+                                    <i class="fas fa-upload text-success"></i>
+                                </div>
+                                <h5>ذخیره پیکربندی</h5>
+                                <p class="text-muted">ذخیره پیکربندی جدید در سرور</p>
+                                <button class="btn btn-outline-success w-100" onclick="setDeviceConfig()">
+                                    <i class="fas fa-save me-2"></i>ذخیره
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="config-action-card">
+                                <div class="action-icon">
+                                    <i class="fas fa-paper-plane text-warning"></i>
+                                </div>
+                                <h5>ارسال پیکربندی</h5>
+                                <p class="text-muted">ارسال پیکربندی به دستگاه از طریق MQTT</p>
+                                <button class="btn btn-outline-warning w-100" onclick="uploadDeviceConfig()">
+                                    <i class="fas fa-paper-plane me-2"></i>ارسال
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuration Editor -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="config-editor-card">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-code me-2"></i>
+                                    ویرایشگر پیکربندی
+                                </h6>
+                                <div class="form-group">
+                                    <textarea 
+                                        id="deviceConfigEditor" 
+                                        class="form-control config-textarea" 
+                                        rows="10" 
+                                        placeholder="پیکربندی دستگاه به صورت JSON یا متن..."
+                                    ></textarea>
+                                </div>
+                                <div class="config-editor-actions mt-3">
+                                    <button class="btn btn-sm btn-outline-secondary me-2" onclick="formatConfig()">
+                                        <i class="fas fa-magic me-1"></i>فرمت‌بندی
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger me-2" onclick="clearConfig()">
+                                        <i class="fas fa-trash me-1"></i>پاک کردن
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="validateConfig()">
+                                        <i class="fas fa-check me-1"></i>اعتبارسنجی
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuration Preview -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="config-preview-card">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-eye me-2"></i>
+                                    پیش‌نمایش پیکربندی
+                                </h6>
+                                <div id="configPreview" class="config-preview">
+                                    <div class="text-muted text-center">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        پیکربندی برای نمایش وجود ندارد
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agriculture JavaScript - Load after DOM and libraries -->
+    <script>
+        // Ensure Bootstrap is loaded before initializing agriculture.js
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if Bootstrap is available
+            if (typeof bootstrap !== 'undefined') {
+                console.log('Bootstrap loaded successfully');
+                // Explicitly ensure main dropdown is closed on page load
+                var menuToggle = document.getElementById('mainMenuDropdown');
+                var menu = document.querySelector('.dropdown-menu.glass-dropdown');
+                if (menu) {
+                    menu.classList.remove('show');
+                }
+                if (menuToggle) {
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                    try {
+                        var dd = bootstrap.Dropdown.getOrCreateInstance(menuToggle);
+                        dd.hide();
+                    } catch (e) {
+                        console.warn('Dropdown instance not available to hide on load:', e);
+                    }
+                }
+            } else {
+                console.error('Bootstrap is not loaded');
+            }
+        });
+    </script>
+    <script src="js/device-config-api.js"></script>
+    <script src="js/agriculture.js"></script>
+    <script src="js/well3d.js"></script>
+    <script type="module">
+        // Initialize 3D well visualization when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit to ensure all scripts are loaded
+            setTimeout(() => {
+                try {
+                    const viz = new Enhanced3DWellVisualization();
+                    viz.init();
+                    console.log('3D Well Visualization initialized successfully');
+                } catch (error) {
+                    console.error('Failed to initialize 3D Well Visualization:', error);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

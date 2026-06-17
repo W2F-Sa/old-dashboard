@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="description" content="پنل مدیریتی اینترنت اشیاء شرکت ماهان الکترونیک پرنیا">
+    <meta name="keywords" content="IoT Dashboard, IoT Panel, IoT Management, IoT System, داشبورد اینترنت اشیاء, پنل اینترنت اشیاء, داشبورد IoT, پنل IoT, کنترل وسایل با اینترنت اشیاء, هوشمند سازی و اینترنت اشیاء,IoT">
+    <meta name="author" content="ماهان الکترونیک پرنیا">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>IoT Dashboard | داشبورد اینترنت اشیاء</title>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdn.giot.ir/js/all.min.css">
+    
+    <!-- IRANSans Font -->
+    <link href="https://my.giot.ir/fonts/css/fontiran.css" rel="stylesheet">
+    
+    <!-- jQuery -->
+    <script src="https://cdn.giot.ir/js/jquery.min.js"></script>
+    
+    <!-- External JavaScript files -->
+    <script src="https://my.giot.ir/js/config.min.js"></script>
+    <script src="https://my.giot.ir/js/login.min.js"></script>
+    
+    <!-- Persian Number Converter -->
+    <script src="https://my.giot.ir/js/persian-number-converter.js"></script>
+    
+    <!-- Bootstrap 5 (matching dashboard) -->
+    <link rel="stylesheet" href="https://cdn.giot.ir/js/bootstrap.min.css">
+    <script src="https://cdn.giot.ir/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link href="https://my.giot.ir/dashboard/css/style.css" rel="stylesheet">
+    <link href="https://my.giot.ir/css/login.min.css" rel="stylesheet">
+    
+    <!-- Notification sounds -->
+    <audio id="OKnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_simple-02.ogg"></audio>
+    <audio id="AlarmnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_ambient.ogg"></audio>
+    
+    <style>
+        /* Additional styles to match dashboard */
+        body {
+            background-color: #f8f9fa;
+            background-image: url('https://my.giot.ir/photo/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        .login-container {
+            padding: 2rem 0;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: #fff;
+            text-align: center;
+            padding: 1.5rem 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .panel-login {
+            border: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        
+        .panel-heading {
+            background: #f8f9fa;
+            border-bottom: 1px solid #eaeaea;
+            padding: 1rem;
+        }
+        
+        .panel-heading a {
+            text-decoration: none;
+            color: #495057;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.75rem 1rem;
+            border-radius: 5px;
+            display: block;
+        }
+        
+        .panel-heading a:hover {
+            color: #2c3e50;
+            background-color: rgba(44, 62, 80, 0.05);
+        }
+        
+        .panel-heading a.active {
+            color: #2c3e50;
+            font-weight: bold;
+            background-color: rgba(44, 62, 80, 0.1);
+        }
+        
+        .panel-body {
+            padding: 1.5rem;
+        }
+        
+        .form-control {
+            height: 45px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #2c3e50;
+            box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+        }
+        
+        .form-label {
+            color: #495057;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn-login, .btn-register, .btn-recover, .btn-finalreg {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: #fff;
+            font-weight: 500;
+            border: none;
+            border-radius: 5px;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-login:hover, .btn-register:hover, .btn-recover:hover, .btn-finalreg:hover {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+        
+        footer {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: #fff;
+            text-align: center;
+            padding: 1rem 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        #notification {
+            background-color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .password-container-login, .password-container1, .password-container2 {
+            position: relative;
+        }
+        
+        .toggleLoginPassword, .toggleRegisterPassword1, .toggleRegisterPassword2 {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #495057;
+        }
+        
+        .forgot-password {
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .forgot-password:hover {
+            color: #34495e;
+            text-decoration: underline;
+        }
+        
+        /* API Data Display Styling */
+        #apiDataDisplay {
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .api-data {
+            color: #495057;
+        }
+        
+        .api-data p {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .api-data-label {
+            font-weight: 500;
+            margin-left: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .api-data i {
+            margin-left: 0.5rem;
+            color: #2c3e50;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .user-greeting {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: #fff;
+            background: rgba(44, 62, 80, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 80%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Additional responsive styles */
+        @media (max-width: 576px) {
+            .row.left-to-right-row {
+                flex-direction: column-reverse;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            #notification {
+                max-width: 90%;
+                font-size: 14px;
+                right: 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification container -->
+    <div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; z-index: 9999; font-weight: 500;">
+        <!-- Notification message will be inserted here -->
+    </div>
+    
+    <h6 id="greeting" class="user-greeting"></h6>
+    
+    <div class="container login-container px-2">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <header>
+                    <i class="fas fa-microchip me-2"></i>
+                    پنل مدیریتی اینترنت اشیاء و داشبورد IoT
+                </header>
+                
+                <div class="panel panel-login">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-4 text-center px-1">
+                                <a href="#" id="recover-form-link">بازیابی رمز عبور</a>
+                            </div>
+                            <div class="col-4 text-center px-1">
+                                <a href="#" id="register-form-link">ثبت نام</a>
+                            </div>
+                            <div class="col-4 text-center px-1">
+                                <a href="#" class="active" id="login-form-link">ورود</a>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <!-- Password Recovery Form -->
+                                <form id="recover-form" method="post" enctype="application/x-www-form-urlencoded" role="form" style="display: none;">
+                                    <div class="form-group mb-3">
+                                        <label for="codemelli_recovery" class="form-label">کد ملی خود را وارد کنید</label>
+                                        <input type="text" name="codemelli_recovery" id="codemelli_recovery" class="form-control" placeholder="کد ملی">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="phonenumber_recovery" class="form-label">شماره ای که با آن ثبت نام کرده اید را وارد کنید</label>
+                                        <input type="text" name="phonenumber_recovery" id="phonenumber_recovery" class="form-control" placeholder="شماره همراه">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <div class="row">
+                                            <div class="col-sm-6 offset-sm-3">
+                                                <button type="submit" name="recover-submit" id="recover-submit" class="btn btn-recover w-100">دریافت رمز جدید با SMS</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                
+                                <!-- Register User Form -->
+                                <form id="register-form" method="post" enctype="application/x-www-form-urlencoded" role="form" style="display: none;">
+                                    <div class="row left-to-right-row mb-3">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <div class="form-group mb-0">
+                                                <label for="otp-submit" class="form-label">برای دریافت کد احراز هویت کلیک کنید</label>
+                                                <button type="submit" name="otp-submit" id="otp-submit" class="btn btn-register w-100">دریافت کد احراز هویت با SMS</button>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group mb-0">
+                                                <label for="phonenumber_register" class="form-label">شماره تلفن ثبت شده با کد ملی شما</label>
+                                                <input type="text" name="phonenumber_register" id="phonenumber_register" class="form-control" placeholder="شماره همراه">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="otpcode" class="form-label">کد عددی دریافت شده توسط پیامک را وارد کنید</label>
+                                        <input type="text" name="otpcode" id="otpcode" class="form-control" placeholder="کد احراز هویت تلفن همراه" disabled>
+                                    </div>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <div class="form-group mb-0">
+                                                <label for="familyname_register" class="form-label">نام خانوادگی (فارسی)</label>
+                                                <input type="text" name="familyname_register" id="familyname_register" class="form-control" placeholder="نام خانوادگی" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group mb-0">
+                                                <label for="shortname_register" class="form-label">نام (فارسی)</label>
+                                                <input type="text" name="shortname_register" id="shortname_register" class="form-control" placeholder="نام" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <div class="form-group mb-0">
+                                                <label for="codemelli_register" class="form-label">کد ملی مالک سیمکارت</label>
+                                                <input type="text" name="codemelli_register" id="codemelli_register" class="form-control" placeholder="کد ملی" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group mb-0">
+                                                <label for="email_register" class="form-label">آدرس پست الکترونیکی</label>
+                                                <input type="text" name="email_register" id="email_register" class="form-control" placeholder="Email" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <div class="form-group mb-0">
+                                                <label for="password_register2" class="form-label">تکرار رمز عبور</label>
+                                                <div class="password-container2">
+                                                    <input type="password" name="password_register2" id="password_register2" class="form-control" placeholder="رمز عبور" disabled>
+                                                    <button type="button" onclick="toggleRegisterPassword2Visibility()" id="toggleRegisterPassword2" class="toggleRegisterPassword2">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group mb-0">
+                                                <label for="password_register1" class="form-label">رمز عبور</label>
+                                                <div class="password-container1">
+                                                    <input type="password" name="password_register1" id="password_register1" class="form-control" placeholder="رمز عبور" disabled>
+                                                    <button type="button" onclick="toggleRegisterPassword1Visibility()" id="toggleRegisterPassword1" class="toggleRegisterPassword1">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <div class="form-group mb-0">
+                                                <label for="city_register" class="form-label">شهر</label>
+                                                <input type="text" name="city_register" id="city_register" class="form-control" placeholder="نام شهر" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group mb-0">
+                                                <label for="provience_register" class="form-label">استان</label>
+                                                <input type="text" name="provience_register" id="provience_register" class="form-control" placeholder="نام استان" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="address_register" class="form-label">آدرس پستی</label>
+                                        <input type="text" name="address_register" id="address_register" class="form-control" placeholder="آدرس پستی" disabled>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="codeposti_register" class="form-label">کد پستی 10 رقمی</label>
+                                        <input type="text" name="codeposti_register" id="codeposti_register" class="form-control" placeholder="کد پستی" disabled>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <div class="row">
+                                            <div class="col-sm-6 offset-sm-3">
+                                                <button type="submit" name="finalreg-submit" id="finalreg-submit" class="btn btn-finalreg w-100" disabled>ثبت نام نهائی</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                
+                                <!-- User Login Form -->
+                                <form id="login-form" method="post" enctype="application/x-www-form-urlencoded" style="display: block;">
+                                    <div class="form-group mb-3">
+                                        <label for="username_login" class="form-label">نام کاربری (کد ملی یا شماره همراه یا آدرس ایمیل)</label>
+                                        <input type="text" name="username_login" id="username_login" class="form-control" placeholder="کد ملی/شماره همراه/ایمیل">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="password_login" class="form-label">رمز عبور</label>
+                                        <div class="password-container-login">
+                                            <input type="password" name="password_login" id="password_login" class="form-control" placeholder="رمز عبور">
+                                            <button type="button" onclick="toggleLoginPasswordVisibility()" id="toggleLoginPassword" class="toggleLoginPassword">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <div class="row">
+                                            <div class="col-sm-6 offset-sm-3">
+                                                <button type="submit" name="login-submit" id="login-submit" class="btn btn-login w-100">ورود</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group text-center">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="text-center">
+                                                    <a href="#" class="forgot-password" onclick="document.getElementById('recover-form-link').click();">رمز عبور خود را فراموش کرده اید؟</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- API Data Display - Integrated with main panel -->
+                    <div id="apiDataDisplay" style="border-top: 1px solid #eaeaea; padding-top: 15px; margin-top: 15px;">
+                        <!-- API data will be inserted here by JavaScript -->
+                    </div>
+                </div>
+                
+                <footer>
+                    <div class="container">
+                        <p class="mb-0">تمامی حقوق این سایت متعلق به شرکت ماهان الکترونیک پرنیا می باشد. &copy; 2024</p>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Ensure Persian numbers are converted before form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            // Override form submissions to ensure Persian number conversion
+            const forms = ['login-form', 'register-form', 'recover-form'];
+            
+            forms.forEach(formId => {
+                const form = document.getElementById(formId);
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        // Convert all input values before submission
+                        const inputs = form.querySelectorAll('input[type="text"], input[type="password"]');
+                        inputs.forEach(input => {
+                            if (input.value && typeof window.PersianNumberConverter !== 'undefined') {
+                                input.value = window.PersianNumberConverter.convert(input.value);
+                            }
+                        });
+                    });
+                }
+            });
+            
+            // Add visual feedback for Persian number conversion
+            const numericInputs = document.querySelectorAll('[data-persian-convert="true"]');
+            numericInputs.forEach(input => {
+                // Add a small indicator
+                const indicator = document.createElement('small');
+                indicator.className = 'text-muted';
+                indicator.style.fontSize = '0.75rem';
+                indicator.textContent = '(اعداد فارسی خودکار تبدیل می‌شوند)';
+                
+                // Insert after the input
+                if (input.parentNode && input.parentNode.querySelector('label')) {
+                    const label = input.parentNode.querySelector('label');
+                    label.appendChild(document.createElement('br'));
+                    label.appendChild(indicator);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
