@@ -1,0 +1,43 @@
+{
+  "system": {
+    "version": "1.0.0",
+    "build_date": "2024-01-01",
+    "device_type": "IoT_Gateway",
+    "manufacturer": "Mahan Electronic",
+    "serial_number": "ME-IOT-001"
+  },
+  "network": {
+    "hostname": "giot-device",
+    "dhcp_enabled": true,
+    "static_ip": "",
+    "subnet_mask": "",
+    "gateway": "",
+    "dns_primary": "8.8.8.8",
+    "dns_secondary": "8.8.4.4"
+  },
+  "security": {
+    "ssh_enabled": true,
+    "ssh_port": 22,
+    "firewall_enabled": true,
+    "auto_update": false,
+    "password_policy": {
+      "min_length": 8,
+      "require_special_chars": true,
+      "require_numbers": true
+    }
+  },
+  "logging": {
+    "log_level": "info",
+    "max_log_size": "10MB",
+    "log_rotation": true,
+    "remote_logging": false,
+    "syslog_server": ""
+  },
+  "performance": {
+    "cpu_limit": 80,
+    "memory_limit": 512,
+    "disk_usage_warning": 85,
+    "temperature_warning": 70,
+    "auto_restart_on_error": true
+  }
+}

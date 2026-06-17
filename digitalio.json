@@ -1,0 +1,329 @@
+{
+  "analog_inputs": [
+    {
+      "calibration": {
+        "offset": 0,
+        "scale": 1,
+        "unit": "°C"
+      },
+      "channel": 0,
+      "description": "سنسور دما",
+      "enabled": true,
+      "name": "Temperature_Sensor",
+      "resolution_bits": 12,
+      "sample_rate_hz": 10,
+      "thresholds": {
+        "max_critical": 70,
+        "max_warning": 60,
+        "min_critical": 5,
+        "min_warning": 10
+      },
+      "voltage_reference": 3.3
+    },
+    {
+      "calibration": {
+        "offset": 0,
+        "scale": 100,
+        "unit": "lux"
+      },
+      "channel": 1,
+      "description": "سنسور نور",
+      "enabled": true,
+      "name": "Light_Sensor",
+      "resolution_bits": 12,
+      "sample_rate_hz": 1,
+      "thresholds": {
+        "max_critical": 2000,
+        "max_warning": 1000,
+        "min_critical": 0,
+        "min_warning": 10
+      },
+      "voltage_reference": 3.3
+    }
+  ],
+  "automation_rules": [
+    {
+      "action": {
+        "duty_cycle": 75,
+        "pin": 21,
+        "type": "set_pwm"
+      },
+      "description": "کنترل خودکار فن بر اساس دما",
+      "enabled": true,
+      "id": 1,
+      "name": "Auto_Fan_Control",
+      "trigger": {
+        "channel": 0,
+        "condition": "greater_than",
+        "type": "analog_threshold",
+        "value": 45
+      }
+    },
+    {
+      "action": {
+        "duration_ms": 5000,
+        "pin": 20,
+        "type": "activate_buzzer"
+      },
+      "description": "هشدار اضطراری",
+      "enabled": true,
+      "id": 2,
+      "name": "Emergency_Alert",
+      "trigger": {
+        "condition": "falling_edge",
+        "pin": 4,
+        "type": "digital_input"
+      }
+    }
+  ],
+  "gpio_pins": {
+    "input_pins": [
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 528 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_528",
+        "pin_number": 528,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 529 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_529",
+        "pin_number": 529,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 530 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_530",
+        "pin_number": 530,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 531 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_531",
+        "pin_number": 531,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 532 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_532",
+        "pin_number": 532,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 533 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_533",
+        "pin_number": 533,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 534 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_534",
+        "pin_number": 534,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 535 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_535",
+        "pin_number": 535,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 536 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_536",
+        "pin_number": 536,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 537 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_537",
+        "pin_number": 537,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 538 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_538",
+        "pin_number": 538,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 539 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_539",
+        "pin_number": 539,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 540 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_540",
+        "pin_number": 540,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 541 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_541",
+        "pin_number": 541,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 542 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_542",
+        "pin_number": 542,
+        "pull_mode": "pull_up"
+      },
+      {
+        "active_state": "low",
+        "debounce_ms": 50,
+        "description": "پین ورودی 543 (بانک 8)",
+        "enabled": true,
+        "interrupt_edge": "falling",
+        "interrupt_enabled": true,
+        "name": "Input_543",
+        "pin_number": 543,
+        "pull_mode": "pull_up"
+      }
+    ],
+    "output_pins": [
+      {
+        "description": "رله فعال‌ساز آمپلی‌فایر",
+        "enabled": true,
+        "initial_state": "low",
+        "name": "Amplifier_Relay",
+        "pin_number": 400,
+        "pwm_duty_cycle": 50,
+        "pwm_enabled": false,
+        "pwm_frequency": 1000
+      },
+      {
+        "description": "پین خروجی 408",
+        "enabled": true,
+        "initial_state": "low",
+        "name": "GPIO_408",
+        "pin_number": 408,
+        "pwm_duty_cycle": 50,
+        "pwm_enabled": false,
+        "pwm_frequency": 1000
+      },
+      {
+        "description": "پین خروجی 409",
+        "enabled": true,
+        "initial_state": "low",
+        "name": "GPIO_409",
+        "pin_number": 409,
+        "pwm_duty_cycle": 50,
+        "pwm_enabled": false,
+        "pwm_frequency": 1000
+      },
+      {
+        "description": "پین خروجی 410",
+        "enabled": true,
+        "initial_state": "low",
+        "name": "GPIO_410",
+        "pin_number": 410,
+        "pwm_duty_cycle": 50,
+        "pwm_enabled": false,
+        "pwm_frequency": 1000
+      },
+      {
+        "description": "پین خروجی 411",
+        "enabled": true,
+        "initial_state": "low",
+        "name": "GPIO_411",
+        "pin_number": 411,
+        "pwm_duty_cycle": 50,
+        "pwm_enabled": false,
+        "pwm_frequency": 1000
+      },
+      {
+        "description": "پین خروجی 412",
+        "enabled": true,
+        "initial_state": "low",
+        "name": "GPIO_412",
+        "pin_number": 412,
+        "pwm_duty_cycle": 50,
+        "pwm_enabled": false,
+        "pwm_frequency": 1000
+      }
+    ]
+  },
+  "settings": {
+    "auto_save_state": true,
+    "log_changes": true,
+    "mqtt_publish": true,
+    "mqtt_topic_prefix": "giot/gpio",
+    "scan_interval_ms": 100,
+    "state_file_path": "/var/lib/giot/gpio_state.json"
+  }
+}

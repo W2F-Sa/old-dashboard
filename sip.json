@@ -1,0 +1,88 @@
+{
+  "sip": {
+    "account": {
+      "auto_register": false,
+      "domain": "",
+      "password": "",
+      "port": 5060,
+      "register_expires": 3600,
+      "server": "",
+      "transport": "UDP",
+      "username": ""
+    },
+    "advanced": {
+      "adaptive_rate_control": true,
+      "bandwidth_limit": 0,
+      "keep_alive_interval": 0,
+      "log_level": "message",
+      "session_expires": 0,
+      "use_info_for_dtmf": false,
+      "use_rfc2833_for_dtmf": true
+    },
+    "audio": {
+      "adaptive_gain_control": true,
+      "capture_device": "plughw:CARD=Codec,DEV=0",
+      "codecs": {
+        "g722": {
+          "enabled": false,
+          "priority": 4
+        },
+        "g729": {
+          "enabled": false,
+          "priority": 5
+        },
+        "opus": {
+          "bitrate": 64000,
+          "channels": 1,
+          "complexity": 10,
+          "enabled": true,
+          "priority": 1,
+          "sample_rate": 48000,
+          "use_dtx": true,
+          "use_vbr": true
+        },
+        "pcma": {
+          "enabled": true,
+          "priority": 3
+        },
+        "pcmu": {
+          "enabled": true,
+          "priority": 2
+        },
+        "speex": {
+          "enabled": false,
+          "priority": 6
+        }
+      },
+      "echo_cancellation": false,
+      "noise_suppression": true,
+      "playback_device": "plughw:CARD=Codec,DEV=0",
+      "volume": {
+        "microphone": 50,
+        "speaker": 50
+      }
+    },
+    "call_settings": {
+      "auto_answer": false,
+      "auto_answer_delay": 0,
+      "call_timeout": 30,
+      "dtmf_mode": "rfc2833",
+      "ring_timeout": 30
+    },
+    "enabled": false,
+    "network": {
+      "firewall_policy": "default",
+      "ice_enabled": true,
+      "media_encryption": "none",
+      "nat_policy": "default",
+      "sip_encryption": "none",
+      "stun_server": "",
+      "upnp_enabled": false
+    },
+    "security": {
+      "allow_all_numbers": false,
+      "require_authentication": false,
+      "whitelist_enabled": false
+    }
+  }
+}

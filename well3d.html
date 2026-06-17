@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نمای سه‌بعدی چاه آب + بافت + برش نمایشی + خط‌کش</title>
+  <style>
+    body { margin: 0; font-family: Tahoma, sans-serif; background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 30%, #8B4513 100%); min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+    header { padding: 16px 20px; color: #1f2937; text-align: center; }
+    .panel { max-width: 1100px; margin: 0 auto 14px auto; background: #ffffffcc; backdrop-filter: blur(2px); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.15); padding: 12px 16px; }
+    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 18px; align-items: center; }
+    .ctrl { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; }
+    .ctrl label { font-weight: 700; color: #0f172a; grid-column: 1 / -1; }
+    .ctrl output { background:#0ea5e9; color:#fff; padding:4px 10px; border-radius: 999px; font-weight: 700; }
+    input[type="range"] { width: 100%; }
+    #stageWrap { max-width: 1100px; margin: 0 auto 24px auto; background: #fff; border-radius: 16px; box-shadow: 0 8px 18px rgba(0,0,0,.15); overflow: hidden; border: 2px solid #334155; }
+    #stage { width: 100%; height: 660px; display: block; background: #eef2ff; }
+    .legend { display:flex; flex-wrap:wrap; gap:10px; padding:10px 14px; font-size:13px; color:#334155; background:#f8fafc; border-top:1px solid #e5e7eb; }
+    .chip { display:flex; align-items:center; gap:8px; }
+    .dot { width:16px; height:16px; border:1px solid #334155; border-radius:4px; }
+    footer { text-align:center; color:#1f2937; padding: 10px; font-size: 12px; }
+  </style>
+
+  <!-- Import map to resolve bare specifiers used inside three.js addons (e.g., OrbitControls) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>نمای سه‌بعدی چاه آب (با بافت، برش نمایشی، خط‌کش عمقی و سطح ایستایی)</h1>
+  </header>
+
+  <section class="panel">
+    <div class="controls">
+      <div class="ctrl">
+        <label for="waterLevel">میزان ستون آب در چاه (متر)</label>
+        <input id="waterLevel" type="range" min="0" max="25" step="0.5" value="15" />
+        <output id="waterOut">۱۵ متر</output>
+      </div>
+      <div class="ctrl">
+        <label for="bucketDepth">عمق سطل از سطح زمین (متر)</label>
+        <input id="bucketDepth" type="range" min="5" max="30" step="0.5" value="10" />
+        <output id="bucketOut">۱۰ متر</output>
+      </div>
+    </div>
+  </section>
+
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div class="legend">
+      <div class="chip"><span class="dot" style="background:#8B4513"></span>خاک سطحی</div>
+      <div class="chip"><span class="dot" style="background:#CD853F"></span>رس</div>
+      <div class="chip"><span class="dot" style="background:#DEB887"></span>ماسه</div>
+      <div class="chip"><span class="dot" style="background:#808080"></span>سنگ</div>
+      <div class="chip"><span class="dot" style="background:#64748b"></span>لاینینگ چاه (برش‌خورده)</div>
+      <div class="chip"><span class="dot" style="background:#29B6F6"></span>آب + سطح ایستایی</div>
+      <div class="chip"><span class="dot" style="background:#0f172a"></span>خط‌کش عمقی</div>
+    </div>
+  </section>
+
+  <footer>چرخش: درَگ با دکمه چپ | زوم: اسکرول | جابه‌جایی: درَگ با راست | عددها بر حسب متر</footer>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ساده‌ترین تست‌های دودی (Smoke Tests) — برای کمک به عیب‌یابی محیط
+    (function selfTests(){
+      console.assert(THREE && typeof THREE.Scene === 'function', '❌ three.js load failed');
+      console.assert(typeof OrbitControls === 'function', '❌ OrbitControls not available');
+      console.assert(document.getElementById('stage'), '❌ canvas#stage not found');
+      console.log('✅ Self-tests passed: three + OrbitControls + canvas');
+    })();
+
+    // ——— پارامترها (۱ واحد = ۱ متر) ———
+    const WELL_DEPTH = 30;            // کل عمق صحنه
+    const WELL_RADIUS = 1;            // شعاع دهانه‌ی چاه
+    const LAYER_INNER_RADIUS = 1.6;   // شعاع داخلی دیواره‌ها (برای دید از داخل)
+
+    // برای نمای واضح‌تر، یک «برش» محیطی روی سیلندرها اعمال می‌کنیم
+    const OPENING = Math.PI * 0.6; // اندازه‌ی دهانه‌ی برش (حدود 108°)
+    const THETA_START = -Math.PI * 0.1; // جهت دهانه به سمت دوربین
+    const THETA_LEN   = Math.PI * 2 - OPENING;
+
+    const layers = [
+      { name:'topsoil', thickness: 6, color: 0x8B4513, pattern: 'noise' },
+      { name:'clay',    thickness: 8, color: 0xCD853F, pattern: 'stripes' },
+      { name:'sand',    thickness: 7, color: 0xDEB887, pattern: 'dots' },
+      { name:'rock',    thickness: 9, color: 0x808080, pattern: 'blotches' },
+    ]; // مجموع = ۳۰ متر
+
+    // ——— DOM ———
+    const canvas = document.getElementById('stage');
+    const waterSlider = document.getElementById('waterLevel');
+    const bucketSlider = document.getElementById('bucketDepth');
+    const waterOut = document.getElementById('waterOut');
+    const bucketOut = document.getElementById('bucketOut');
+
+    // ——— صحنه، دوربین، رندرر ———
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xeef2ff);
+
+    const camera = new THREE.PerspectiveCamera(55, canvas.clientWidth / canvas.clientHeight, 0.1, 1200);
+    camera.position.set(5.5, 8.5, 9.5);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.target.set(0, -WELL_DEPTH/2, 0);
+
+    // ——— نورپردازی ———
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+    dir.position.set(8, 14, 6);
+    scene.add(dir);
+
+    // ——— زمین با سوراخ چاه برای فهم بصری ———
+    const groundShape = new THREE.Shape();
+    groundShape.moveTo(-6, -6); groundShape.lineTo(6,-6); groundShape.lineTo(6,6); groundShape.lineTo(-6,6); groundShape.lineTo(-6,-6);
+    const hole = new THREE.Path(); hole.absellipse(0,0, LAYER_INNER_RADIUS*1.05, LAYER_INNER_RADIUS*1.05, 0, Math.PI*2, false, 0);
+    groundShape.holes.push(hole);
+    const groundGeom = new THREE.ShapeGeometry(groundShape, 64);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x7fbf7f, roughness: 1, metalness: 0 });
+    const ground = new THREE.Mesh(groundGeom, groundMat);
+    ground.rotation.x = -Math.PI/2; ground.position.y = 0.001; // کمی بالاتر از ۰ برای جلوگیری از Z-fighting
+    scene.add(ground);
+
+    // ——— شبکه راهنما کف ———
+    const grid = new THREE.GridHelper(20, 20, 0x94a3b8, 0xcbd5e1);
+    grid.position.y = -WELL_DEPTH; scene.add(grid);
+
+    // ——— گروه اصلی ———
+    const wellGroup = new THREE.Group(); scene.add(wellGroup);
+
+    // ——— توابع ساخت بافت‌ها (CanvasTexture) ———
+    function makeCanvas(w=256, h=256) { const c = document.createElement('canvas'); c.width=w; c.height=h; return c; }
+    function texFromCanvas(canvas) { const tex = new THREE.CanvasTexture(canvas); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.anisotropy = 4; return tex; }
+
+    function makeNoiseTexture(base='#6b3f1e', accent='#8B4513', density=0.6) {
+      const c = makeCanvas(); const ctx = c.getContext('2d');
+      ctx.fillStyle = base; ctx.fillRect(0,0,c.width,c.height);
+      const count = c.width * c.height * density * 0.02;
+      for (let i=0;i<count;i++) { const x = Math.random()*c.width, y = Math.random()*c.height; const r = 1 + Math.random()*2; ctx.fillStyle = accent; ctx.globalAlpha = 0.35 + Math.random()*0.25; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
+      ctx.globalAlpha = 1; return texFromCanvas(c);
+    }
+    function makeStripesTexture(color='#b87333', bg='#cd853f', stripeW=12) {
+      const c = makeCanvas(); const ctx = c.getContext('2d');
+      ctx.fillStyle = bg; ctx.fillRect(0,0,c.width,c.height);
+      ctx.fillStyle = color;
+      for (let x=-stripeW; x<c.width+stripeW; x+=stripeW*2) { ctx.save(); ctx.translate(x,0); ctx.rotate(-8*Math.PI/180); ctx.fillRect(0,0,stripeW,c.height); ctx.restore(); }
+      return texFromCanvas(c);
+    }
+    function makeDotsTexture(dotColor='#caa874', bg='#deb887', density=0.9) {
+      const c = makeCanvas(); const ctx = c.getContext('2d');
+      ctx.fillStyle = bg; ctx.fillRect(0,0,c.width,c.height);
+      const count = c.width * c.height * density * 0.015;
+      ctx.fillStyle = dotColor;
+      for (let i=0;i<count;i++) { const x = Math.random()*c.width, y = Math.random()*c.height; const r = Math.random()*1.8 + 0.3; ctx.globalAlpha = 0.7 + Math.random()*0.3; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
+      ctx.globalAlpha = 1; return texFromCanvas(c);
+    }
+    function makeBlotchesTexture(base='#8c8c8c', acc='#6d6d6d') {
+      const c = makeCanvas(); const ctx = c.getContext('2d');
+      ctx.fillStyle = base; ctx.fillRect(0,0,c.width,c.height);
+      for (let i=0;i<120;i++) { const x = Math.random()*c.width, y = Math.random()*c.height; const w = 10 + Math.random()*50, h = 6 + Math.random()*30; ctx.save(); ctx.translate(x,y); ctx.rotate(Math.random()*Math.PI); const grad = ctx.createRadialGradient(0,0,0, 0,0, Math.max(w,h)); grad.addColorStop(0, acc); grad.addColorStop(1, base); ctx.fillStyle = grad; ctx.globalAlpha = 0.35 + Math.random()*0.35; ctx.beginPath(); ctx.ellipse(0,0,w,h,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+      ctx.globalAlpha = 1; return texFromCanvas(c);
+    }
+    function textureFor(pattern) { switch(pattern){ case 'noise': return makeNoiseTexture(); case 'stripes': return makeStripesTexture(); case 'dots': return makeDotsTexture(); case 'blotches': return makeBlotchesTexture(); default: return makeNoiseTexture(); } }
+
+    // ——— دیواره‌ی لایه‌ها با بافت و «برش نمایشی» ———
+    let accDepth = 0;
+    for (const layer of layers) {
+      const geom = new THREE.CylinderGeometry(LAYER_INNER_RADIUS, LAYER_INNER_RADIUS, layer.thickness, 96, 1, true, THETA_START, THETA_LEN);
+      const map = textureFor(layer.pattern); map.repeat.set(8, layer.thickness/2);
+      const mat = new THREE.MeshStandardMaterial({ map, color: layer.color, metalness: 0, roughness: 1, side: THREE.DoubleSide });
+      const mesh = new THREE.Mesh(geom, mat);
+      const yMid = - (accDepth + layer.thickness / 2); mesh.position.set(0, yMid, 0);
+      wellGroup.add(mesh); accDepth += layer.thickness;
+    }
+
+    // ——— لاینینگ چاه (برش‌خورده) ———
+    const liningGeom = new THREE.CylinderGeometry(WELL_RADIUS, WELL_RADIUS, WELL_DEPTH, 96, 1, true, THETA_START, THETA_LEN);
+    const liningMat = new THREE.MeshStandardMaterial({ color: 0x64748b, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+    const lining = new THREE.Mesh(liningGeom, liningMat); lining.position.y = -WELL_DEPTH / 2; wellGroup.add(lining);
+
+    // لبه‌ی دهانه‌ی چاه (نشانگر بالا)
+    const rimGeom = new THREE.TorusGeometry(WELL_RADIUS, 0.06, 16, 96, THETA_LEN);
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0x374151 });
+    const rim = new THREE.Mesh(rimGeom, rimMat); rim.rotation.x = Math.PI/2; rim.rotation.z = THETA_START; rim.position.y = 0.02; wellGroup.add(rim);
+
+    // ——— آب (برش‌خورده) ———
+    const waterMat = new THREE.MeshPhysicalMaterial({ color: 0x29B6F6, metalness: 0, roughness: 0.1, transmission: 0.65, transparent: true, opacity: 0.95, clearcoat: 0.4, clearcoatRoughness: 0.05 });
+    let waterMesh = null;
+    function createOrUpdateWater(height) {
+      if (waterMesh) { wellGroup.remove(waterMesh); waterMesh.geometry.dispose(); }
+      const h = Math.max(0.01, height);
+      const geom = new THREE.CylinderGeometry(WELL_RADIUS * 0.92, WELL_RADIUS * 0.92, h, 96, 1, false, THETA_START, THETA_LEN);
+      waterMesh = new THREE.Mesh(geom, waterMat); waterMesh.position.y = -WELL_DEPTH + h / 2; wellGroup.add(waterMesh);
+    }
+
+    // ——— سطح ایستایی ———
+    const waterPlaneMat = new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.18, side: THREE.DoubleSide });
+    const waterPlane = new THREE.Mesh(new THREE.CircleGeometry(LAYER_INNER_RADIUS * 1.1, 64), waterPlaneMat); waterPlane.rotation.x = -Math.PI/2; wellGroup.add(waterPlane);
+    const waterRing = new THREE.Mesh(new THREE.RingGeometry(LAYER_INNER_RADIUS*1.06, LAYER_INNER_RADIUS*1.12, 96, 1, THETA_START, THETA_LEN), new THREE.MeshBasicMaterial({ color: 0x3b82f6, side: THREE.DoubleSide })); waterRing.rotation.x = -Math.PI/2; wellGroup.add(waterRing);
+
+    function makeCanvasLabel(text, w=256, h=128) { const c = document.createElement('canvas'); c.width=w; c.height=h; const ctx = c.getContext('2d'); ctx.fillStyle = 'rgba(15,23,42,0.8)'; const r = 14; const bx=12, by=36, bw=w-24, bh=56; ctx.beginPath(); ctx.moveTo(bx+r,by); ctx.arcTo(bx+bw,by, bx+bw,by+bh, r); ctx.arcTo(bx+bw,by+bh, bx,by+bh, r); ctx.arcTo(bx,by+bh, bx,by, r); ctx.arcTo(bx,by, bx+bw,by, r); ctx.closePath(); ctx.fill(); ctx.font = 'bold 34px Tahoma'; ctx.fillStyle = '#fff'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(text, w/2, by+bh/2+2); return texFromCanvas(c); }
+    function makeLabelSprite(text) { const tex = makeCanvasLabel(text); const mat = new THREE.SpriteMaterial({ map: tex, transparent: true }); const s = new THREE.Sprite(mat); s.scale.set(2.4, 1.2, 1); return s; }
+
+    const waterLabel = makeLabelSprite('سطح ایستایی'); wellGroup.add(waterLabel);
+    function updateWaterTable(y) { waterPlane.position.y = y; waterRing.position.y = y; waterLabel.position.set(LAYER_INNER_RADIUS*1.25, y + 0.01, 0); }
+
+    // ——— سطل + طناب ———
+    const bucketGroup = new THREE.Group(); wellGroup.add(bucketGroup);
+    const bucketBody = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.42, 0.45, 32, 1, false, THETA_START, THETA_LEN), new THREE.MeshStandardMaterial({ color: 0x708090, metalness: 0.2, roughness: 0.6 })); bucketBody.position.y = 0; bucketGroup.add(bucketBody);
+    const handle = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.02, 12, 48, Math.PI), new THREE.MeshStandardMaterial({ color: 0x374151 })); handle.rotation.z = Math.PI; handle.position.y = 0.28; bucketGroup.add(handle);
+
+    let ropeLine = null;
+    function updateRope(toY) { if (ropeLine) { wellGroup.remove(ropeLine); ropeLine.geometry.dispose(); } const points = [ new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, toY + 0.3, 0) ]; const geom = new THREE.BufferGeometry().setFromPoints(points); const mat = new THREE.LineBasicMaterial({ color: 0x8B4513 }); ropeLine = new THREE.Line(geom, mat); wellGroup.add(ropeLine); }
+
+    // ——— خط‌کش عمقی ———
+    const rulerGroup = new THREE.Group();
+    const rulerX = -(LAYER_INNER_RADIUS + 1.6);
+    const mainLine = new THREE.Mesh(new THREE.BoxGeometry(0.04, WELL_DEPTH, 0.04), new THREE.MeshStandardMaterial({ color: 0x0f172a })); mainLine.position.set(rulerX, -WELL_DEPTH/2, 0); rulerGroup.add(mainLine);
+    function toFaDigits(numStr) { return String(numStr).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
+    for (let m = 0; m <= WELL_DEPTH; m++) { const is5 = (m % 5 === 0); const len = is5 ? 0.36 : 0.2; const tick = new THREE.Mesh(new THREE.BoxGeometry(len, 0.03, 0.04), new THREE.MeshStandardMaterial({ color: 0x0f172a })); tick.position.set(rulerX + len/2, -m, 0); rulerGroup.add(tick); if (is5) { const labMap = makeCanvasLabel(toFaDigits(m) + ' متر', 220, 96); const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: labMap, transparent:true })); lab.scale.set(1.6, 0.8, 1); lab.position.set(rulerX + len + 0.7, -m, 0); rulerGroup.add(lab); } }
+    scene.add(rulerGroup);
+
+    // ——— وضعیت ———
+    function updateState() {
+      const waterHeight = parseFloat(waterSlider.value);   // ارتفاع ستون آب از کف
+      const bucketDepth = parseFloat(bucketSlider.value);  // فاصله از سطح زمین
+      const fa = n => toFaDigits(n.toString().replace('.', '٫'));
+      waterOut.textContent = fa(waterHeight) + ' متر'; bucketOut.textContent = fa(bucketDepth) + ' متر';
+      createOrUpdateWater(waterHeight);
+      const waterSurfaceDepth = WELL_DEPTH - waterHeight; // عمق سطح آب از بالا
+      updateWaterTable(-waterSurfaceDepth);
+      const bucketY = -bucketDepth; bucketGroup.position.set(0, bucketY, 0);
+      const isSubmerged = bucketDepth > waterSurfaceDepth; bucketBody.material.color.set(isSubmerged ? 0x4FC3F7 : 0x708090);
+      updateRope(bucketY);
+    }
+
+    waterSlider.addEventListener('input', updateState);
+    bucketSlider.addEventListener('input', updateState);
+
+    function resizeRendererToDisplaySize() { const { clientWidth, clientHeight } = canvas; const needResize = canvas.width !== clientWidth || canvas.height !== clientHeight; if (needResize) { renderer.setSize(clientWidth, clientHeight, false); camera.aspect = clientWidth / clientHeight; camera.updateProjectionMatrix(); } }
+
+    updateState();
+
+    function animate() { requestAnimationFrame(animate); resizeRendererToDisplaySize(); controls.update(); renderer.render(scene, camera); }
+    animate();
+
+    camera.lookAt(0, -WELL_DEPTH / 2, 0);
+  </script>
+</body>
+</html>

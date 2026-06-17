@@ -1,0 +1,94 @@
+{
+  "sessions": {
+    "active_sessions": [
+      {
+        "created_at": "Sun, 27 Jul 2025 09:13:16 GMT",
+        "expires_at": "Mon, 28 Jul 2025 09:13:16 GMT",
+        "ip_address": "172.16.1.51",
+        "last_activity": "Sun, 27 Jul 2025 09:13:16 GMT",
+        "token": "FgJ9mmSP8jTKoZnqQSEDuz7vh9GnnqigQk9Pp81GJeUpBaHSt1EKzdEKWyqN58k4",
+        "user_id": 1,
+        "username": "admin"
+      },
+      {
+        "created_at": "Tue, 05 Aug 2025 18:37:07 GMT",
+        "expires_at": "Wed, 06 Aug 2025 18:37:07 GMT",
+        "ip_address": "172.16.1.1",
+        "last_activity": "Tue, 05 Aug 2025 18:42:49 GMT",
+        "token": "oRuIvTqWMQwKP8q16NDVrmQLt9AZgUW5qhqcdENdgnNq6fFDqIuxZcw2t2E4bGNd",
+        "user_id": 1,
+        "username": "admin"
+      },
+      {
+        "created_at": "Wed, 06 Aug 2025 00:24:23 GMT",
+        "expires_at": "Thu, 07 Aug 2025 00:24:23 GMT",
+        "ip_address": "172.16.1.1",
+        "last_activity": "Wed, 06 Aug 2025 00:24:23 GMT",
+        "token": "BdOZMyck8H9zu0d4BIhSTelvPyNKuB8b70gyGN4E1lSQu1hN6rdxDx3RDbCX8fBA",
+        "user_id": 1,
+        "username": "admin"
+      }
+    ],
+    "session_settings": {
+      "max_sessions_per_user": 3,
+      "secure_cookies": true,
+      "session_length_hours": 24
+    }
+  },
+  "users": [
+    {
+      "active": true,
+      "email": "admin@example.com",
+      "id": 1,
+      "last_login": "Fri, 08 Aug 2025 05:35:58 GMT",
+      "password_hash": "$2b$12$LQv3c1yqBWVHxkd0LQ4YCOdHrAiONyYpv96ULE9BDXYqst.Z4nCu6",
+      "permissions": [
+        "read",
+        "write",
+        "admin"
+      ],
+      "profile": {
+        "created_at": "2024-01-01T00:00:00Z",
+        "first_name": "Admin",
+        "last_name": "User"
+      },
+      "role": "admin",
+      "username": "admin"
+    },
+    {
+      "active": true,
+      "email": "user1@example.com",
+      "id": 2,
+      "last_login": "Sun, 27 Jul 2025 05:08:42 GMT",
+      "password_hash": "$2b$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "permissions": [
+        "read"
+      ],
+      "profile": {
+        "created_at": "2024-01-01T00:00:00Z",
+        "first_name": "User",
+        "last_name": "One"
+      },
+      "role": "user",
+      "username": "user1"
+    },
+    {
+      "active": true,
+      "email": "user2@example.com",
+      "id": 3,
+      "last_login": null,
+      "password_hash": "$2b$12$K2eoAZvdaS6/V7dNi6GUUOyHcouLO/iO3/p7Vw8qbXlLkXeA8/Oe.",
+      "permissions": [
+        "read",
+        "write"
+      ],
+      "profile": {
+        "created_at": "2024-01-01T00:00:00Z",
+        "first_name": "User",
+        "last_name": "Two"
+      },
+      "role": "user",
+      "username": "user2"
+    }
+  ]
+}

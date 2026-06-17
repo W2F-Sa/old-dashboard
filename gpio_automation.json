@@ -1,0 +1,224 @@
+{
+  "automation_rules": [
+    {
+      "id": 1,
+      "name": "نمونه کنترل بر اساس زمان",
+      "description": "روشن کردن چراغ در ساعت 18:00 و خاموش کردن در 06:00",
+      "enabled": true,
+      "priority": 1,
+      "trigger": {
+        "type": "time_based",
+        "time_conditions": [
+          {
+            "time": "18:00",
+            "action": "activate"
+          },
+          {
+            "time": "06:00",
+            "action": "deactivate"
+          }
+        ],
+        "days_of_week": [1, 2, 3, 4, 5, 6, 7],
+        "date_range": {
+          "start_date": null,
+          "end_date": null
+        }
+      },
+      "actions": [
+        {
+          "type": "gpio_output",
+          "pin_number": 408,
+          "state": "high",
+          "duration_ms": null,
+          "pwm_enabled": false,
+          "pwm_duty_cycle": 50
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "نمونه کنترل بر اساس طلوع/غروب",
+      "description": "روشن کردن نور خیابان در غروب و خاموش کردن در طلوع",
+      "enabled": true,
+      "priority": 2,
+      "trigger": {
+        "type": "sun_based",
+        "sun_conditions": [
+          {
+            "event": "sunset",
+            "offset_minutes": -30,
+            "action": "activate"
+          },
+          {
+            "event": "sunrise",
+            "offset_minutes": 30,
+            "action": "deactivate"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "gpio_output",
+          "pin_number": 409,
+          "state": "high",
+          "duration_ms": null,
+          "pwm_enabled": false,
+          "pwm_duty_cycle": 50
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "نمونه کنترل بر اساس ورودی آنالوگ",
+      "description": "روشن کردن فن زمانی که دما بالای 35 درجه باشد",
+      "enabled": true,
+      "priority": 3,
+      "trigger": {
+        "type": "analog_input",
+        "analog_conditions": [
+          {
+            "channel": 0,
+            "condition": "greater_than",
+            "threshold": 35.0,
+            "hysteresis": 2.0,
+            "action": "activate"
+          },
+          {
+            "channel": 0,
+            "condition": "less_than",
+            "threshold": 30.0,
+            "hysteresis": 2.0,
+            "action": "deactivate"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "gpio_output",
+          "pin_number": 410,
+          "state": "high",
+          "duration_ms": null,
+          "pwm_enabled": true,
+          "pwm_duty_cycle": 75
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "نمونه کنترل بر اساس ورودی دیجیتال",
+      "description": "فعال کردن آژیر هنگام فشردن دکمه اضطراری",
+      "enabled": true,
+      "priority": 4,
+      "trigger": {
+        "type": "digital_input",
+        "digital_conditions": [
+          {
+            "pin_number": 528,
+            "condition": "falling_edge",
+            "debounce_ms": 50,
+            "action": "activate"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "gpio_output",
+          "pin_number": 411,
+          "state": "high",
+          "duration_ms": 5000,
+          "pwm_enabled": false,
+          "pwm_duty_cycle": 50
+        },
+        {
+          "type": "notification",
+          "message": "هشدار اضطراری فعال شد!",
+          "mqtt_topic": "alerts/emergency",
+          "log_level": "critical"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "نمونه کنترل ترکیبی",
+      "description": "کنترل هوشمند نورپردازی بر اساس زمان و سنسور نور",
+      "enabled": true,
+      "priority": 5,
+      "trigger": {
+        "type": "combined",
+        "logic_operator": "AND",
+        "conditions": [
+          {
+            "type": "time_based",
+            "time_range": {
+              "start_time": "19:00",
+              "end_time": "07:00"
+            }
+          },
+          {
+            "type": "analog_input",
+            "channel": 1,
+            "condition": "less_than",
+            "threshold": 100.0
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "gpio_output",
+          "pin_number": 412,
+          "state": "high",
+          "duration_ms": null,
+          "pwm_enabled": true,
+          "pwm_duty_cycle": 80
+        }
+      ]
+    }
+  ],
+  "global_settings": {
+    "automation_enabled": true,
+    "check_interval_ms": 1000,
+    "max_concurrent_rules": 10,
+    "log_rule_execution": true,
+    "mqtt_publish_events": true,
+    "mqtt_topic_prefix": "automation/gpio",
+    "timezone": "Asia/Tehran",
+    "latitude": 35.6892,
+    "longitude": 51.3890
+  },
+  "rule_types": {
+    "time_based": {
+      "description": "قوانین بر اساس زمان مشخص",
+      "supported_formats": ["HH:MM", "HH:MM:SS"]
+    },
+    "sun_based": {
+      "description": "قوانین بر اساس طلوع و غروب خورشید",
+      "supported_events": ["sunrise", "sunset", "solar_noon", "civil_twilight_begin", "civil_twilight_end"]
+    },
+    "analog_input": {
+      "description": "قوانین بر اساس ورودی‌های آنالوگ",
+      "supported_conditions": ["greater_than", "less_than", "equal", "between", "outside_range"]
+    },
+    "digital_input": {
+      "description": "قوانین بر اساس ورودی‌های دیجیتال",
+      "supported_conditions": ["rising_edge", "falling_edge", "high_level", "low_level", "state_change"]
+    },
+    "combined": {
+      "description": "ترکیب چندین شرط با عملگرهای منطقی",
+      "supported_operators": ["AND", "OR", "NOT"]
+    }
+  },
+  "action_types": {
+    "gpio_output": {
+      "description": "کنترل خروجی‌های GPIO",
+      "parameters": ["pin_number", "state", "duration_ms", "pwm_enabled", "pwm_duty_cycle"]
+    },
+    "notification": {
+      "description": "ارسال اعلان یا پیام",
+      "parameters": ["message", "mqtt_topic", "log_level"]
+    },
+    "delay": {
+      "description": "تاخیر قبل از اجرای عمل بعدی",
+      "parameters": ["delay_ms"]
+    }
+  }
+}

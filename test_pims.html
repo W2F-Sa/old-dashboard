@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست PIMS</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .schedule-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .alert-info {
+            background-color: #e3f2fd;
+            border: 1px solid #2196f3;
+            color: #0c5460;
+        }
+        #notifications {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>تست تنظیمات PIMS</h1>
+        
+        <div class="schedule-card">
+            <h3>برنامه 1</h3>
+            <div class="form-group">
+                <label>فعال/غیرفعال:</label>
+                <select id="pims1_enabled">
+                    <option value="false">غیرفعال</option>
+                    <option value="true">فعال</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>زمان شروع:</label>
+                <input type="time" id="pims1_time_of_play">
+            </div>
+            <div class="form-group">
+                <label>زمان پایان:</label>
+                <input type="time" id="pims1_time_of_stop">
+            </div>
+            <div class="form-group">
+                <label>صدا:</label>
+                <input type="number" id="pims1_volume" min="0" max="100" value="50">
+            </div>
+            <div class="form-group">
+                <label>روزهای هفته:</label>
+                <select id="pims1_day_of_week">
+                    <option value="127">همه روزها</option>
+                    <option value="1">شنبه</option>
+                    <option value="2">یکشنبه</option>
+                    <option value="4">دوشنبه</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>فایل:</label>
+                <input type="text" id="pims1_file" placeholder="مسیر فایل یا URL">
+            </div>
+            <div class="form-group">
+                <label>پوشه:</label>
+                <input type="text" id="pims1_folder" placeholder="مسیر پوشه">
+            </div>
+        </div>
+        
+        <div class="schedule-card">
+            <h3>برنامه 2</h3>
+            <div class="form-group">
+                <label>فعال/غیرفعال:</label>
+                <select id="pims2_enabled">
+                    <option value="false">غیرفعال</option>
+                    <option value="true">فعال</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>زمان شروع:</label>
+                <input type="time" id="pims2_time_of_play">
+            </div>
+            <div class="form-group">
+                <label>زمان پایان:</label>
+                <input type="time" id="pims2_time_of_stop">
+            </div>
+            <div class="form-group">
+                <label>صدا:</label>
+                <input type="number" id="pims2_volume" min="0" max="100" value="50">
+            </div>
+            <div class="form-group">
+                <label>روزهای هفته:</label>
+                <select id="pims2_day_of_week">
+                    <option value="127">همه روزها</option>
+                    <option value="1">شنبه</option>
+                    <option value="2">یکشنبه</option>
+                    <option value="4">دوشنبه</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>فایل:</label>
+                <input type="text" id="pims2_file" placeholder="مسیر فایل یا URL">
+            </div>
+            <div class="form-group">
+                <label>پوشه:</label>
+                <input type="text" id="pims2_folder" placeholder="مسیر پوشه">
+            </div>
+        </div>
+        
+        <button class="btn" onclick="testSavePIMS()">ذخیره تنظیمات PIMS</button>
+        <button class="btn" onclick="testLoadPIMS()">بارگذاری تنظیمات نمونه</button>
+        <button class="btn" onclick="clearInfo()">پاک کردن اطلاعات</button>
+    </div>
+    
+    <div id="notifications"></div>
+    
+    <script>
+        // Mock functions for testing
+        function showNotification(message, type = 'info') {
+            const notifications = document.getElementById('notifications');
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.textContent = message;
+            notifications.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+        
+        function testSavePIMS() {
+            // Simulate the savePIMSSettings function
+            const pimsData = {};
+            let hasScheduleData = false;
+            
+            for (let i = 1; i <= 2; i++) {
+                const enabledEl = document.getElementById(`pims${i}_enabled`);
+                const startTimeEl = document.getElementById(`pims${i}_time_of_play`);
+                const stopTimeEl = document.getElementById(`pims${i}_time_of_stop`);
+                const volumeEl = document.getElementById(`pims${i}_volume`);
+                const dayOfWeekEl = document.getElementById(`pims${i}_day_of_week`);
+                const fileEl = document.getElementById(`pims${i}_file`);
+                const folderEl = document.getElementById(`pims${i}_folder`);
+                
+                if (enabledEl || startTimeEl || stopTimeEl || volumeEl || dayOfWeekEl || fileEl || folderEl) {
+                    const schedule = {
+                        enabled: false,
+                        time_of_play: '',
+                        time_of_stop: '',
+                        volume: 50,
+                        day_of_week: '127',
+                        file: 'NAN',
+                        folder: 'NAN'
+                    };
+                    
+                    if (enabledEl) {
+                        schedule.enabled = enabledEl.value === 'true';
+                    }
+                    
+                    if (startTimeEl && startTimeEl.value) {
+                        schedule.time_of_play = startTimeEl.value;
+                        hasScheduleData = true;
+                    }
+                    if (stopTimeEl && stopTimeEl.value) {
+                        schedule.time_of_stop = stopTimeEl.value;
+                        hasScheduleData = true;
+                    }
+                    
+                    if (volumeEl) {
+                        schedule.volume = parseInt(volumeEl.value) || 50;
+                    }
+                    
+                    if (dayOfWeekEl && dayOfWeekEl.value) {
+                        schedule.day_of_week = dayOfWeekEl.value;
+                    }
+                    
+                    if (fileEl && fileEl.value) {
+                        if (fileEl.value.startsWith('http://') || fileEl.value.startsWith('https://')) {
+                            schedule.url = fileEl.value;
+                            schedule.file = 'NAN';
+                        } else {
+                            schedule.file = fileEl.value;
+                        }
+                        hasScheduleData = true;
+                    }
+                    
+                    if (folderEl && folderEl.value) {
+                        schedule.folder = folderEl.value;
+                        hasScheduleData = true;
+                    }
+                    
+                    if (hasScheduleData || schedule.enabled || schedule.time_of_play || schedule.file !== 'NAN') {
+                        pimsData[i] = schedule;
+                    }
+                }
+            }
+            
+            console.log('Test PIMS data:', pimsData);
+            console.log('Test PIMS data structure:', JSON.stringify(pimsData, null, 2));
+            
+            showNotification('تست ذخیره‌سازی انجام شد. داده‌ها در کنسول مرورگر بررسی کنید.', 'success');
+        }
+        
+        function testLoadPIMS() {
+            // Simulate loading sample data
+            const sampleData = {
+                1: {
+                    enabled: true,
+                    time_of_play: '08:00',
+                    time_of_stop: '08:30',
+                    volume: 75,
+                    day_of_week: '127',
+                    file: '/audio/morning.mp3',
+                    folder: '/audio'
+                },
+                2: {
+                    enabled: false,
+                    time_of_play: '12:00',
+                    time_of_stop: '12:15',
+                    volume: 60,
+                    day_of_week: '31',
+                    url: 'https://example.com/audio.mp3',
+                    file: 'NAN',
+                    folder: 'NAN'
+                }
+            };
+            
+            populatePIMSSettings(sampleData);
+        }
+        
+        function populatePIMSSettings(data) {
+            // Clear previous info displays
+            for (let i = 1; i <= 2; i++) {
+                const infoEl = document.getElementById(`pimsInfo${i}`);
+                if (infoEl) {
+                    infoEl.remove();
+                }
+            }
+            
+            let schedulesLoaded = 0;
+            const loadedSchedules = [];
+            
+            for (let i = 1; i <= 2; i++) {
+                if (data[i]) {
+                    const schedule = data[i];
+                    schedulesLoaded++;
+                    loadedSchedules.push(i);
+                    
+                    const enabledEl = document.getElementById(`pims${i}_enabled`);
+                    if (enabledEl) {
+                        enabledEl.value = (schedule.enabled === true || schedule.enabled === 'true' || schedule.enabled === 1) ? 'true' : 'false';
+                    }
+                    
+                    const startTimeEl = document.getElementById(`pims${i}_time_of_play`);
+                    if (startTimeEl) {
+                        startTimeEl.value = schedule.time_of_play || '';
+                    }
+                    
+                    const stopTimeEl = document.getElementById(`pims${i}_time_of_stop`);
+                    if (stopTimeEl) {
+                        stopTimeEl.value = schedule.time_of_stop || '';
+                    }
+                    
+                    const volumeEl = document.getElementById(`pims${i}_volume`);
+                    if (volumeEl) {
+                        volumeEl.value = schedule.volume !== undefined ? schedule.volume : 50;
+                    }
+                    
+                    const dayOfWeekEl = document.getElementById(`pims${i}_day_of_week`);
+                    if (dayOfWeekEl) {
+                        dayOfWeekEl.value = schedule.day_of_week !== undefined ? schedule.day_of_week : '127';
+                    }
+                    
+                    const fileEl = document.getElementById(`pims${i}_file`);
+                    if (fileEl) {
+                        if (schedule.file && schedule.file !== 'NAN' && schedule.file !== '') {
+                            fileEl.value = schedule.file;
+                        } else if (schedule.url) {
+                            fileEl.value = schedule.url;
+                        } else {
+                            fileEl.value = '';
+                        }
+                    }
+                    
+                    const folderEl = document.getElementById(`pims${i}_folder`);
+                    if (folderEl) {
+                        if (schedule.folder && schedule.folder !== 'NAN' && schedule.folder !== '') {
+                            folderEl.value = schedule.folder;
+                        } else {
+                            folderEl.value = '';
+                        }
+                    }
+                    
+                    // Add info display
+                    const scheduleContainer = document.querySelector(`#pims${i}_enabled`)?.closest('.schedule-card');
+                    if (scheduleContainer) {
+                        const infoDiv = document.createElement('div');
+                        infoDiv.id = `pimsInfo${i}`;
+                        infoDiv.className = 'alert alert-info';
+                        infoDiv.style.fontSize = '0.9em';
+                        infoDiv.style.marginTop = '15px';
+                        
+                        const enabledText = (schedule.enabled === true || schedule.enabled === 'true' || schedule.enabled === 1) ? 'فعال' : 'غیرفعال';
+                        const fileText = schedule.file && schedule.file !== 'NAN' ? schedule.file : (schedule.url ? schedule.url : 'تعریف نشده');
+                        const folderText = schedule.folder && schedule.folder !== 'NAN' ? schedule.folder : 'تعریف نشده';
+                        
+                        // Convert day_of_week number to readable text
+                        let dayText = 'نامشخص';
+                        if (schedule.day_of_week) {
+                            const dayNum = parseInt(schedule.day_of_week);
+                            if (dayNum === 127) {
+                                dayText = 'همه روزها';
+                            } else {
+                                const days = [];
+                                if (dayNum & 1) days.push('شنبه');
+                                if (dayNum & 2) days.push('یکشنبه');
+                                if (dayNum & 4) days.push('دوشنبه');
+                                if (dayNum & 8) days.push('سه‌شنبه');
+                                if (dayNum & 16) days.push('چهارشنبه');
+                                if (dayNum & 32) days.push('پنج‌شنبه');
+                                if (dayNum & 64) days.push('جمعه');
+                                dayText = days.length > 0 ? days.join(', ') : 'هیچ روز';
+                            }
+                        }
+                        
+                        infoDiv.innerHTML = `
+                            <strong>📋 اطلاعات بارگذاری شده برنامه ${i}:</strong><br>
+                            <div style="margin-top: 5px; line-height: 1.4;">
+                                🔘 وضعیت: <span style="color: ${schedule.enabled ? '#4caf50' : '#f44336'}; font-weight: bold;">${enabledText}</span><br>
+                                ⏰ زمان پخش: <strong>${schedule.time_of_play || 'تعریف نشده'}</strong> تا <strong>${schedule.time_of_stop || 'تعریف نشده'}</strong><br>
+                                🔊 صدا: <strong>${schedule.volume || 'نامشخص'}</strong> | 📅 روزها: <strong>${dayText}</strong><br>
+                                📁 فایل: <strong>${fileText}</strong><br>
+                                📂 پوشه: <strong>${folderText}</strong>
+                            </div>
+                        `;
+                        
+                        scheduleContainer.appendChild(infoDiv);
+                    }
+                }
+            }
+            
+            if (schedulesLoaded > 0) {
+                const scheduleNumbers = loadedSchedules.join(', ');
+                showNotification(`✅ تنظیمات PIMS با موفقیت بارگذاری شد\n📊 تعداد برنامه‌ها: ${schedulesLoaded}\n🔢 شماره برنامه‌ها: ${scheduleNumbers}`, 'success');
+            }
+        }
+        
+        function clearInfo() {
+            for (let i = 1; i <= 2; i++) {
+                const infoEl = document.getElementById(`pimsInfo${i}`);
+                if (infoEl) {
+                    infoEl.remove();
+                }
+            }
+            showNotification('اطلاعات نمایشی پاک شد', 'info');
+        }
+    </script>
+</body>
+</html>

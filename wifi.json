@@ -1,0 +1,82 @@
+{
+  "current_connection": {
+    "ssid": "Mahan-1st-Floor",
+    "password": "123456",
+    "security": "WPA2",
+    "connected": true,
+    "signal_strength": -45,
+    "ip_address": "192.168.1.100",
+    "gateway": "192.168.1.1",
+    "dns": ["8.8.8.8", "8.8.4.4"],
+    "connection_time": "2024-01-15T08:30:00Z"
+  },
+  "saved_networks": [
+    {
+      "ssid": "Mahan-1st-Floor",
+      "password": "123456",
+      "security": "WPA2",
+      "priority": 1,
+      "auto_connect": true,
+      "last_connected": "2024-01-15T08:30:00Z"
+    },
+    {
+      "ssid": "Mahan-Guest",
+      "password": "guest123",
+      "security": "WPA2",
+      "priority": 2,
+      "auto_connect": false,
+      "last_connected": "2024-01-10T14:20:00Z"
+    },
+    {
+      "ssid": "Backup-Network",
+      "password": "backup456",
+      "security": "WPA2",
+      "priority": 3,
+      "auto_connect": true,
+      "last_connected": "2024-01-05T10:15:00Z"
+    }
+  ],
+  "settings": {
+    "wifi_enabled": true,
+    "auto_connect": true,
+    "scan_interval_seconds": 30,
+    "connection_timeout_seconds": 20,
+    "max_retry_attempts": 3,
+    "power_save_mode": false,
+    "country_code": "IR",
+    "regulatory_domain": "IR"
+  },
+  "access_point": {
+    "enabled": false,
+    "ssid": "GIoT-Setup",
+    "password": "setup123456",
+    "security": "WPA2",
+    "channel": 6,
+    "hidden": false,
+    "max_clients": 4,
+    "ip_range": {
+      "start": "192.168.4.2",
+      "end": "192.168.4.10",
+      "gateway": "192.168.4.1",
+      "subnet": "255.255.255.0"
+    }
+  },
+  "advanced": {
+    "dhcp_enabled": true,
+    "static_ip": "192.168.4.1",
+    "subnet_mask": "255.255.255.0",
+    "gateway": "192.168.4.1",
+    "dns_primary": "8.8.8.8",
+    "dns_secondary": "8.8.4.4",
+    "mac_address": "AA:BB:CC:DD:EE:FF",
+    "hostname": "giot-device"
+  },
+  "monitoring": {
+    "connection_quality_threshold": -70,
+    "auto_reconnect": true,
+    "ping_test_enabled": true,
+    "ping_host": "8.8.8.8",
+    "ping_interval_seconds": 60,
+    "connection_log_enabled": true
+  }
+}

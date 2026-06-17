@@ -1,0 +1,96 @@
+{
+  "sip": {
+    "enabled": true,
+    "account": {
+      "username": "1001",
+      "password": "your_sip_password",
+      "domain": "sip.example.com",
+      "server": "sip.example.com",
+      "port": 5060,
+      "transport": "UDP",
+      "register_expires": 3600,
+      "auto_register": true
+    },
+    "audio": {
+      "capture_device": "plughw:CARD=Codec,DEV=0",
+      "playback_device": "plughw:CARD=Codec,DEV=0",
+      "codecs": {
+        "opus": {
+          "enabled": true,
+          "priority": 1,
+          "bitrate": 64000,
+          "sample_rate": 48000,
+          "channels": 1,
+          "complexity": 10,
+          "use_vbr": true,
+          "use_dtx": true
+        },
+        "pcmu": {
+          "enabled": true,
+          "priority": 2
+        },
+        "pcma": {
+          "enabled": true,
+          "priority": 3
+        },
+        "g722": {
+          "enabled": false,
+          "priority": 4
+        },
+        "g729": {
+          "enabled": false,
+          "priority": 5
+        },
+        "speex": {
+          "enabled": false,
+          "priority": 6
+        }
+      },
+      "echo_cancellation": true,
+      "noise_suppression": true,
+      "adaptive_gain_control": true,
+      "volume": {
+        "microphone": 80,
+        "speaker": 80
+      }
+    },
+    "call_settings": {
+      "auto_answer": false,
+      "auto_answer_delay": 0,
+      "call_timeout": 30,
+      "ring_timeout": 60,
+      "dtmf_mode": "rfc2833"
+    },
+    "security": {
+      "whitelist_enabled": true,
+      "allow_all_numbers": false,
+      "allowed_numbers": [
+        "+989123456789",
+        "+989987654321",
+        "02112345678"
+      ],
+      "blocked_numbers": [
+        "+989111111111"
+      ],
+      "require_authentication": false
+    },
+    "network": {
+      "stun_server": "stun.l.google.com:19302",
+      "ice_enabled": true,
+      "upnp_enabled": false,
+      "nat_policy": "default",
+      "firewall_policy": "default",
+      "media_encryption": "none",
+      "sip_encryption": "none"
+    },
+    "advanced": {
+      "log_level": "message",
+      "keep_alive_interval": 30,
+      "session_expires": 0,
+      "use_rfc2833_for_dtmf": true,
+      "use_info_for_dtmf": false,
+      "adaptive_rate_control": true,
+      "bandwidth_limit": 0
+    }
+  }
+}

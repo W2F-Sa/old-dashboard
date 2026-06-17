@@ -1,0 +1,80 @@
+{
+    "buffer": {
+        "max_messages": 1000,
+        "max_size_mb": 10,
+        "offline_storage_path": "/var/lib/giot/mqtt_buffer",
+        "persist_offline": true
+    },
+    "customer_settings": {
+        "authentication": {
+            "client_id": "12c0000298618752",
+            "password": "cHUYAZRSEbUsI92E68EYetDof1tfv8",
+            "username": "fhAmq62tHz"
+        },
+        "broker": {
+            "host": "mqtt.giot.ir",
+            "port": 8883,
+            "secure": true
+        },
+        "qos": 1,
+        "retain": false,
+        "topics": {
+            "main_topic": "yianvC3f0xcofqUy2qe2GJQMvWegUsCSakGUwJ9uGjhuZBqazScGj0adWEJy6URf/fjfAvy82SX"
+        }
+    },
+    "device_info": {
+        "location": "",
+        "name": ""
+    },
+    "factory_settings": {
+        "authentication": {
+            "ca_cert_path": "/etc/ssl/certs/ISRG_Root_X1.pem",
+            "client_cert_path": "",
+            "client_id": "{{device_cpuid}}",
+            "client_key_path": "",
+            "password": "R48dbQSM)uUAi2b+1o6*",
+            "use_certificates": true,
+            "username": "factoryup"
+        },
+        "broker": {
+            "clean_session": true,
+            "host": "mqtt.giot.ir",
+            "keepalive": 60,
+            "port": 8883,
+            "protocol": "mqtts",
+            "reconnect_interval": 5000,
+            "secure": true
+        },
+        "description": "Factory default settings - not visible in web interface",
+        "is_confidential": true,
+        "qos": {
+            "default": 1,
+            "presence": 0,
+            "registration": 2,
+            "status": 1
+        },
+        "retain": {
+            "presence": false,
+            "registration": true,
+            "status": true
+        },
+        "topics": {
+            "main_topic": "giot/factory/azan/up"
+        }
+    },
+    "last_will": {
+        "message": "{\"status\": \"offline\", \"timestamp\": \"{{timestamp}}\", \"device_id\": \"{{device_id}}\"}",
+        "qos": 1,
+        "retain": true,
+        "topic": "{{active_topic}}/status"
+    },
+    "mqtt_v5_features": {
+        "clean_start": true,
+        "enabled": true,
+        "session_expiry_interval": 60
+    },
+    "publish_intervals": {
+        "data": 60,
+        "status": 30
+    }
+}

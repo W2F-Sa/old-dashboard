@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نمای سه‌بعدی چاه آب + بافت + برش نمایشی + خط‌کش</title>
+  <style>
+    body { 
+      margin: 0; 
+      font-family: Tahoma, sans-serif; 
+      background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 30%, #8B4513 100%); 
+      min-height: 100vh; 
+      display: grid; 
+      grid-template-rows: auto 1fr; 
+    }
+    header { 
+      padding: 16px 20px; 
+      color: #1f2937; 
+      text-align: center; 
+    }
+    .panel { 
+      max-width: 1100px; 
+      margin: 0 auto 14px auto; 
+      background: #ffffffcc; 
+      backdrop-filter: blur(2px); 
+      border-radius: 12px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,.15); 
+      padding: 12px 16px; 
+    }
+    .controls { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+      gap: 12px 18px; 
+      align-items: center; 
+    }
+    .ctrl { 
+      display: grid; 
+      grid-template-columns: 1fr auto; 
+      gap: 8px 12px; 
+      align-items: center; 
+    }
+    .ctrl label { 
+      font-weight: 700; 
+      color: #0f172a; 
+      grid-column: 1 / -1; 
+    }
+    .ctrl output { 
+      background:#0ea5e9; 
+      color:#fff; 
+      padding:4px 10px; 
+      border-radius: 999px; 
+      font-weight: 700; 
+    }
+    input[type="range"] { 
+      width: 100%; 
+    }
+    #stageWrap { 
+      max-width: 1100px; 
+      margin: 0 auto 24px auto; 
+      background: #fff; 
+      border-radius: 16px; 
+      box-shadow: 0 8px 18px rgba(0,0,0,.15); 
+      overflow: hidden; 
+      border: 2px solid #334155; 
+    }
+    #stage { 
+      width: 100%; 
+      height: 660px; 
+      display: block; 
+      background: #eef2ff; 
+    }
+    .legend { 
+      display:flex; 
+      flex-wrap:wrap; 
+      gap:10px; 
+      padding:10px 14px; 
+      font-size:13px; 
+      color:#334155; 
+      background:#f8fafc; 
+      border-top:1px solid #e5e7eb; 
+    }
+    .chip { 
+      display:flex; 
+      align-items:center; 
+      gap:8px; 
+    }
+    .dot { 
+      width:16px; 
+      height:16px; 
+      border:1px solid #334155; 
+      border-radius:4px; 
+    }
+    footer { 
+      text-align:center; 
+      color:#1f2937; 
+      padding: 10px; 
+      font-size: 12px; 
+    }
+  </style>
+
+  <!-- Import map to resolve bare specifiers used inside three.js addons (e.g., OrbitControls) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>نمای سه‌بعدی چاه آب (با بافت، برش نمایشی، خط‌کش عمقی و سطح ایستایی)</h1>
+  </header>
+
+  <section class="panel">
+    <div class="controls">
+      <div class="ctrl">
+        <label for="waterLevel">میزان ستون آب در چاه (متر)</label>
+        <input id="waterLevel" type="range" min="0" max="25" step="0.5" value="15" />
+        <output id="waterOut">۱۵ متر</output>
+      </div>
+      <div class="ctrl">
+        <label for="bucketDepth">عمق سطل از سطح زمین (متر)</label>
+        <input id="bucketDepth" type="range" min="5" max="30" step="0.5" value="10" />
+        <output id="bucketOut">۱۰ متر</output>
+      </div>
+    </div>
+  </section>
+
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div class="legend">
+      <div class="chip"><span class="dot" style="background:#8B4513"></span>خاک سطحی</div>
+      <div class="chip"><span class="dot" style="background:#CD853F"></span>رس</div>
+      <div class="chip"><span class="dot" style="background:#DEB887"></span>ماسه</div>
+      <div class="chip"><span class="dot" style="background:#808080"></span>سنگ</div>
+      <div class="chip"><span class="dot" style="background:#64748b"></span>لاینینگ چاه (برش‌خورده)</div>
+      <div class="chip"><span class="dot" style="background:#29B6F6"></span>آب + سطح ایستایی</div>
+      <div class="chip"><span class="dot" style="background:#0f172a"></span>خط‌کش عمقی</div>
+    </div>
+  </section>
+
+  <footer>چرخش: درَگ با دکمه چپ | زوم: اسکرول | جابه‌جایی: درَگ با راست | عددها بر حسب متر</footer>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ساده‌ترین تست‌های دودی (Smoke Tests) — برای کمک به عیب‌یابی محیط
+    (function selfTests(){
+      console.assert(THREE && typeof THREE.Scene === 'function', '❌ three.js load failed');
+      console.assert(typeof OrbitControls === 'function', '❌ OrbitControls not available');
+      console.assert(document.getElementById('stage'), '❌ canvas#stage not found');
+      console.log('✅ Self-tests passed: three + OrbitControls + canvas');
+    })();
+
+    // ——— پارامترها (۱ واحد = ۱ متر) ———
+    const WELL_DEPTH = 30;            // کل عمق صحنه
+    const WELL_RADIUS = 1;            // شعاع دهانه‌ی چاه
+    const LAYER_INNER_RADIUS = 1.6;   // شعاع داخلی دیواره‌ها (برای دید از داخل)
+
+    // برای نمای واضح‌تر، یک «برش» محیطی روی سیلندرها اعمال می‌کنیم
+    const OPENING = Math.PI * 0.6; // اندازه‌ی دهانه‌ی برش (حدود 108°)
+    const THETA_START = -Math.PI * 0.1; // جهت دهانه به سمت دوربین
+    const THETA_LEN   = Math.PI * 2 - OPENING;
+
+    const layers = [
+      { name:'topsoil', thickness: 6, color: 0x8B4513, pattern: 'noise' },
+      { name:'clay',    thickness: 8, color: 0xCD853F, pattern: 'stripes' },
+      { name:'sand',    thickness: 7, color: 0xDEB887, pattern: 'dots' },
+      { name:'rock',    thickness: 9, color: 0x808080, pattern: 'blotches' },
+    ]; // مجموع = ۳۰ متر
+
+    // ——— DOM ———
+    const canvas = document.getElementById('stage');
+    const waterSlider = document.getElementById('waterLevel');
+    const bucketSlider = document.getElementById('bucketDepth');
+    const waterOut = document.getElementById('waterOut');
+    const bucketOut = document.getElementById('bucketOut');
+
+    // ——— صحنه، دوربین، رندرر ———
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xeef2ff);
+
+    const camera = new THREE.PerspectiveCamera(55, canvas.clientWidth / canvas.clientHeight, 0.1, 1200);
+    camera.position.set(5.5, 8.5, 9.5);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.target.set(0, -WELL_DEPTH / 2, 0);
+
+    // ——— نورپردازی ———
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(10, 10, 5);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+
+    // ——— تولید بافت‌های رویه‌ای ———
+    function createTexture(pattern, color) {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      
+      // پس‌زمینه
+      ctx.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+      ctx.fillRect(0, 0, 256, 256);
+      
+      // الگوها
+      ctx.fillStyle = `rgba(0,0,0,0.2)`;
+      
+      switch(pattern) {
+        case 'noise':
+          for(let i = 0; i < 1000; i++) {
+            ctx.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
+          }
+          break;
+        case 'stripes':
+          for(let y = 0; y < 256; y += 8) {
+            ctx.fillRect(0, y, 256, 4);
+          }
+          break;
+        case 'dots':
+          for(let x = 0; x < 256; x += 16) {
+            for(let y = 0; y < 256; y += 16) {
+              ctx.beginPath();
+              ctx.arc(x + 8, y + 8, 3, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          break;
+        case 'blotches':
+          for(let i = 0; i < 50; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random() * 256, Math.random() * 256, Math.random() * 8 + 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          break;
+      }
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(2, 2);
+      return texture;
+    }
+
+    // ——— ساخت لایه‌های زمین‌شناسی ———
+    const layerMeshes = [];
+    let currentY = 0;
+
+    layers.forEach((layer, index) => {
+      const texture = createTexture(layer.pattern, layer.color);
+      const material = new THREE.MeshLambertMaterial({ 
+        map: texture,
+        transparent: true,
+        opacity: 0.9
+      });
+
+      // سیلندر خارجی (دیواره)
+      const geometry = new THREE.CylinderGeometry(
+        LAYER_INNER_RADIUS, LAYER_INNER_RADIUS,
+        layer.thickness,
+        32, 1,
+        false, THETA_START, THETA_LEN
+      );
+
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.y = currentY - layer.thickness / 2;
+      scene.add(mesh);
+      layerMeshes.push(mesh);
+
+      currentY -= layer.thickness;
+    });
+
+    // ——— لاینینگ چاه (دیواره داخلی) ———
+    const liningMaterial = new THREE.MeshLambertMaterial({ 
+      color: 0x64748b,
+      transparent: true,
+      opacity: 0.7
+    });
+
+    const liningGeometry = new THREE.CylinderGeometry(
+      WELL_RADIUS, WELL_RADIUS,
+      WELL_DEPTH,
+      32, 1,
+      false, THETA_START, THETA_LEN
+    );
+
+    const liningMesh = new THREE.Mesh(liningGeometry, liningMaterial);
+    liningMesh.position.y = -WELL_DEPTH / 2;
+    scene.add(liningMesh);
+
+    // ——— آب ———
+    const waterMaterial = new THREE.MeshLambertMaterial({ 
+      color: 0x29B6F6,
+      transparent: true,
+      opacity: 0.7
+    });
+
+    let waterMesh;
+    function updateWater(waterLevel) {
+      if (waterMesh) {
+        scene.remove(waterMesh);
+      }
+      
+      if (waterLevel > 0) {
+        const waterGeometry = new THREE.CylinderGeometry(
+          WELL_RADIUS * 0.95, WELL_RADIUS * 0.95,
+          waterLevel,
+          32
+        );
+        
+        waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
+        waterMesh.position.y = -WELL_DEPTH + waterLevel / 2;
+        scene.add(waterMesh);
+      }
+    }
+
+    // ——— خط‌کش عمقی ———
+    const rulerGroup = new THREE.Group();
+    
+    // خط اصلی
+    const rulerGeometry = new THREE.CylinderGeometry(0.02, 0.02, WELL_DEPTH, 8);
+    const rulerMaterial = new THREE.MeshLambertMaterial({ color: 0x0f172a });
+    const rulerLine = new THREE.Mesh(rulerGeometry, rulerMaterial);
+    rulerLine.position.set(WELL_RADIUS * 0.7, -WELL_DEPTH / 2, 0);
+    rulerGroup.add(rulerLine);
+
+    // علائم عمق
+    for (let depth = 0; depth <= WELL_DEPTH; depth += 5) {
+      const markGeometry = new THREE.CylinderGeometry(0.01, 0.01, 0.3, 8);
+      const mark = new THREE.Mesh(markGeometry, rulerMaterial);
+      mark.position.set(WELL_RADIUS * 0.85, -depth, 0);
+      mark.rotation.z = Math.PI / 2;
+      rulerGroup.add(mark);
+
+      // متن عمق
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 32;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '16px Tahoma';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${depth}m`, 32, 20);
+
+      const textTexture = new THREE.CanvasTexture(canvas);
+      const textMaterial = new THREE.MeshBasicMaterial({ 
+        map: textTexture,
+        transparent: true
+      });
+      const textGeometry = new THREE.PlaneGeometry(0.5, 0.25);
+      const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+      textMesh.position.set(WELL_RADIUS * 1.2, -depth, 0);
+      rulerGroup.add(textMesh);
+    }
+
+    scene.add(rulerGroup);
+
+    // ——— سطل ———
+    let bucketMesh;
+    function updateBucket(depth) {
+      if (bucketMesh) {
+        scene.remove(bucketMesh);
+      }
+
+      const bucketGeometry = new THREE.CylinderGeometry(0.3, 0.25, 0.4, 16);
+      const bucketMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+      bucketMesh = new THREE.Mesh(bucketGeometry, bucketMaterial);
+      bucketMesh.position.set(0, -depth, 0);
+      scene.add(bucketMesh);
+
+      // طناب
+      const ropeGeometry = new THREE.CylinderGeometry(0.02, 0.02, depth, 8);
+      const ropeMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+      const rope = new THREE.Mesh(ropeGeometry, ropeMaterial);
+      rope.position.set(0, -depth / 2, 0);
+      scene.add(rope);
+    }
+
+    // ——— تبدیل اعداد به فارسی ———
+    function toPersianNumber(num) {
+      const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+      return num.toString().replace(/\d/g, d => persianDigits[d]);
+    }
+
+    // ——— کنترل‌ها ———
+    function updateControls() {
+      const waterLevel = parseFloat(waterSlider.value);
+      const bucketDepth = parseFloat(bucketSlider.value);
+
+      waterOut.textContent = `${toPersianNumber(waterLevel)} متر`;
+      bucketOut.textContent = `${toPersianNumber(bucketDepth)} متر`;
+
+      updateWater(waterLevel);
+      updateBucket(bucketDepth);
+    }
+
+    waterSlider.addEventListener('input', updateControls);
+    bucketSlider.addEventListener('input', updateControls);
+
+    // مقداردهی اولیه
+    updateControls();
+
+    // ——— حلقه رندر ———
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // ——— تنظیم اندازه ———
+    function handleResize() {
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      
+      renderer.setSize(width, height, false);
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    // شروع انیمیشن
+    animate();
+  </script>
+</body>
+</html>

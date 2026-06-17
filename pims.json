@@ -1,0 +1,47 @@
+{
+  "1": {
+    "day_of_week": "127",
+    "enabled": true,
+    "file": "user_pims/silent.mp3",
+    "folder": "NAN",
+    "time_of_play": "00:00",
+    "time_of_stop": "00:01",
+    "volume": 50
+  },
+  "2": {
+    "day_of_week": "127",
+    "enabled": false,
+    "file": "playlists/pims/sahar.m3u",
+    "folder": "NAN",
+    "time_of_play": "04:00",
+    "time_of_stop": "00:00",
+    "volume": 100
+  },
+  "3": {
+    "day_of_week": "63",
+    "enabled": false,
+    "file": "playlists/pims/sobh.m3u",
+    "folder": "NAN",
+    "time_of_play": "06:00",
+    "time_of_stop": "00:00",
+    "volume": 100
+  },
+  "4": {
+    "day_of_week": "63",
+    "enabled": false,
+    "file": "",
+    "folder": "monajat",
+    "time_of_play": "07:00",
+    "time_of_stop": "07:30",
+    "volume": 100
+  },
+  "5": {
+    "day_of_week": "127",
+    "enabled": true,
+    "file": "http://s4.cdn3.iranseda.ir:1935/liveedge/radio-tartil/playlist.m3u8",
+    "folder": "NAN",
+    "time_of_play": "09:00",
+    "time_of_stop": "09:30",
+    "volume": 90
+  }
+}

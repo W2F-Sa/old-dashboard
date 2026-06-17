@@ -3,23 +3,871 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سیستم مدیریت تیکت‌ها - شرکت ماهان الکترونیک پرنیا</title>
-	<script src="https://cdn.giot.ir/js/jquery.min.js"></script>
-	<link rel="stylesheet" href="https://cdn.giot.ir/js/all.min.css">
-	<link href="https://my.giot.ir/fonts/css/fontiran.css" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdn.giot.ir/js/bootstrap.min.css">
-	<script src="https://cdn.giot.ir/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://my.giot.ir/crm/css/crm-style.css">
-	<script src="https://my.giot.ir/js/config.min.js"></script>
-	<script src="https://my.giot.ir/crm/js/crm.js"></script>
-	<audio id="OKnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_simple-02.ogg"></audio>
-	<audio id="AlarmnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_ambient.ogg"></audio>
+    <title>مدیریت دستگاه اذان | Azan Device Management</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.giot.ir/js/jquery.min.js"></script>
+    <script src="https://cdn.giot.ir/js/Chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.giot.ir/js/all.min.css">
+    <link href="https://my.giot.ir/fonts/css/fontiran.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.giot.ir/js/bootstrap.min.css">
+    <script src="https://cdn.giot.ir/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- MQTT.js -->
+    <script src="https://cdn.giot.ir/js/mqtt.min.js"></script>
+    
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="https://my.giot.ir/dashboard/css/style.css">
+    
+    <!-- Audio Files -->
+    <audio id="OKnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_simple-02.ogg"></audio>
+    <audio id="AlarmnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_ambient.ogg"></audio>
+    
+    <style>
+        /* Additional styles for Azan page */
+        .azan-navigation {
+            background: var(--bg-glass);
+            backdrop-filter: var(--glass-blur-strong);
+            -webkit-backdrop-filter: var(--glass-blur-strong);
+            border: var(--glass-border);
+            border-radius: 25px;
+            margin: 15px auto;
+            max-width: 1200px;
+            padding: 15px 20px;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs-custom {
+            border: none;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tabs-custom .nav-link {
+            background: var(--bg-glass);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: 20px;
+            padding: 12px 25px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-tabs-custom .nav-link:hover {
+            background: var(--bg-glass-hover);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .nav-tabs-custom .nav-link.active {
+            background: linear-gradient(135deg, var(--dark-blue), var(--dark-blue-light));
+            color: white;
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .category-navigation {
+            background: var(--bg-glass);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: var(--glass-shadow);
+        }
+        
+        .category-btn {
+            background: var(--bg-glass);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: 15px;
+            padding: 10px 20px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .category-btn:hover {
+            background: var(--bg-glass-hover);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-btn.active {
+            background: linear-gradient(135deg, var(--dark-blue), var(--dark-blue-light));
+            color: white;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .category-section {
+            display: none;
+        }
+        
+        .category-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .glass-card {
+            background: var(--bg-glass);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            background: var(--bg-glass-hover);
+            box-shadow: var(--glass-shadow-hover);
+            transform: translateY(-2px);
+        }
+        
+        .form-control, .form-select {
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 15px;
+            padding: 12px 15px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        /* Device Information Fields */
+        #device_id, #device_name {
+            background: rgba(173, 216, 230, 0.2);
+            border: 2px solid rgba(173, 216, 230, 0.4);
+        }
+        
+        /* Location Fields */
+        #location_name, #location_id, #latitude, #longitude, #timezone, #timezone_name, #gps_mode {
+            background: rgba(144, 238, 144, 0.2);
+            border: 2px solid rgba(144, 238, 144, 0.4);
+        }
+        
+        /* Prayer Calculation Fields */
+        #calc_method, #asr_method, #high_lats_method {
+            background: rgba(255, 182, 193, 0.2);
+            border: 2px solid rgba(255, 182, 193, 0.4);
+        }
+        
+        /* Master Volume Fields */
+        #master_mic_volume, #master_playback_volume {
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid rgba(255, 215, 0, 0.4);
+        }
+        
+        /* Sobh Prayer Fields */
+        #sobh_days_of_week, #sobh_volume, #sobh_pre_volume, #sobh_post_volume,
+        #sobh_playlist, #sobh_pre_playlist, #sobh_post_playlist,
+        #sobh_pre_days, #sobh_post_days, #sobh_random {
+            background: rgba(255, 160, 122, 0.2);
+            border: 2px solid rgba(255, 160, 122, 0.4);
+        }
+        
+        /* Dhohr Prayer Fields */
+        #dhohr_days_of_week, #dhohr_volume, #dhohr_pre_volume, #dhohr_post_volume,
+        #dhohr_playlist, #dhohr_pre_playlist, #dhohr_post_playlist,
+        #dhohr_pre_days, #dhohr_post_days, #dhohr_random {
+            background: rgba(221, 160, 221, 0.2);
+            border: 2px solid rgba(221, 160, 221, 0.4);
+        }
+        
+        /* Asr Prayer Fields */
+        #asr_days_of_week, #asr_volume, #asr_pre_volume, #asr_post_volume,
+        #asr_playlist, #asr_pre_playlist, #asr_post_playlist,
+        #asr_pre_days, #asr_post_days, #asr_random {
+            background: rgba(135, 206, 250, 0.2);
+            border: 2px solid rgba(135, 206, 250, 0.4);
+        }
+        
+        /* Maghrib Prayer Fields */
+        #maghrib_days_of_week, #maghrib_volume, #maghrib_pre_volume, #maghrib_post_volume,
+        #maghrib_playlist, #maghrib_pre_playlist, #maghrib_post_playlist,
+        #maghrib_pre_days, #maghrib_post_days, #maghrib_random {
+            background: rgba(255, 192, 203, 0.2);
+            border: 2px solid rgba(255, 192, 203, 0.4);
+        }
+        
+        /* Isha Prayer Fields */
+        #isha_days_of_week, #isha_volume, #isha_pre_volume, #isha_post_volume,
+        #isha_playlist, #isha_pre_playlist, #isha_post_playlist,
+        #isha_pre_days, #isha_post_days, #isha_random {
+            background: rgba(152, 251, 152, 0.2);
+            border: 2px solid rgba(152, 251, 152, 0.4);
+        }
+        
+        /* Sunrise Prayer Fields */
+        #sunrise_days_of_week, #sunrise_volume, #sunrise_pre_volume, #sunrise_post_volume,
+        #sunrise_playlist, #sunrise_pre_playlist, #sunrise_post_playlist,
+        #sunrise_pre_days, #sunrise_post_days, #sunrise_random {
+            background: rgba(255, 218, 185, 0.2);
+            border: 2px solid rgba(255, 218, 185, 0.4);
+        }
+        
+        /* Sunset Prayer Fields */
+        #sunset_days_of_week, #sunset_volume, #sunset_pre_volume, #sunset_post_volume,
+        #sunset_playlist, #sunset_pre_playlist, #sunset_post_playlist,
+        #sunset_pre_days, #sunset_post_days, #sunset_random {
+            background: rgba(240, 230, 140, 0.2);
+            border: 2px solid rgba(240, 230, 140, 0.4);
+        }
+        
+        /* Default for other fields */
+        .form-control:not(#device_id):not(#device_name):not(#location_name):not(#location_id):not(#latitude):not(#longitude):not(#timezone):not(#timezone_name):not(#master_mic_volume):not(#master_playback_volume):not([id*="sobh"]):not([id*="dhohr"]):not([id*="asr"]):not([id*="maghrib"]):not([id*="isha"]):not([id*="sunrise"]):not([id*="sunset"]),
+        .form-select:not(#gps_mode):not(#calc_method):not(#asr_method):not(#high_lats_method):not([id*="sobh"]):not([id*="dhohr"]):not([id*="asr"]):not([id*="maghrib"]):not([id*="isha"]):not([id*="sunrise"]):not([id*="sunset"]) {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--dark-blue-light);
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+            color: var(--text-primary);
+        }
+        
+        /* Focus states for different field types */
+        #device_id:focus, #device_name:focus {
+            background: rgba(173, 216, 230, 0.35);
+        }
+        
+        #location_name:focus, #location_id:focus, #latitude:focus, #longitude:focus, #timezone:focus, #timezone_name:focus, #gps_mode:focus {
+            background: rgba(144, 238, 144, 0.35);
+        }
+        
+        #calc_method:focus, #asr_method:focus, #high_lats_method:focus {
+            background: rgba(255, 182, 193, 0.35);
+        }
+        
+        /* Focus states for audio fields */
+        #master_mic_volume:focus, #master_playback_volume:focus {
+            background: rgba(255, 215, 0, 0.35);
+        }
+        
+        #sobh_days_of_week:focus, #sobh_volume:focus, #sobh_pre_volume:focus, #sobh_post_volume:focus,
+        #sobh_playlist:focus, #sobh_pre_playlist:focus, #sobh_post_playlist:focus,
+        #sobh_pre_days:focus, #sobh_post_days:focus, #sobh_random:focus {
+            background: rgba(255, 160, 122, 0.35);
+        }
+        
+        #dhohr_days_of_week:focus, #dhohr_volume:focus, #dhohr_pre_volume:focus, #dhohr_post_volume:focus,
+        #dhohr_playlist:focus, #dhohr_pre_playlist:focus, #dhohr_post_playlist:focus,
+        #dhohr_pre_days:focus, #dhohr_post_days:focus, #dhohr_random:focus {
+            background: rgba(221, 160, 221, 0.35);
+        }
+        
+        #asr_days_of_week:focus, #asr_volume:focus, #asr_pre_volume:focus, #asr_post_volume:focus,
+        #asr_playlist:focus, #asr_pre_playlist:focus, #asr_post_playlist:focus,
+        #asr_pre_days:focus, #asr_post_days:focus, #asr_random:focus {
+            background: rgba(135, 206, 250, 0.35);
+        }
+        
+        #maghrib_days_of_week:focus, #maghrib_volume:focus, #maghrib_pre_volume:focus, #maghrib_post_volume:focus,
+        #maghrib_playlist:focus, #maghrib_pre_playlist:focus, #maghrib_post_playlist:focus,
+        #maghrib_pre_days:focus, #maghrib_post_days:focus, #maghrib_random:focus {
+            background: rgba(255, 192, 203, 0.35);
+        }
+        
+        #isha_days_of_week:focus, #isha_volume:focus, #isha_pre_volume:focus, #isha_post_volume:focus,
+        #isha_playlist:focus, #isha_pre_playlist:focus, #isha_post_playlist:focus,
+        #isha_pre_days:focus, #isha_post_days:focus, #isha_random:focus {
+            background: rgba(152, 251, 152, 0.35);
+        }
+        
+        #sunrise_days_of_week:focus, #sunrise_volume:focus, #sunrise_pre_volume:focus, #sunrise_post_volume:focus,
+        #sunrise_playlist:focus, #sunrise_pre_playlist:focus, #sunrise_post_playlist:focus,
+        #sunrise_pre_days:focus, #sunrise_post_days:focus, #sunrise_random:focus {
+            background: rgba(255, 218, 185, 0.35);
+        }
+        
+        #sunset_days_of_week:focus, #sunset_volume:focus, #sunset_pre_volume:focus, #sunset_post_volume:focus,
+        #sunset_playlist:focus, #sunset_pre_playlist:focus, #sunset_post_playlist:focus,
+        #sunset_pre_days:focus, #sunset_post_days:focus, #sunset_random:focus {
+            background: rgba(240, 230, 140, 0.35);
+        }
+        
+        .form-control:not(#device_id):not(#device_name):not(#location_name):not(#location_id):not(#latitude):not(#longitude):not(#timezone):not(#timezone_name):not(#master_mic_volume):not(#master_playback_volume):not([id*="sobh"]):not([id*="dhohr"]):not([id*="asr"]):not([id*="maghrib"]):not([id*="isha"]):not([id*="sunrise"]):not([id*="sunset"]):focus,
+        .form-select:not(#gps_mode):not(#calc_method):not(#asr_method):not(#high_lats_method):not([id*="sobh"]):not([id*="dhohr"]):not([id*="asr"]):not([id*="maghrib"]):not([id*="isha"]):not([id*="sunrise"]):not([id*="sunset"]):focus {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--dark-blue), var(--dark-blue-light));
+            border: none;
+            border-radius: 15px;
+            padding: 12px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--dark-blue-light), var(--dark-blue));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 15px;
+            padding: 12px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .status-connected {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .status-disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .status-reconnecting {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        .info-display {
+            background: var(--bg-glass);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .section-title {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: var(--dark-blue-light);
+        }
+        
+        /* System Time Display Styles */
+        .system-time-container {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .time-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .time-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .time-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .time-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .time-unix {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .time-uptime {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1));
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+        
+        .system-time-title {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .system-time-title i {
+            color: var(--dark-blue-light);
+            font-size: 1.3rem;
+        }
+        
+        /* Prayer Times Display Styles */
+        .prayer-times-display {
+            margin: 20px 0;
+        }
+        
+        .prayer-time-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 15px 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .prayer-time-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+        
+        .current-time-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 15px 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .current-time-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+        
+        .prayer-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--dark-blue-light), var(--dark-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .prayer-info {
+            flex: 1;
+        }
+        
+        .prayer-info h4 {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+        
+        .prayer-time {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark-blue);
+            font-family: 'Courier New', monospace;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .prayer-status {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 5px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: inline-block;
+        }
+        
+        .prayer-status.active {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2));
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .prayer-status.passed {
+            background: rgba(156, 163, 175, 0.2);
+            color: #6b7280;
+        }
+        
+        /* GPIO List Styles */
+        .gpio-list {
+            margin-top: 20px;
+        }
+        
+        .gpio-summary {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .gpio-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .gpio-summary-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gpio-summary-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark-blue-light);
+            display: block;
+        }
+        
+        .gpio-summary-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        .gpio-pins-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .gpio-bank {
+            background: var(--bg-glass);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .gpio-bank-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .gpio-pin {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .gpio-pin:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .gpio-pin-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .gpio-pin-number {
+            background: var(--dark-blue-light);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .gpio-pin-details {
+            flex: 1;
+        }
+        
+        .gpio-pin-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+        
+        .gpio-pin-type {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        
+        .gpio-pin-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .gpio-status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .gpio-status-high {
+            background: #10b981;
+            border-color: #059669;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        
+        .gpio-status-low {
+            background: #6b7280;
+            border-color: #4b5563;
+        }
+        
+        .gpio-status-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 60px;
+        }
+        
+        .gpio-status-high-text {
+            color: #10b981;
+        }
+        
+        .gpio-status-low-text {
+            color: #6b7280;
+        }
+        
+        .gpio-pin-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .gpio-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 60px;
+        }
+        
+        .gpio-btn-on {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .gpio-btn-on:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .gpio-btn-off {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+        }
+        
+        .gpio-btn-off:hover {
+            background: linear-gradient(135deg, #4b5563, #374151);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+        }
+        
+        .gpio-btn-toggle {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .gpio-btn-toggle:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+        
+        .gpio-pin.input-pin .gpio-pin-actions {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .gpio-pin.input-pin .gpio-pin-number {
+            background: #6b7280;
+        }
+        
+        .gpio-empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .gpio-empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        /* Hardware Section Colored Boxes */
+        #hardware-tab .glass-card:nth-child(1) {
+            background: rgba(74, 144, 226, 0.06);
+            border: 1px solid rgba(74, 144, 226, 0.15);
+        }
+        
+        #hardware-tab .glass-card:nth-child(2) {
+            background: rgba(40, 167, 69, 0.06);
+            border: 1px solid rgba(40, 167, 69, 0.15);
+        }
+        
+        #hardware-tab .glass-card:nth-child(3) {
+            background: rgba(255, 193, 7, 0.06);
+            border: 1px solid rgba(255, 193, 7, 0.15);
+        }
+        
+        /* Temperature Sensor Card */
+        #analogInputs .glass-card:nth-child(1) {
+            background: rgba(220, 53, 69, 0.06);
+            border: 1px solid rgba(220, 53, 69, 0.15);
+        }
+        
+        /* Light Sensor Card */
+        #analogInputs .glass-card:nth-child(2) {
+            background: rgba(255, 193, 7, 0.06);
+            border: 1px solid rgba(255, 193, 7, 0.15);
+        }
+        
+        /* Input Pins Card */
+        .mb-4:nth-child(2) .glass-card:nth-child(1) {
+            background: rgba(23, 162, 184, 0.06);
+            border: 1px solid rgba(23, 162, 184, 0.15);
+        }
+        
+        /* Output Pins Card */
+        .mb-4:nth-child(2) .glass-card:nth-child(2) {
+            background: rgba(108, 117, 125, 0.06);
+            border: 1px solid rgba(108, 117, 125, 0.15);
+        }
+        
+        /* General Settings Card */
+        .mb-4:nth-child(3) .glass-card {
+            background: rgba(111, 66, 193, 0.06);
+            border: 1px solid rgba(111, 66, 193, 0.15);
+        }
+    </style>
 </head>
 <body>
-    <div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; z-index: 9999; font-weight: 500;">
-		<!-- Notification message will be inserted here -->
-	</div>
+    <div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; z-index: 9999; font-weight: 500; max-width: 90%; word-wrap: break-word;">
+        <!-- Notification message will be inserted here -->
+    </div>
     
+    <!-- Main Header (Same as Dashboard) -->
     <header class="header navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
@@ -36,59 +884,39 @@
 
             <!-- Collapsible Mobile Menu -->
             <div class="collapse navbar-collapse" id="mobileNavMenu">
-                <!-- Mobile Menu Items (Only visible on mobile) -->
-                <div class="mobile-menu-items d-lg-none">
-                    
-                    <div class="mobile-menu-section">
-                        <h6><i class="fas fa-cogs me-2"></i>مدیریت دستگاه‌ها</h6>
-                        <a href="../dashboard/add-device.html" class="mobile-menu-item">
-                            <i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید
-                        </a>
-                        <a href="../dashboard/devices-list.html" class="mobile-menu-item">
-                            <i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها
-                        </a>
-                        <a href="../dashboard/rename-device.html" class="mobile-menu-item">
-                            <i class="fas fa-edit me-2"></i>تغییر نام دستگاه
-                        </a>
-                        <a href="../dashboard/remove-device.html" class="mobile-menu-item text-danger">
-                            <i class="fas fa-trash me-2"></i>حذف دستگاه
-                        </a>
-                    </div>
-                    
-                    <div class="mobile-menu-section">
-                        <h6><i class="fas fa-users-cog me-2"></i>مدیریت دسترسی</h6>
-                        <a href="../dashboard/manage-access.html" class="mobile-menu-item">
-                            <i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی
-                        </a>
-                        <a href="../dashboard/edit-access.html" class="mobile-menu-item">
-                            <i class="fas fa-user-edit me-2"></i>ویرایش سطوح دسترسی
-                        </a>
-                    </div>
-                    
-                    <div class="mobile-menu-section">
-                        <h6><i class="fas fa-home me-2"></i>ناوبری</h6>
-                        <a href="../dashboard/devices-list.html" class="mobile-menu-item">
-                            <i class="fas fa-arrow-left me-2"></i>بازگشت به داشبورد
-                        </a>
-                    </div>
-                    
-                    <div class="mobile-menu-section">
-                        <h6><i class="fas fa-user me-2"></i>حساب کاربری</h6>
-                        <a href="../dashboard/edit-profile.html" class="mobile-menu-item">
-                            <i class="fas fa-user-edit me-2"></i>ویرایش کاربری
-                        </a>
-                        <a href="../dashboard/changepassword.html" class="mobile-menu-item">
-                            <i class="fas fa-key me-2"></i>تغییر رمز عبور
-                        </a>
-                        <a href="#" class="mobile-menu-item text-danger" id="mobileSignOut">
-                            <i class="fas fa-sign-out-alt me-2"></i>خروج
-                        </a>
+                <!-- Modern Device Management Menu -->
+                <div class="device-management-menu">
+                    <div class="dropdown">
+                        <button class="btn device-menu-btn dropdown-toggle" type="button" id="deviceMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cogs me-2"></i>
+                            مدیریت دستگاه‌ها
+                        </button>
+                        <ul class="dropdown-menu glass-dropdown" aria-labelledby="deviceMenuDropdown">
+                            <li><a class="dropdown-item glass-item" href="../dashboard/add-device.html">
+                                <i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید
+                            </a></li>
+                            <li><a class="dropdown-item glass-item" href="../dashboard/devices-list.html">
+                                <i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item glass-item" href="../dashboard/rename-device.html">
+                                <i class="fas fa-edit me-2"></i>تغییر نام دستگاه
+                            </a></li>
+                            <li><a class="dropdown-item glass-item text-danger" href="../dashboard/remove-device.html">
+                                <i class="fas fa-trash me-2"></i>حذف دستگاه
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item glass-item" href="../dashboard/manage-access.html">
+                                <i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی
+                            </a></li>
+                            <li><a class="dropdown-item glass-item" href="../dashboard/edit-access.html">
+                                <i class="fas fa-user-shield me-2"></i>ویرایش سطوح دسترسی
+                            </a></li>
+                        </ul>
                     </div>
                 </div>
                 
-                <!-- Desktop Menu (visible only on desktop) -->
-                <div class="d-none d-lg-flex ms-auto">
-                    <div class="header-actions">
+                <div class="header-actions">
                     <div class="theme-toggle-container">
                         <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
                         <label for="theme-toggle" class="theme-toggle-label">
@@ -99,277 +927,1757 @@
                         </label>
                     </div>
                     <div class="dropdown">
-                        <a class="nav-link dropdown-toggle user-menu-btn" href="#" id="mainMenuDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-bars me-1"></i> منوی اصلی
+                        <a class="nav-link dropdown-toggle user-menu-btn" href="#" id="userMenuDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i> محیط کاربری
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end glass-dropdown" aria-labelledby="mainMenuDropdown">
-                            <h6 class="dropdown-header"><i class="fas fa-cogs me-2"></i>مدیریت دستگاه‌ها</h6>
-                            <a class="dropdown-item glass-item" href="../dashboard/add-device.html"><i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید</a>
-                            <a class="dropdown-item glass-item" href="../dashboard/devices-list.html"><i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها</a>
-                            <a class="dropdown-item glass-item" href="../dashboard/rename-device.html"><i class="fas fa-edit me-2"></i>تغییر نام دستگاه</a>
-                            <a class="dropdown-item glass-item text-danger" href="../dashboard/remove-device.html"><i class="fas fa-trash me-2"></i>حذف دستگاه</a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
+                            <a class="dropdown-item" href="../dashboard/edit-profile.html"><i class="fas fa-user-edit me-2"></i>ویرایش کاربری</a>
+                            <a class="dropdown-item" href="../dashboard/changepassword.html"><i class="fas fa-key me-2"></i>تغییر رمز عبور</a>
+                            <a class="dropdown-item" id="signOut" href="#"><i class="fas fa-sign-out-alt me-2"></i>خروج</a>
                             <div class="dropdown-divider"></div>
-                            <h6 class="dropdown-header"><i class="fas fa-users-cog me-2"></i>مدیریت دسترسی</h6>
-                            <a class="dropdown-item glass-item" href="../dashboard/manage-access.html"><i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی</a>
-                            <a class="dropdown-item glass-item" href="../dashboard/edit-access.html"><i class="fas fa-user-edit me-2"></i>ویرایش سطوح دسترسی</a>
-                            <div class="dropdown-divider"></div>
-                            <h6 class="dropdown-header"><i class="fas fa-home me-2"></i>ناوبری</h6>
-                            <a class="dropdown-item glass-item" href="../dashboard/devices-list.html"><i class="fas fa-arrow-left me-2"></i>بازگشت به داشبورد</a>
-                            <div class="dropdown-divider"></div>
-                            <h6 class="dropdown-header"><i class="fas fa-user me-2"></i>حساب کاربری</h6>
-                            <a class="dropdown-item glass-item" href="../dashboard/edit-profile.html"><i class="fas fa-user-edit me-2"></i>ویرایش کاربری</a>
-                            <a class="dropdown-item glass-item" href="../dashboard/changepassword.html"><i class="fas fa-key me-2"></i>تغییر رمز عبور</a>
-                            <a class="dropdown-item glass-item text-danger" id="signOut" href="#"><i class="fas fa-sign-out-alt me-2"></i>خروج</a>
+                            <a class="dropdown-item" href="../crm/index.html"><i class="fas fa-ticket-alt me-2"></i>سامانه پشتیبانی و Crm</a>
                         </div>
-                    </div>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
+    <!-- Azan Navigation Header -->
+    <div class="azan-navigation">
+        <ul class="nav-tabs-custom">
+            <li>
+                <a class="nav-link active" onclick="showTab('azan', event)">
+                    <i class="fas fa-mosque"></i>
+                    اذان
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" onclick="showTab('prayer-times', event)">
+                    <i class="fas fa-clock"></i>
+                    اوقات شرعی
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" onclick="showTab('system', event)">
+                    <i class="fas fa-cog"></i>
+                    سیستم
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" onclick="showTab('hardware', event)">
+                    <i class="fas fa-microchip"></i>
+                    سخت‌افزار
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" onclick="showTab('pims', event)">
+                    <i class="fas fa-clock"></i>
+                    PIMS
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" onclick="showTab('sip', event)">
+                    <i class="fas fa-phone"></i>
+                    SIP
+                </a>
+            </li>
+
+        </ul>
+    </div>
+
     <div class="container-fluid">
-        <!-- Main content -->
         <main role="main" class="px-4" style="margin-top: 10px;">
             
-            <!-- CRM Stats -->
-            <div class="row mb-4">
-                <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="card-title text-muted">تیکت‌های باز</h6>
-                                    <h2 class="mb-0" id="openTicketsCount">0</h2>
+            <!-- Azan Tab -->
+            <div id="azan-tab" class="tab-content active">
+                <!-- Category Navigation for Azan -->
+                <div class="category-navigation">
+                    <button class="category-btn active" onclick="showCategory('basic')">
+                        <i class="fas fa-cog"></i>
+                        تنظیمات پایه
+                    </button>
+                    <button class="category-btn" onclick="showCategory('audio')">
+                        <i class="fas fa-volume-up"></i>
+                        تنظیمات صوتی
+                    </button>
+
+
+                </div>
+
+                <!-- Basic Settings Category -->
+                <div id="basic-category" class="category-section active">
+                    <div class="glass-card">
+                        <h3 class="section-title">
+                            <i class="fas fa-cog"></i>
+                            تنظیمات پایه اذان
+                        </h3>
+                        
+                        <!-- Device Information -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h5 class="mb-3">اطلاعات دستگاه</h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">شناسه دستگاه</label>
+                                    <input type="text" class="form-control" id="device_id" readonly>
                                 </div>
-                                <div class="stat-icon bg-primary">
-                                    <i class="fas fa-ticket-alt"></i>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نام دستگاه</label>
+                                    <input type="text" class="form-control" id="device_name">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- GPS/Location Settings -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h5 class="mb-3">تنظیمات موقعیت جغرافیایی</h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نام موقعیت</label>
+                                    <input type="text" class="form-control" id="location_name" placeholder="اصفهان - اصفهان - اصفهان">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">شناسه موقعیت</label>
+                                    <input type="number" class="form-control" id="location_id" placeholder="153">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">عرض جغرافیایی</label>
+                                    <input type="number" class="form-control" id="latitude" step="0.01" placeholder="32.66">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">طول جغرافیایی</label>
+                                    <input type="number" class="form-control" id="longitude" step="0.01" placeholder="51.67">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">منطقه زمانی</label>
+                                    <input type="number" class="form-control" id="timezone" step="0.5" placeholder="3.5">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">نام منطقه زمانی</label>
+                                    <input type="text" class="form-control" id="timezone_name" placeholder="Asia/Tehran">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">حالت GPS</label>
+                                    <select class="form-select" id="gps_mode">
+                                        <option value="0">دستی</option>
+                                        <option value="1">خودکار</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="dst_active">
+                                        <label class="form-check-label" for="dst_active">
+                                            فعال‌سازی تغییر ساعت تابستانی
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Prayer Calculation Settings -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h5 class="mb-3">تنظیمات محاسبه اوقات شرعی</h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">روش محاسبه</label>
+                                    <select class="form-select" id="calc_method">
+                                        <option value="Jafary">جعفری</option>
+                                        <option value="Karachi">کراچی</option>
+                                        <option value="ISNA">ISNA</option>
+                                        <option value="MWL">رابطه جهانی اسلامی</option>
+                                        <option value="Makkah">مکه</option>
+                                        <option value="Egypt">مصر</option>
+                                        <option value="Tehran">تهران</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">روش محاسبه عصر</label>
+                                    <select class="form-select" id="asr_method">
+                                        <option value="Shafii">شافعی</option>
+                                        <option value="Hanafi">حنفی</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">تنظیم عرض‌های بالا</label>
+                                    <select class="form-select" id="high_lats_method">
+                                        <option value="None">هیچ</option>
+                                        <option value="NightMiddle">وسط شب</option>
+                                        <option value="OneSeventh">یک هفتم</option>
+                                        <option value="AngleBased">بر اساس زاویه</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Files Information (Display Only) -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h5 class="mb-3">اطلاعات فایل‌ها</h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">تعداد فایل‌های اذان</label>
+                                    <div class="info-display" id="azan_file_count">-</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">قرآن 3 دقیقه‌ای</label>
+                                    <div class="info-display" id="quran_3min_count">-</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">قرآن 7 دقیقه‌ای</label>
+                                    <div class="info-display" id="quran_7min_count">-</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">صفحات قرآن</label>
+                                    <div class="info-display" id="quran_pages_count">-</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <button class="btn btn-primary" onclick="saveAzanSettings()">
+                            <i class="fas fa-save me-2"></i>
+                            ذخیره تنظیمات
+                        </button>
+                        <button class="btn btn-success ms-2" onclick="loadAzanSettings()">
+                            <i class="fas fa-download me-2"></i>
+                            بارگذاری تنظیمات
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Audio Settings Category -->
+                <div id="audio-category" class="category-section">
+                    <div class="glass-card">
+                        <h3 class="section-title">
+                            <i class="fas fa-volume-up"></i>
+                            تنظیمات صوتی
+                        </h3>
+                        
+                        <!-- Master Volume Settings -->
+                        <div class="prayer-section">
+                            <h5 class="mb-3">تنظیمات صدای کلی</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">حجم میکروفون اصلی</label>
+                                        <input type="number" class="form-control" id="master_mic_volume" min="0" max="100" placeholder="100">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">حجم پخش اصلی</label>
+                                        <input type="number" class="form-control" id="master_playback_volume" min="0" max="100" placeholder="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sobh (Fajr) Prayer Settings -->
+                        <div class="prayer-section">
+                            <h5 class="mb-3">تنظیمات اذان صبح</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای هفته</label>
+                                        <input type="number" class="form-control" id="sobh_days_of_week" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا اذان</label>
+                                        <input type="number" class="form-control" id="sobh_volume" min="0" max="100" placeholder="80">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پیش از اذان</label>
+                                        <input type="number" class="form-control" id="sobh_pre_volume" min="0" max="100" placeholder="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پس از اذان</label>
+                                        <input type="number" class="form-control" id="sobh_post_volume" min="0" max="100" placeholder="0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل اذان</label>
+                                        <input type="text" class="form-control" id="sobh_playlist" placeholder="media/playlists/azan/sobh.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پیش از اذان</label>
+                                        <input type="text" class="form-control" id="sobh_pre_playlist" placeholder="media/playlists/azan/pre_sobh.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پس از اذان</label>
+                                        <input type="text" class="form-control" id="sobh_post_playlist" placeholder="media/playlists/azan/post_sobh.m3u">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پیش از اذان</label>
+                                        <input type="number" class="form-control" id="sobh_pre_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پس از اذان</label>
+                                        <input type="number" class="form-control" id="sobh_post_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">انتخاب تصادفی فایل</label>
+                                        <select class="form-select" id="sobh_random">
+                                            <option value="0">خیر</option>
+                                            <option value="1">بله</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dhohr Prayer Settings -->
+                        <div class="prayer-section">
+                            <h5 class="mb-3">تنظیمات اذان ظهر</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای هفته</label>
+                                        <input type="number" class="form-control" id="dhohr_days_of_week" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا اذان</label>
+                                        <input type="number" class="form-control" id="dhohr_volume" min="0" max="100" placeholder="80">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پیش از اذان</label>
+                                        <input type="number" class="form-control" id="dhohr_pre_volume" min="0" max="100" placeholder="70">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پس از اذان</label>
+                                        <input type="number" class="form-control" id="dhohr_post_volume" min="0" max="100" placeholder="50">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل اذان</label>
+                                        <input type="text" class="form-control" id="dhohr_playlist" placeholder="media/playlists/azan/dhohr.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پیش از اذان</label>
+                                        <input type="text" class="form-control" id="dhohr_pre_playlist" placeholder="media/playlists/azan/pre_dhohr.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پس از اذان</label>
+                                        <input type="text" class="form-control" id="dhohr_post_playlist" placeholder="media/playlists/azan/post_dhohr.m3u">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پیش از اذان</label>
+                                        <input type="number" class="form-control" id="dhohr_pre_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پس از اذان</label>
+                                        <input type="number" class="form-control" id="dhohr_post_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">انتخاب تصادفی فایل</label>
+                                        <input type="number" class="form-control" id="dhohr_random" placeholder="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Asr Prayer Settings -->
+                        <div class="prayer-section">
+                            <h5 class="mb-3">تنظیمات اذان عصر</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای هفته</label>
+                                        <input type="number" class="form-control" id="asr_days_of_week" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا اذان</label>
+                                        <input type="number" class="form-control" id="asr_volume" min="0" max="100" placeholder="80">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پیش از اذان</label>
+                                        <input type="number" class="form-control" id="asr_pre_volume" min="0" max="100" placeholder="70">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پس از اذان</label>
+                                        <input type="number" class="form-control" id="asr_post_volume" min="0" max="100" placeholder="50">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل اذان</label>
+                                        <input type="text" class="form-control" id="asr_playlist" placeholder="media/playlists/azan/asr.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پیش از اذان</label>
+                                        <input type="text" class="form-control" id="asr_pre_playlist" placeholder="media/playlists/azan/pre_asr.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پس از اذان</label>
+                                        <input type="text" class="form-control" id="asr_post_playlist" placeholder="media/playlists/azan/post_asr.m3u">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پیش از اذان</label>
+                                        <input type="number" class="form-control" id="asr_pre_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پس از اذان</label>
+                                        <input type="number" class="form-control" id="asr_post_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">انتخاب تصادفی فایل</label>
+                                        <input type="number" class="form-control" id="asr_random" placeholder="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Maghrib Prayer Settings -->
+                        <div class="prayer-section">
+                            <h5 class="mb-3">تنظیمات اذان مغرب</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای هفته</label>
+                                        <input type="number" class="form-control" id="maghrib_days_of_week" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا اذان</label>
+                                        <input type="number" class="form-control" id="maghrib_volume" min="0" max="100" placeholder="80">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پیش از اذان</label>
+                                        <input type="number" class="form-control" id="maghrib_pre_volume" min="0" max="100" placeholder="70">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پس از اذان</label>
+                                        <input type="number" class="form-control" id="maghrib_post_volume" min="0" max="100" placeholder="50">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل اذان</label>
+                                        <input type="text" class="form-control" id="maghrib_playlist" placeholder="media/playlists/azan/maghrib.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پیش از اذان</label>
+                                        <input type="text" class="form-control" id="maghrib_pre_playlist" placeholder="media/playlists/azan/pre_maghrib.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پس از اذان</label>
+                                        <input type="text" class="form-control" id="maghrib_post_playlist" placeholder="media/playlists/azan/post_maghrib.m3u">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پیش از اذان</label>
+                                        <input type="number" class="form-control" id="maghrib_pre_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پس از اذان</label>
+                                        <input type="number" class="form-control" id="maghrib_post_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">انتخاب تصادفی فایل</label>
+                                        <input type="number" class="form-control" id="maghrib_random" placeholder="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Isha Prayer Settings -->
+                        <div class="prayer-section">
+                            <h5 class="mb-3">تنظیمات اذان عشا</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای هفته</label>
+                                        <input type="number" class="form-control" id="isha_days_of_week" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا اذان</label>
+                                        <input type="number" class="form-control" id="isha_volume" min="0" max="100" placeholder="80">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پیش از اذان</label>
+                                        <input type="number" class="form-control" id="isha_pre_volume" min="0" max="100" placeholder="70">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پس از اذان</label>
+                                        <input type="number" class="form-control" id="isha_post_volume" min="0" max="100" placeholder="50">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل اذان</label>
+                                        <input type="text" class="form-control" id="isha_playlist" placeholder="media/playlists/azan/isha.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پیش از اذان</label>
+                                        <input type="text" class="form-control" id="isha_pre_playlist" placeholder="media/playlists/azan/pre_isha.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پس از اذان</label>
+                                        <input type="text" class="form-control" id="isha_post_playlist" placeholder="media/playlists/azan/post_isha.m3u">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پیش از اذان</label>
+                                        <input type="number" class="form-control" id="isha_pre_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پس از اذان</label>
+                                        <input type="number" class="form-control" id="isha_post_days" placeholder="126">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">انتخاب تصادفی فایل</label>
+                                        <input type="number" class="form-control" id="isha_random" placeholder="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sunrise Prayer Settings -->
+                        <div class="prayer-section">
+                            <h5 class="mb-3">تنظیمات طلوع آفتاب</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای هفته</label>
+                                        <input type="number" class="form-control" id="sunrise_days_of_week" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا اذان</label>
+                                        <input type="number" class="form-control" id="sunrise_volume" min="0" max="100" placeholder="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پیش از اذان</label>
+                                        <input type="number" class="form-control" id="sunrise_pre_volume" min="0" max="100" placeholder="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پس از اذان</label>
+                                        <input type="number" class="form-control" id="sunrise_post_volume" min="0" max="100" placeholder="0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل اذان</label>
+                                        <input type="text" class="form-control" id="sunrise_playlist" placeholder="media/playlists/azan/sunrise.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پیش از اذان</label>
+                                        <input type="text" class="form-control" id="sunrise_pre_playlist" placeholder="media/playlists/azan/pre_sunrise.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پس از اذان</label>
+                                        <input type="text" class="form-control" id="sunrise_post_playlist" placeholder="media/playlists/azan/post_sunrise.m3u">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پیش از اذان</label>
+                                        <input type="number" class="form-control" id="sunrise_pre_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پس از اذان</label>
+                                        <input type="number" class="form-control" id="sunrise_post_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">انتخاب تصادفی فایل</label>
+                                        <input type="number" class="form-control" id="sunrise_random" placeholder="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sunset Prayer Settings -->
+                        <div class="prayer-section">
+                            <h5 class="mb-3">تنظیمات غروب آفتاب</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای هفته</label>
+                                        <input type="number" class="form-control" id="sunset_days_of_week" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا اذان</label>
+                                        <input type="number" class="form-control" id="sunset_volume" min="0" max="100" placeholder="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پیش از اذان</label>
+                                        <input type="number" class="form-control" id="sunset_pre_volume" min="0" max="100" placeholder="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">میزان صدا پس از اذان</label>
+                                        <input type="number" class="form-control" id="sunset_post_volume" min="0" max="100" placeholder="0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل اذان</label>
+                                        <input type="text" class="form-control" id="sunset_playlist" placeholder="media/playlists/azan/sunset.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پیش از اذان</label>
+                                        <input type="text" class="form-control" id="sunset_pre_playlist" placeholder="media/playlists/azan/pre_sunset.m3u">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">فایل پس از اذان</label>
+                                        <input type="text" class="form-control" id="sunset_post_playlist" placeholder="media/playlists/azan/post_sunset.m3u">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پیش از اذان</label>
+                                        <input type="number" class="form-control" id="sunset_pre_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">روزهای پس از اذان</label>
+                                        <input type="number" class="form-control" id="sunset_post_days" placeholder="127">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">انتخاب تصادفی فایل</label>
+                                        <input type="number" class="form-control" id="sunset_random" placeholder="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-success" onclick="testAzan('fajr')">
+                            <i class="fas fa-play me-2"></i>
+                            تست اذان
+                        </button>
+                        <button class="btn btn-primary ms-2" onclick="saveAudioSettings()">
+                            <i class="fas fa-save me-2"></i>
+                            ذخیره تنظیمات
+                        </button>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+
+            <!-- Prayer Times Tab -->
+            <div id="prayer-times-tab" class="tab-content">
+                <div class="glass-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-clock"></i>
+                        اوقات شرعی امروز
+                    </h2>
+                    <div class="prayer-times-display">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="prayer-time-card">
+                                    <div class="prayer-icon">
+                                        <i class="fas fa-sun"></i>
+                                    </div>
+                                    <div class="prayer-info">
+                                        <h4>اذان صبح</h4>
+                                        <div class="prayer-time" id="fajr-time">--:--</div>
+                                        <div class="prayer-status" id="fajr-status">در انتظار</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="prayer-time-card">
+                                    <div class="prayer-icon">
+                                        <i class="fas fa-sun"></i>
+                                    </div>
+                                    <div class="prayer-info">
+                                        <h4>طلوع آفتاب</h4>
+                                        <div class="prayer-time" id="sunrise-time">--:--</div>
+                                        <div class="prayer-status" id="sunrise-status">در انتظار</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="prayer-time-card">
+                                    <div class="prayer-icon">
+                                        <i class="fas fa-sun"></i>
+                                    </div>
+                                    <div class="prayer-info">
+                                        <h4>اذان ظهر</h4>
+                                        <div class="prayer-time" id="dhuhr-time">--:--</div>
+                                        <div class="prayer-status" id="dhuhr-status">در انتظار</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="prayer-time-card">
+                                    <div class="prayer-icon">
+                                        <i class="fas fa-sun"></i>
+                                    </div>
+                                    <div class="prayer-info">
+                                        <h4>اذان عصر</h4>
+                                        <div class="prayer-time" id="asr-time">--:--</div>
+                                        <div class="prayer-status" id="asr-status">در انتظار</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="prayer-time-card">
+                                    <div class="prayer-icon">
+                                        <i class="fas fa-moon"></i>
+                                    </div>
+                                    <div class="prayer-info">
+                                        <h4>اذان مغرب</h4>
+                                        <div class="prayer-time" id="maghrib-time">--:--</div>
+                                        <div class="prayer-status" id="maghrib-status">در انتظار</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="prayer-time-card">
+                                    <div class="prayer-icon">
+                                        <i class="fas fa-moon"></i>
+                                    </div>
+                                    <div class="prayer-info">
+                                        <h4>اذان عشا</h4>
+                                        <div class="prayer-time" id="isha-time">--:--</div>
+                                        <div class="prayer-status" id="isha-status">در انتظار</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="prayer-time-card">
+                                    <div class="prayer-icon">
+                                        <i class="fas fa-moon"></i>
+                                    </div>
+                                    <div class="prayer-info">
+                                        <h4>غروب آفتاب</h4>
+                                        <div class="prayer-time" id="sunset-time">--:--</div>
+                                        <div class="prayer-status" id="sunset-status">در انتظار</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="current-time-card">
+                                    <div class="prayer-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="prayer-info">
+                                        <h4>زمان فعلی</h4>
+                                        <div class="prayer-time" id="current-time">--:--:--</div>
+                                        <div class="prayer-status" id="current-date">--</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="card-title text-muted">تیکت‌های بسته</h6>
-                                    <h2 class="mb-0" id="closedTicketsCount">0</h2>
-                                </div>
-                                <div class="stat-icon bg-success">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                            </div>
-                        </div>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-primary" onclick="refreshPrayerTimes()">
+                            <i class="fas fa-sync me-2"></i>
+                            بروزرسانی اوقات شرعی
+                        </button>
+                        <button class="btn btn-success ms-2" onclick="testNextPrayer()">
+                            <i class="fas fa-play me-2"></i>
+                            تست اذان بعدی
+                        </button>
                     </div>
                 </div>
-                <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="card-title text-muted">در انتظار پاسخ</h6>
-                                    <h2 class="mb-0" id="pendingTicketsCount">0</h2>
-                                </div>
-                                <div class="stat-icon bg-warning">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="card-title text-muted">کل تیکت‌ها</h6>
-                                    <h2 class="mb-0" id="totalTicketsCount">0</h2>
-                                </div>
-                                <div class="stat-icon bg-info">
-                                    <i class="fas fa-clipboard-list"></i>
-                                </div>
-                            </div>
+                
+                <!-- Prayer Times Detailed Information -->
+                <div class="glass-card mt-4">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        اطلاعات تفصیلی اوقات شرعی
+                    </h3>
+                    <div id="prayer-times-detailed-info">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                            <p>در حال بارگذاری اطلاعات تفصیلی...</p>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Tickets Management Section -->
-            <div class="row mb-4">
-                <!-- Create New Ticket Form -->
-                <div class="col-12" id="newTicketSection" style="display: none;">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-plus-circle me-2"></i>
-                                ایجاد تیکت جدید
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <form id="newTicketForm">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="ticketTitle" class="form-label">عنوان تیکت *</label>
-                                        <input type="text" class="form-control" id="ticketTitle" required maxlength="500">
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label for="ticketCategory" class="form-label">دسته‌بندی</label>
-                                        <select class="form-select" id="ticketCategory">
-                                            <option value="general">عمومی</option>
-                                            <option value="technical">فنی</option>
-                                            <option value="billing">مالی</option>
-                                            <option value="account">حساب کاربری</option>
-                                            <option value="feature_request">درخواست ویژگی</option>
-                                            <option value="bug_report">گزارش باگ</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label for="ticketPriority" class="form-label">اولویت</label>
-                                        <select class="form-select" id="ticketPriority">
-                                            <option value="low">کم</option>
-                                            <option value="normal" selected>متوسط</option>
-                                            <option value="high">بالا</option>
-                                            <option value="urgent">فوری</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="ticketDescription" class="form-label">توضیحات تیکت *</label>
-                                    <textarea class="form-control" id="ticketDescription" rows="5" required maxlength="10000" placeholder="لطفاً مشکل یا درخواست خود را به تفصیل شرح دهید..."></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="ticketTags" class="form-label">برچسب‌ها (اختیاری)</label>
-                                    <input type="text" class="form-control" id="ticketTags" placeholder="برچسب‌ها را با کاما جدا کنید">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="ticketAttachment" class="form-label attachment-label">
-                                        <i class="fas fa-paperclip me-2"></i>
-                                        فایل ضمیمه (اختیاری)
-                                    </label>
-                                    
-                                    <!-- File Upload Area -->
-                                    <div class="file-upload-area" id="fileUploadArea">
-                                        <div class="file-upload-content">
-                                            <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
-                                            <h6 class="file-upload-title">فایل خود را اینجا بکشید یا کلیک کنید</h6>
-                                            <p class="file-upload-subtitle">حداکثر حجم: 1MB | فرمت‌های مجاز: JPG, PNG, WebP, PDF</p>
-                                            <input type="file" class="file-input" id="ticketAttachment" accept="image/jpeg,image/png,image/webp,application/pdf">
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- File Compression Tools -->
-                                     <div class="compression-tools mt-2">
-                                         <div class="compression-header">
-                                             <i class="fas fa-compress-alt me-1"></i>
-                                             <small class="text-muted">ابزارهای کاهش حجم فایل:</small>
-                                         </div>
-                                         <div class="compression-links mt-1">
-                                             <a href="https://tinypng.com" target="_blank" class="compression-link">
-                                                 <i class="fas fa-image"></i> TinyPNG
-                                             </a>
-                                             <a href="https://compressjpeg.com" target="_blank" class="compression-link">
-                                                 <i class="fas fa-file-image"></i> CompressJPEG
-                                             </a>
-                                             <a href="https://smallpdf.com/compress-pdf" target="_blank" class="compression-link">
-                                                 <i class="fas fa-file-pdf"></i> SmallPDF
-                                             </a>
-                                             <a href="https://www.ilovepdf.com/compress_pdf" target="_blank" class="compression-link">
-                                                 <i class="fas fa-heart"></i> ILovePDF
-                                             </a>
-                                         </div>
-                                         
 
-                                     </div>
-                                    
-                                    <!-- File Preview -->
-                                    <div id="attachmentPreview" class="attachment-preview mt-3" style="display: none;">
-                                        <div class="attachment-preview-card">
-                                            <div class="attachment-preview-header">
-                                                <div class="attachment-preview-icon">
-                                                    <i class="fas fa-file" id="attachmentIcon"></i>
-                                                </div>
-                                                <div class="attachment-preview-info">
-                                                    <div class="attachment-preview-name" id="attachmentName"></div>
-                                                    <div class="attachment-preview-size" id="attachmentSize"></div>
-                                                </div>
-                                                <button type="button" class="attachment-remove-btn" id="removeAttachment">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                            <div class="attachment-preview-progress" id="uploadProgress" style="display: none;">
-                                                <div class="progress">
-                                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                                                </div>
-                                                <small class="progress-text">در حال آپلود...</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-paper-plane me-2"></i>
-                                        ارسال تیکت
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" id="cancelNewTicket">
-                                        <i class="fas fa-times me-2"></i>
-                                        انصراف
-                                    </button>
-                                </div>
-                            </form>
+            <!-- System Tab -->
+            <div id="system-tab" class="tab-content">
+                <div class="glass-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        اطلاعات سیستم
+                    </h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-display">
+                                <strong>مدل CPU:</strong>
+                                <span id="systemCpuModel">نامشخص</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-display">
+                                <strong>سریال CPU:</strong>
+                                <span id="systemCpuSerial">نامشخص</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="info-display">
+                                <strong>سخت‌افزار:</strong>
+                                <span id="systemHardware">نامشخص</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-display">
+                                <strong>آدرس IP:</strong>
+                                <span id="systemIpAddress">نامشخص</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="info-display">
+                                <strong>آدرس MAC:</strong>
+                                <span id="systemMacAddress">نامشخص</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-display">
+                                <strong>نسخه:</strong>
+                                <span id="systemRevision">نامشخص</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="getSystemInfo()">
+                        <i class="fas fa-sync me-2"></i>
+                        بروزرسانی اطلاعات
+                    </button>
+                </div>
+
+                <div class="glass-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-clock"></i>
+                        مدیریت زمان سیستم
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">تاریخ</label>
+                                <input type="date" class="form-control" id="systemDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">زمان</label>
+                                <input type="time" class="form-control" id="systemTime">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="info-display">
+                                <strong>زمان فعلی سیستم:</strong>
+                                <span id="currentSystemTime">نامشخص</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="setCurrentTime()">
+                        <i class="fas fa-clock me-2"></i>
+                        تنظیم زمان فعلی
+                    </button>
+                    <button class="btn btn-primary ms-2" onclick="setSystemTime()">
+                        <i class="fas fa-save me-2"></i>
+                        تنظیم زمان دستی
+                    </button>
+                    <button class="btn btn-secondary ms-2" onclick="getSystemTime()">
+                        <i class="fas fa-sync me-2"></i>
+                        دریافت زمان
+                    </button>
+                </div>
+                
+
+            </div>
+
+            <!-- Hardware Tab -->
+            <div id="hardware-tab" class="tab-content">
+                <div class="glass-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-microchip"></i>
+                        کنترل GPIO
+                    </h2>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <button class="btn btn-primary me-2" onclick="refreshGPIOStatus()">
+                                <i class="fas fa-sync me-2"></i>
+                                بروزرسانی وضعیت GPIO
+                            </button>
+                            <button class="btn btn-success me-2" onclick="refreshAllGPIOPins()">
+                                <i class="fas fa-refresh me-2"></i>
+                                بروزرسانی همه پین‌ها
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- GPIO Status Container -->
+                    <div id="gpioStatusContainer">
+                        <div class="text-center text-muted p-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            برای مشاهده وضعیت GPIO ها، دکمه "بروزرسانی وضعیت GPIO" را فشار دهید
+                        </div>
+                    </div>
+                    
+                    <!-- Output Pins Section -->
+                    <div id="outputPinsSection" class="mt-4" style="display: none;">
+                        <h5 class="mb-3">
+                            <i class="fas fa-arrow-up text-success"></i>
+                            پین‌های خروجی
+                        </h5>
+                        <div id="outputPinsContainer" class="row">
+                            <!-- Output pins will be dynamically generated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Input Pins Section -->
+                    <div id="inputPinsSection" class="mt-4" style="display: none;">
+                        <h5 class="mb-3">
+                            <i class="fas fa-arrow-down text-info"></i>
+                            پین‌های ورودی
+                        </h5>
+                        <div id="inputPinsContainer" class="row">
+                            <!-- Input pins will be dynamically generated here -->
                         </div>
                     </div>
                 </div>
                 
-                <!-- My Tickets List -->
-                <div class="col-12" id="myTicketsSection">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-list me-2"></i>
-                                تیکت‌های من
-                            </h5>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-primary btn-sm" id="refreshTicketsBtn">
-                                    <i class="fas fa-sync-alt me-1"></i>
-                                    بروزرسانی
-                                </button>
-                                <button class="btn btn-success btn-sm" id="showNewTicketBtn">
-                                    <i class="fas fa-plus me-1"></i>
-                                    تیکت جدید
+                <!-- GPIO Automation Section -->
+                <div class="glass-card mt-4">
+                    <h2 class="section-title">
+                        <i class="fas fa-robot"></i>
+                        کنترل اتوماسیون GPIO با MQTT
+                    </h2>
+                    
+                    <!-- Automation Status -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="mb-1">وضعیت سیستم اتوماسیون</h5>
+                                        <p class="mb-0">وضعیت فعلی: <span id="automationStatus" class="badge bg-secondary">نامشخص</span></p>
+                                        <p class="mb-0">تعداد قوانین: <span id="totalRules">0</span></p>
+                                        <p class="mb-0">آخرین بررسی: <span id="lastCheck">-</span></p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <button class="btn btn-info" onclick="getAutomationStatus()">
+                                            <i class="fas fa-sync-alt"></i>
+                                            بروزرسانی وضعیت
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Global Settings -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">تنظیمات کلی</h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">فعال‌سازی اتوماسیون</label>
+                                <select class="form-select" id="automationEnabled" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">فاصله بررسی (میلی‌ثانیه)</label>
+                                <input type="number" class="form-control" id="checkInterval" placeholder="1000" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">حداکثر قوانین همزمان</label>
+                                <input type="number" class="form-control" id="maxConcurrentRules" placeholder="10" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">ثبت اجرای قوانین</label>
+                                <select class="form-select" id="logRuleExecution" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Automation Rules -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">قوانین اتوماسیون</h5>
+                                <button class="btn btn-success" onclick="addAutomationRule()">
+                                    <i class="fas fa-plus"></i>
+                                    افزودن قانون جدید
                                 </button>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <!-- Loading Spinner -->
-                            <div id="ticketsLoading" class="text-center py-4" style="display: none;">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">در حال بارگذاری...</span>
-                                </div>
-                                <p class="mt-2">در حال بارگذاری تیکت‌ها...</p>
+                    </div>
+
+                    <!-- Rules Container -->
+                    <div id="automationRulesContainer">
+                        <!-- Dynamic rules will be generated here -->
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <button class="btn btn-primary me-2" onclick="saveAutomationRules()">
+                                <i class="fas fa-save me-2"></i>
+                                ذخیره قوانین اتوماسیون
+                            </button>
+                            <button class="btn btn-success me-2" onclick="loadAutomationRules()">
+                                <i class="fas fa-download me-2"></i>
+                                بارگذاری قوانین اتوماسیون
+                            </button>
+                            <button class="btn btn-warning me-2" onclick="getAutomationStatus()">
+                                <i class="fas fa-info-circle me-2"></i>
+                                دریافت وضعیت
+                            </button>
+                            <button class="btn btn-danger" onclick="clearAllAutomationRules()">
+                                <i class="fas fa-trash me-2"></i>
+                                پاک کردن همه قوانین
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Help Section -->
+                    <div class="alert alert-info mt-4">
+                        <h6><i class="fas fa-info-circle me-2"></i>راهنمای استفاده</h6>
+                        <ul class="mb-0">
+                            <li><strong>شناسه پیام 30:</strong> دریافت قوانین اتوماسیون</li>
+                            <li><strong>شناسه پیام 31:</strong> ذخیره قوانین اتوماسیون</li>
+                            <li><strong>شناسه پیام 32:</strong> دریافت وضعیت اتوماسیون</li>
+                            <li><strong>انواع تریگر:</strong> sun_based (بر اساس خورشید), time_based (بر اساس زمان), gpio_input (ورودی GPIO)</li>
+                            <li><strong>انواع عمل:</strong> gpio_output (خروجی GPIO), delay (تاخیر), notification (اعلان)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PIMS Tab -->
+            <div id="pims-tab" class="tab-content">
+                <div class="glass-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-clock"></i>
+                        برنامه‌های زمان‌بندی شده PIMS
+                        <span class="badge bg-primary ms-2" id="pimsScheduleCounter">0 برنامه</span>
+                    </h2>
+                    
+                    <!-- PIMS Management Buttons -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <button class="btn btn-success me-2" onclick="addPIMSSchedule()">
+                                <i class="fas fa-plus me-2"></i>
+                                افزودن برنامه جدید
+                            </button>
+                            <button class="btn btn-primary me-2" onclick="savePIMSSettings()">
+                                <i class="fas fa-save me-2"></i>
+                                ذخیره تنظیمات
+                            </button>
+                            <button class="btn btn-info" onclick="loadPIMSSettings()">
+                                <i class="fas fa-download me-2"></i>
+                                بارگذاری تنظیمات
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Dynamic PIMS Schedules Container -->
+                    <div id="pimsSchedulesContainer">
+                        <!-- Dynamic schedules will be generated here -->
+                    </div>
+                    
+                    <!-- Help Text -->
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>راهنما:</strong> برای افزودن برنامه جدید از دکمه "افزودن برنامه جدید" استفاده کنید. برای حذف هر برنامه، روی دکمه سطل زباله آن کلیک کنید. تعداد برنامه‌ها بر اساس داده‌های دریافتی از سرور تنظیم می‌شود.
+                    </div>
+                </div>
+            </div>
+
+            <!-- SIP Tab -->
+            <div id="sip-tab" class="tab-content">
+                <div class="glass-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-phone"></i>
+                        تنظیمات SIP
+                    </h2>
+                    
+                    <!-- General Settings -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">تنظیمات کلی</h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">وضعیت SIP</label>
+                                <select class="form-select" id="sipEnabled" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
                             </div>
-                            
-                            <!-- Tickets List -->
-                            <div id="ticketsList">
-                                <!-- Tickets will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Account Settings -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">تنظیمات حساب کاربری</h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">نام کاربری</label>
+                                <input type="text" class="form-control" id="sipUsername" placeholder="1001" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
                             </div>
-                            
-                            <!-- Pagination -->
-                            <nav aria-label="صفحه‌بندی تیکت‌ها" id="ticketsPagination" style="display: none;">
-                                <ul class="pagination justify-content-center">
-                                    <!-- Pagination will be generated here -->
-                                </ul>
-                            </nav>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">رمز عبور</label>
+                                <input type="password" class="form-control" id="sipPassword" placeholder="password" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">دامنه</label>
+                                <input type="text" class="form-control" id="sipDomain" placeholder="sip.example.com" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">سرور</label>
+                                <input type="text" class="form-control" id="sipServer" placeholder="sip.example.com" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">پورت</label>
+                                <input type="number" class="form-control" id="sipPort" placeholder="5060" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">پروتکل انتقال</label>
+                                <select class="form-select" id="sipTransport" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="UDP">UDP</option>
+                                    <option value="TCP">TCP</option>
+                                    <option value="TLS">TLS</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">مدت انقضای ثبت‌نام (ثانیه)</label>
+                                <input type="number" class="form-control" id="sipRegisterExpires" placeholder="3600" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">ثبت‌نام خودکار</label>
+                                <select class="form-select" id="sipAutoRegister" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Audio Settings -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">تنظیمات صوتی</h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">دستگاه ضبط</label>
+                                <input type="text" class="form-control" id="sipCaptureDevice" placeholder="plughw:CARD=Codec,DEV=0" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">دستگاه پخش</label>
+                                <input type="text" class="form-control" id="sipPlaybackDevice" placeholder="plughw:CARD=Codec,DEV=0" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">صدای میکروفون</label>
+                                <input type="number" class="form-control" id="sipMicrophoneVolume" min="0" max="100" placeholder="80" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">صدای بلندگو</label>
+                                <input type="number" class="form-control" id="sipSpeakerVolume" min="0" max="100" placeholder="80" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">حذف اکو</label>
+                                <select class="form-select" id="sipEchoCancellation" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">حذف نویز</label>
+                                <select class="form-select" id="sipNoiseSuppression" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">کنترل تطبیقی بهره</label>
+                                <select class="form-select" id="sipAdaptiveGainControl" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Call Settings -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">تنظیمات تماس</h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">پاسخ خودکار</label>
+                                <select class="form-select" id="sipAutoAnswer" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">تاخیر پاسخ خودکار (ثانیه)</label>
+                                <input type="number" class="form-control" id="sipAutoAnswerDelay" placeholder="0" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">زمان انتظار تماس (ثانیه)</label>
+                                <input type="number" class="form-control" id="sipCallTimeout" placeholder="30" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">زمان انتظار زنگ (ثانیه)</label>
+                                <input type="number" class="form-control" id="sipRingTimeout" placeholder="60" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">حالت DTMF</label>
+                                <select class="form-select" id="sipDtmfMode" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="rfc2833">RFC2833</option>
+                                    <option value="info">SIP INFO</option>
+                                    <option value="inband">In-band</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Settings -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">تنظیمات امنیتی</h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">فهرست سفید فعال</label>
+                                <select class="form-select" id="sipWhitelistEnabled" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">اجازه همه شماره‌ها</label>
+                                <select class="form-select" id="sipAllowAllNumbers" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">نیاز به احراز هویت</label>
+                                <select class="form-select" id="sipRequireAuthentication" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">شماره‌های مجاز (جدا شده با کاما)</label>
+                                <textarea class="form-control" id="sipAllowedNumbers" rows="3" placeholder="+989123456789,+989987654321,02112345678"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">شماره‌های مسدود (جدا شده با کاما)</label>
+                                <textarea class="form-control" id="sipBlockedNumbers" rows="3" placeholder="+989111111111"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Network Settings -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">تنظیمات شبکه</h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">سرور STUN</label>
+                                <input type="text" class="form-control" id="sipStunServer" placeholder="stun.l.google.com:19302" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">ICE فعال</label>
+                                <select class="form-select" id="sipIceEnabled" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">UPnP فعال</label>
+                                <select class="form-select" id="sipUpnpEnabled" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="true">فعال</option>
+                                    <option value="false">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">سیاست NAT</label>
+                                <select class="form-select" id="sipNatPolicy" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="default">پیش‌فرض</option>
+                                    <option value="force">اجباری</option>
+                                    <option value="disable">غیرفعال</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">سیاست فایروال</label>
+                                <select class="form-select" id="sipFirewallPolicy" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="default">پیش‌فرض</option>
+                                    <option value="strict">سخت‌گیرانه</option>
+                                    <option value="permissive">آزاد</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">رمزگذاری رسانه</label>
+                                <select class="form-select" id="sipMediaEncryption" style="border: 3px solid #808080 !important; background: rgba(255, 255, 255, 0.15) !important;">
+                                    <option value="none">هیچ</option>
+                                    <option value="srtp">SRTP</option>
+                                    <option value="dtls">DTLS</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- SIP Action Buttons -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <button class="btn btn-primary me-2" onclick="saveSIPSettings()">
+                                <i class="fas fa-save me-2"></i>
+                                ذخیره تنظیمات SIP
+                            </button>
+                            <button class="btn btn-success" onclick="loadSIPSettings()">
+                                <i class="fas fa-download me-2"></i>
+                                بارگذاری تنظیمات SIP
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
+
+
         </main>
     </div>
 
+    <!-- JavaScript Files -->
+    <script src="https://my.giot.ir/js/config.min.js"></script>
+    <script src="azan.js"></script>
+    
+    <script>
+        // Sign out functionality
+        document.getElementById('signOut').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Clear session and local storage
+            sessionStorage.clear();
+            localStorage.clear();
+            
+            // Show beautiful success notification
+            showNotification('با موفقیت از حساب کاربری خارج شدید!');
+            
+            // Redirect to my.giot.ir after a short delay
+            setTimeout(() => {
+                window.location.href = 'https://my.giot.ir';
+            }, 1500);
+        });
+        
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            themeToggle.checked = true;
+        }
+        
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            }
+        });
 
+        // Handle logout button clicks for both desktop and mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            // Desktop logout button
+            const signOutBtn = document.getElementById('signOut');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (typeof SignOut === 'function') {
+                        SignOut();
+                    } else {
+                        console.error('SignOut function not found');
+                    }
+                });
+            }
 
+            // Mobile logout button (if exists)
+            const mobileSignOutBtn = document.getElementById('mobileSignOut');
+            if (mobileSignOutBtn) {
+                mobileSignOutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (typeof SignOut === 'function') {
+                        SignOut();
+                    } else {
+                        console.error('SignOut function not found');
+                    }
+                });
+            }
+        });
+    </script>
+
+    <style>
+        /* Mobile Menu Styles */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .mobile-menu-items {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .mobile-menu-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .mobile-menu-section h6 {
+            color: #007bff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(0, 123, 255, 0.2);
+        }
+
+        .mobile-menu-section a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-section a:hover {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .device-management-menu,
+            .header-actions {
+                display: none;
+            }
+
+            .mobile-menu-items.show {
+                display: block;
+            }
+        }
+    </style>
 </body>
 </html>

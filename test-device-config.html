@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Device Config API</title>
+</head>
+<body>
+    <h1>Testing Device Config API</h1>
+    <div id="test-results"></div>
+    
+    <script src="js/device-config-api.js"></script>
+    <script>
+        // Test if the API is loaded
+        const resultsDiv = document.getElementById('test-results');
+        let results = [];
+        
+        // Test 1: Check if window.deviceConfigAPI exists
+        if (window.deviceConfigAPI) {
+            results.push('✅ window.deviceConfigAPI is loaded');
+            
+            // Test 2: Check if methods exist
+            if (typeof window.deviceConfigAPI.getDeviceConfig === 'function') {
+                results.push('✅ getDeviceConfig method exists');
+            } else {
+                results.push('❌ getDeviceConfig method missing');
+            }
+            
+            if (typeof window.deviceConfigAPI.setDeviceConfig === 'function') {
+                results.push('✅ setDeviceConfig method exists');
+            } else {
+                results.push('❌ setDeviceConfig method missing');
+            }
+            
+            if (typeof window.deviceConfigAPI.uploadDeviceConfig === 'function') {
+                results.push('✅ uploadDeviceConfig method exists');
+            } else {
+                results.push('❌ uploadDeviceConfig method missing');
+            }
+            
+            // Test 3: Check if hasApiAccess method exists
+            if (typeof window.deviceConfigAPI.hasApiAccess === 'function') {
+                results.push('✅ hasApiAccess method exists');
+                
+                // Test 4: Check API access (should return false without session data)
+                const hasAccess = window.deviceConfigAPI.hasApiAccess();
+                results.push(`🔍 API Access Check: ${hasAccess ? 'Granted' : 'Denied (expected without session)'}`);
+            } else {
+                results.push('❌ hasApiAccess method missing');
+            }
+            
+        } else {
+            results.push('❌ window.deviceConfigAPI is NOT loaded');
+        }
+        
+        // Display results
+        resultsDiv.innerHTML = '<h2>Test Results:</h2><ul>' + 
+            results.map(result => `<li>${result}</li>`).join('') + 
+            '</ul>';
+            
+        console.log('Device Config API Test Results:', results);
+    </script>
+</body>
+</html>

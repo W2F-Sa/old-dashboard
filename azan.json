@@ -1,0 +1,117 @@
+{
+  "device": {
+    "device_id": "10293984930",
+    "device_name": "Azangoo-MahanElectronic"
+  },
+  "files": {
+    "azan_archive_file_count": 35,
+    "quran_3min_archive_file_count": 100,
+    "quran_7min_pages_archive_file_count": 100,
+    "quran_pages_archive_file_count": 604
+  },
+  "gps": {
+    "ptimes_geolocation_dstactive": true,
+    "ptimes_geolocation_id": 153,
+    "ptimes_geolocation_mode_gps": 0,
+    "ptimes_geolocation_name": "اصفهان - اصفهان - اصفهان",
+    "ptimes_geolocation_timezone": 3.5,
+    "ptimes_geolocation_timezonename": "Asia/Tehran",
+    "ptimes_geolocation_xlatitude": 32.66,
+    "ptimes_geolocation_xlongitude": 51.67
+  },
+  "prayer_calculation": {
+    "ptimes_asr_method": "Shafii",
+    "ptimes_calc_method": "Jafary",
+    "ptimes_high_lats_adjust_method": "None"
+  },
+  "prayer_times": {
+    "asr": {
+      "azan_asr_days_of_week": 127,
+      "azan_asr_playlist_files": "media/playlists/azan/asr.m3u",
+      "azan_asr_post_days_of_week": 127,
+      "azan_asr_post_playlist_files": "media/playlists/azan/post_asr.m3u",
+      "azan_asr_post_volume": 50,
+      "azan_asr_pre_days_of_week": 127,
+      "azan_asr_pre_playlist_files": "media/playlists/azan/pre_asr.m3u",
+      "azan_asr_pre_volume": 70,
+      "azan_asr_volume": 80,
+      "random_file_selection": 1
+    },
+    "dhohr": {
+      "azan_dhohr_days_of_week": 127,
+      "azan_dhohr_playlist_files": "media/playlists/azan/dhohr.m3u",
+      "azan_dhohr_post_days_of_week": 127,
+      "azan_dhohr_post_playlist_files": "media/playlists/azan/post_dhohr.m3u",
+      "azan_dhohr_post_volume": 50,
+      "azan_dhohr_pre_days_of_week": 127,
+      "azan_dhohr_pre_playlist_files": "media/playlists/azan/pre_dhohr.m3u",
+      "azan_dhohr_pre_volume": 70,
+      "azan_dhohr_volume": 80,
+      "random_file_selection": 1
+    },
+    "isha": {
+      "azan_isha_days_of_week": 127,
+      "azan_isha_playlist_files": "media/playlists/azan/isha.m3u",
+      "azan_isha_post_days_of_week": 126,
+      "azan_isha_post_playlist_files": "media/playlists/azan/post_isha.m3u",
+      "azan_isha_post_volume": 50,
+      "azan_isha_pre_days_of_week": 127,
+      "azan_isha_pre_playlist_files": "media/playlists/azan/pre_isha.m3u",
+      "azan_isha_pre_volume": 70,
+      "azan_isha_volume": 80,
+      "random_file_selection": 1
+    },
+    "maghrib": {
+      "azan_maghrib_days_of_week": 127,
+      "azan_maghrib_playlist_files": "media/playlists/azan/maghrib.m3u",
+      "azan_maghrib_post_days_of_week": 127,
+      "azan_maghrib_post_playlist_files": "media/playlists/azan/post_maghrib.m3u",
+      "azan_maghrib_post_volume": 50,
+      "azan_maghrib_pre_days_of_week": 127,
+      "azan_maghrib_pre_playlist_files": "media/playlists/azan/pre_maghrib.m3u",
+      "azan_maghrib_pre_volume": 70,
+      "azan_maghrib_volume": 80,
+      "random_file_selection": 1
+    },
+    "sobh": {
+      "azan_sobh_days_of_week": 127,
+      "azan_sobh_playlist_files": "media/playlists/azan/sobh.m3u",
+      "azan_sobh_post_days_of_week": 127,
+      "azan_sobh_post_playlist_files": "media/playlists/azan/post_sobh.m3u",
+      "azan_sobh_post_volume": 0,
+      "azan_sobh_pre_days_of_week": 127,
+      "azan_sobh_pre_playlist_files": "media/playlists/azan/pre_sobh.m3u",
+      "azan_sobh_pre_volume": 0,
+      "azan_sobh_volume": 80,
+      "random_file_selection": 0
+    },
+    "sunrise": {
+      "azan_sunrise_days_of_week": 127,
+      "azan_sunrise_playlist_files": "media/playlists/azan/sunrise.m3u",
+      "azan_sunrise_post_days_of_week": 127,
+      "azan_sunrise_post_playlist_files": "media/playlists/azan/post_sunrise.m3u",
+      "azan_sunrise_post_volume": 0,
+      "azan_sunrise_pre_days_of_week": 127,
+      "azan_sunrise_pre_playlist_files": "media/playlists/azan/pre_sunrise.m3u",
+      "azan_sunrise_pre_volume": 0,
+      "azan_sunrise_volume": 0,
+      "random_file_selection": 1
+    },
+    "sunset": {
+      "azan_sunset_days_of_week": 127,
+      "azan_sunset_playlist_files": "media/playlists/azan/sunset.m3u",
+      "azan_sunset_post_days_of_week": 127,
+      "azan_sunset_post_playlist_files": "media/playlists/azan/post_sunset.m3u",
+      "azan_sunset_post_volume": 0,
+      "azan_sunset_pre_days_of_week": 127,
+      "azan_sunset_pre_playlist_files": "media/playlists/azan/pre_sunset.m3u",
+      "azan_sunset_pre_volume": 0,
+      "azan_sunset_volume": 0,
+      "random_file_selection": 1
+    }
+  },
+  "volume": {
+    "master_mic_volume": 100,
+    "master_playback_volume": 100
+  }
+}

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نمای سه‌بعدی استخر کشاورزی (خاک، چمن، برش مقطعی)</title>
+  <style>
+    body { margin: 0; font-family: Tahoma, sans-serif; background: linear-gradient(to bottom, #87CEEB 0%, #e7f6ff 30%, #ffffff 100%); min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+    header { padding: 16px 20px; color: #0f172a; text-align: center; }
+    .panel { max-width: 1100px; margin: 0 auto 14px auto; background: #ffffffcc; backdrop-filter: blur(2px); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.15); padding: 12px 16px; }
+    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 18px; align-items: center; }
+    .ctrl { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; }
+    .ctrl label { font-weight: 700; color: #0f172a; grid-column: 1 / -1; }
+    .ctrl output { background:#0ea5e9; color:#fff; padding:4px 10px; border-radius: 999px; font-weight: 700; }
+    input[type="range"] { width: 100%; }
+    input[type="checkbox"] { justify-self: start; }
+    #stageWrap { max-width: 1100px; margin: 0 auto 24px auto; background: #fff; border-radius: 16px; box-shadow: 0 8px 18px rgba(0,0,0,.15); overflow: hidden; border: 2px solid #334155; }
+    #stage { width: 100%; height: 680px; display: block; background: #eef2ff; }
+    .legend { display:flex; flex-wrap:wrap; gap:10px; padding:10px 14px; font-size:13px; color:#334155; background:#f8fafc; border-top:1px solid #e5e7eb; }
+    .chip { display:flex; align-items:center; gap:8px; }
+    .dot { width:16px; height:16px; border:1px solid #334155; border-radius:4px; }
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>نمای سه‌بعدی استخر کشاورزی (خاک، چمن، برش مقطعی)</h1>
+  </header>
+
+  <section class="panel">
+    <div class="controls">
+      <div class="ctrl">
+        <label for="waterLevel">ارتفاع آب از کف استخر (متر)</label>
+        <input id="waterLevel" type="range" min="0" max="2.5" step="0.05" value="1.8" />
+        <output id="waterOut">۱٫۸ متر</output>
+      </div>
+      <div class="ctrl">
+        <label for="tileSize">اندازهٔ کاشی (سانتی‌متر)</label>
+        <input id="tileSize" type="range" min="5" max="30" step="1" value="15" />
+        <output id="tileOut">۱۵ سانت</output>
+      </div>
+      <div class="ctrl">
+        <label for="clippingSlider">برش مقطعی استخر (در راستای طول)</label>
+        <input id="clippingEnabled" type="checkbox" title="فعال‌سازی برش" />
+        <input id="clippingSlider" type="range" min="-5" max="5" step="0.1" value="5" disabled />
+      </div>
+    </div>
+  </section>
+
+  <section id="stageWrap">
+    <canvas id="stage"></canvas>
+    <div class="legend">
+      <div class="chip"><span class="dot" style="background:#60a5fa"></span>آب</div>
+      <div class="chip"><span class="dot" style="background:#93c5fd"></span>کاشی داخل استخر</div>
+      <div class="chip"><span class="dot" style="background:#559e48"></span>سطح چمن</div>
+      <div class="chip"><span class="dot" style="background: linear-gradient(to bottom, #a16207, #ca8a04, #eab308); border: none;"></span>لایه‌های خاک</div>
+    </div>
+  </section>
+
+  <footer>چرخش: درَگ با دکمه چپ | زوم: اسکرول | جابه‌جایی: درَگ با راست | عددها بر حسب متر</footer>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ——— ابعاد و موقعیت استخر (متر) ———
+    const POOL_LENGTH = 10;
+    const POOL_WIDTH  = 5;
+    const POOL_DEPTH  = 2.5;
+    // ارتفاع بسیار کم برای جلوگیری از خطای رندرینگ و تضمین نمایش صحیح لبه
+    const POOL_ELEVATION = 0.01;
+
+    // ——— عناصر DOM ———
+    const canvas = document.getElementById('stage');
+    const waterSlider = document.getElementById('waterLevel');
+    const tileSlider = document.getElementById('tileSize');
+    const clipCheckbox = document.getElementById('clippingEnabled');
+    const clipSlider = document.getElementById('clippingSlider');
+    const waterOut = document.getElementById('waterOut');
+    const tileOut = document.getElementById('tileOut');
+    
+    clipSlider.min = -POOL_LENGTH / 2 - 1;
+    clipSlider.max = POOL_LENGTH / 2 + 1;
+    clipSlider.value = POOL_LENGTH / 2 + 1;
+
+    // ——— صحنه، دوربین و رندرکننده ———
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xeef2ff);
+
+    const camera = new THREE.PerspectiveCamera(55, canvas.clientWidth / canvas.clientHeight, 0.1, 1500);
+    camera.position.set(9, 9, 11);
+    
+    // تعریف صفحه برش سراسری
+    const clippingPlanes = [
+      new THREE.Plane(new THREE.Vector3(-1, 0, 0), clipSlider.max)
+    ];
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    renderer.localClippingEnabled = false; // برش به طور پیش‌فرض غیرفعال است
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; 
+    controls.target.set(0, -POOL_DEPTH/2 + POOL_ELEVATION, 0);
+
+    // ——— نورپردازی صحنه ———
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.9); 
+    dir.position.set(8, 14, 6); 
+    scene.add(dir);
+
+    // ——— توابع ساخت بافت (Texture) ———
+    function makeCanvas(w=512, h=512) { const c = document.createElement('canvas'); c.width=w; c.height=h; return c; }
+    function texFromCanvas(c) { const t = new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.anisotropy=8; t.needsUpdate = true; return t; }
+
+    // بافت کاشی استخر
+    function makePoolTileTexture(tileCm=15) {
+      const c = makeCanvas(512,512), ctx = c.getContext('2d');
+      ctx.fillStyle = '#93c5fd'; ctx.fillRect(0,0,c.width,c.height);
+      ctx.strokeStyle = '#e6efc'; ctx.lineWidth = 2;
+      const pxPerTile = (tileCm/100) * 100;
+      for (let x=0; x<=c.width; x+=pxPerTile) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,c.height); ctx.stroke(); }
+      for (let y=0; y<=c.height; y+=pxPerTile) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(c.width,y); ctx.stroke(); }
+      return texFromCanvas(c);
+    }
+
+    // بافت چمن طبیعی
+    function makeGrassTexture() {
+        const c = makeCanvas(512, 512), ctx = c.getContext('2d');
+        ctx.fillStyle = '#4a752e';
+        ctx.fillRect(0, 0, 512, 512);
+        const grassColors = ['#559e48', '#6cae54', '#7baf5f', '#a1c47b', '#b3d092', '#c1a555'];
+        for (let i = 0; i < 50000; i++) {
+            const x = Math.random() * 512, y = Math.random() * 512;
+            const length = Math.random() * 15 + 5, angle = (Math.random() - 0.5) * Math.PI * 0.25;
+            const width = Math.random() * 1.5 + 0.5;
+            ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+            ctx.fillStyle = grassColors[Math.floor(Math.random() * grassColors.length)];
+            ctx.globalAlpha = Math.random() * 0.5 + 0.3;
+            ctx.fillRect(-width / 2, 0, width, length); ctx.restore();
+        }
+        ctx.globalAlpha = 1; const tex = texFromCanvas(c); tex.repeat.set(12, 12); return tex;
+    }
+
+    // بافت لایه‌های خاک
+    function makeSoilLayerTexture() {
+        const c = makeCanvas(256, 512), ctx = c.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+        gradient.addColorStop(0, '#854d0e'); gradient.addColorStop(0.3, '#a16207');
+        gradient.addColorStop(0.6, '#ca8a04'); gradient.addColorStop(0.85, '#a3a3a3');
+        ctx.fillStyle = gradient; ctx.fillRect(0, 0, 256, 512);
+        ctx.globalAlpha = 0.08; ctx.fillStyle = '#000';
+        for (let i = 0; i < 4000; i++) {
+            const x = Math.random() * 256, y = Math.random() * 512, r = Math.random() * 1.2;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1; const tex = texFromCanvas(c); tex.repeat.set(1, 1); return tex;
+    }
+
+    // ——— ساخت زمین اطراف استخر ———
+    const groundDepth = POOL_DEPTH + 1.5;
+    const groundShape = new THREE.Shape();
+    const outerW = 20, outerH = 14;
+    groundShape.moveTo(-outerW/2, -outerH/2); groundShape.lineTo(outerW/2, -outerH/2); groundShape.lineTo(outerW/2, outerH/2); groundShape.lineTo(-outerW/2, outerH/2); groundShape.closePath();
+    
+    const holePath = new THREE.Path();
+    const holeW  = POOL_LENGTH + 0.6, holeH  = POOL_WIDTH  + 0.6;
+    holePath.moveTo(-holeW/2, -holeH/2); holePath.lineTo(holeW/2, -holeH/2); holePath.lineTo(holeW/2, holeH/2); holePath.lineTo(-holeW/2, holeH/2); holePath.closePath();
+    groundShape.holes.push(holePath);
+
+    const groundGeom = new THREE.ExtrudeGeometry(groundShape, { depth: groundDepth, bevelEnabled: false });
+    groundGeom.translate(0, 0, -groundDepth / 2); // تنظیم نقطه مرکزی برای تراز صحیح
+
+    const grassMat = new THREE.MeshStandardMaterial({ map: makeGrassTexture(), roughness: 1, clippingPlanes });
+    const soilMat  = new THREE.MeshStandardMaterial({ map: makeSoilLayerTexture(), roughness: 1, clippingPlanes });
+    
+    const ground = new THREE.Mesh(groundGeom, [grassMat, soilMat]);
+    ground.rotation.x = -Math.PI/2;
+    ground.position.y = 0;
+    scene.add(ground);
+
+    // ——— ساخت مجموعه استخر (دیواره، لبه، آب و ...) ———
+    const poolGroup = new THREE.Group();
+    poolGroup.position.y = POOL_ELEVATION;
+    scene.add(poolGroup);
+    
+    // دیواره‌ها و کف
+    const wallMatShared = new THREE.MeshStandardMaterial({ map: makePoolTileTexture(15), side: THREE.DoubleSide, clippingPlanes });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(POOL_LENGTH, POOL_WIDTH), wallMatShared);
+    floor.rotation.x = -Math.PI/2; floor.position.y = -POOL_DEPTH; poolGroup.add(floor);
+
+    const north = new THREE.Mesh(new THREE.PlaneGeometry(POOL_LENGTH, POOL_DEPTH), wallMatShared);
+    north.position.set(0, -POOL_DEPTH/2, -POOL_WIDTH/2); north.rotation.y = Math.PI; poolGroup.add(north);
+    const south = new THREE.Mesh(new THREE.PlaneGeometry(POOL_LENGTH, POOL_DEPTH), wallMatShared);
+    south.position.set(0, -POOL_DEPTH/2,  POOL_WIDTH/2); poolGroup.add(south);
+    const east = new THREE.Mesh(new THREE.PlaneGeometry(POOL_WIDTH, POOL_DEPTH), wallMatShared);
+    east.position.set( POOL_LENGTH/2, -POOL_DEPTH/2, 0); east.rotation.y = -Math.PI/2; poolGroup.add(east);
+    const west = new THREE.Mesh(new THREE.PlaneGeometry(POOL_WIDTH, POOL_DEPTH), wallMatShared);
+    west.position.set(-POOL_LENGTH/2, -POOL_DEPTH/2, 0); west.rotation.y =  Math.PI/2; poolGroup.add(west);
+    
+    // لبهٔ بالایی (Coping)
+    const copingDepth = 0.2;
+    const copShape = new THREE.Shape();
+    const copOuterL = holeW + 0.4, copOuterW = holeH + 0.4;
+    copShape.moveTo(-copOuterL/2, -copOuterW/2); copShape.lineTo(copOuterL/2, -copOuterW/2); copShape.lineTo(copOuterL/2, copOuterW/2); copShape.lineTo(-copOuterL/2, copOuterW/2); copShape.closePath();
+    const copHole = new THREE.Path();
+    copHole.moveTo(-holeW/2, -holeH/2); copHole.lineTo(holeW/2, -holeH/2); copHole.lineTo(holeW/2, holeH/2); copHole.lineTo(-holeW/2, holeH/2); copHole.closePath();
+    copShape.holes.push(copHole);
+
+    const copGeom = new THREE.ExtrudeGeometry(copShape, { depth: copingDepth, bevelEnabled: false });
+    copGeom.translate(0, 0, -copingDepth / 2); // تنظیم نقطه مرکزی
+
+    const copMat  = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 1, side: THREE.DoubleSide, clippingPlanes });
+    const coping  = new THREE.Mesh(copGeom, copMat);
+    coping.rotation.x = -Math.PI/2;
+    coping.position.y = 0.0;
+    poolGroup.add(coping);
+
+    // آب
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x4aa3ff, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false, clippingPlanes });
+    const waterPlaneMat = new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.28, side: THREE.DoubleSide, clippingPlanes });
+    const waterPlane = new THREE.Mesh(new THREE.PlaneGeometry(POOL_LENGTH*0.99, POOL_WIDTH*0.99), waterPlaneMat);
+    waterPlane.rotation.x = -Math.PI/2; poolGroup.add(waterPlane);
+    let waterMesh = null;
+    
+    function createOrUpdateWater(height) {
+      if (waterMesh) { poolGroup.remove(waterMesh); waterMesh.geometry.dispose(); }
+      const h = Math.max(0.01, height);
+      const geom = new THREE.BoxGeometry(POOL_LENGTH*0.98, h, POOL_WIDTH*0.98);
+      waterMesh = new THREE.Mesh(geom, waterMat);
+      waterMesh.position.set(0, -POOL_DEPTH + h/2, 0);
+      poolGroup.add(waterMesh);
+      waterPlane.position.set(0, -POOL_DEPTH + h, 0);
+    }
+
+    // ——— رویدادها و کنترلرها ———
+    const toFa = s => String(s).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+    function updateTileSize() {
+      const tileCm = parseFloat(tileSlider.value);
+      tileOut.textContent = toFa(tileCm) + ' سانت';
+      wallMatShared.map = makePoolTileTexture(tileCm);
+      wallMatShared.needsUpdate = true;
+    }
+
+    function updateWater() {
+      const h = parseFloat(waterSlider.value);
+      waterOut.textContent = toFa(h.toString().replace('.', '٫')) + ' متر';
+      createOrUpdateWater(h);
+    }
+
+    waterSlider.addEventListener('input', updateWater);
+    tileSlider.addEventListener('input', updateTileSize);
+    clipCheckbox.addEventListener('change', () => {
+        renderer.localClippingEnabled = clipCheckbox.checked;
+        clipSlider.disabled = !clipCheckbox.checked;
+    });
+    clipSlider.addEventListener('input', () => {
+        clippingPlanes[0].constant = parseFloat(clipSlider.value);
+    });
+
+    // ——— اجرای اولیه ———
+    updateTileSize();
+    updateWater();
+
+    // ——— حلقه رندر ———
+    function animate(){ 
+      requestAnimationFrame(animate);
+      const { clientWidth, clientHeight } = canvas;
+      const needResize = canvas.width !== clientWidth || canvas.height !== clientHeight;
+      if (needResize) { 
+        renderer.setSize(clientWidth, clientHeight, false); 
+        camera.aspect = clientWidth / clientHeight; 
+        camera.updateProjectionMatrix(); 
+      }
+      controls.update(); 
+      renderer.render(scene, camera); 
+    }
+    animate();
+
+    camera.lookAt(0, -POOL_DEPTH/2, 0);
+
+  </script>
+</body>
+</html>

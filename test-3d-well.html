@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 3D Well Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .controls button {
+            margin: 5px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            background: #0056b3;
+        }
+        #stageWrap {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+        }
+        #stage {
+            width: 100%;
+            height: 100%;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 Test 3D Well Visualization</h1>
+        <p>This page tests the 3D well visualization with water level display.</p>
+        
+        <div class="controls">
+            <h3>Water Level Controls:</h3>
+            <button onclick="setWaterLevel(0.5)">0.5m (Low)</button>
+            <button onclick="setWaterLevel(1.0)">1.0m</button>
+            <button onclick="setWaterLevel(1.5)">1.5m</button>
+            <button onclick="setWaterLevel(2.0)">2.0m (Normal)</button>
+            <button onclick="setWaterLevel(2.5)">2.5m</button>
+            <button onclick="setWaterLevel(3.0)">3.0m (High)</button>
+            <button onclick="setWaterLevel(3.5)">3.5m</button>
+            <button onclick="setWaterLevel(4.0)">4.0m (Very High)</button>
+            <button onclick="animateWaterLevel()">Animate</button>
+        </div>
+        
+        <div id="stageWrap">
+            <canvas id="stage"></canvas>
+        </div>
+        
+        <div class="info">
+            <div id="status">Status: Initializing...</div>
+            <div id="water-info">Water Level: Not set</div>
+            <div id="debug-info">Debug: Waiting for initialization...</div>
+        </div>
+    </div>
+
+    <!-- Load required libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Load our 3D well visualization -->
+    <script src="js/well3d.js"></script>
+    
+    <script>
+        let wellViz;
+        let currentWaterLevel = 2.0;
+        
+        // Initialize the 3D well visualization
+        function initWellViz() {
+            try {
+                document.getElementById('status').textContent = 'Status: Initializing 3D Well...';
+                
+                wellViz = new Enhanced3DWellVisualization();
+                wellViz.init();
+                
+                document.getElementById('status').textContent = 'Status: ✅ 3D Well Initialized Successfully!';
+                document.getElementById('debug-info').textContent = 'Debug: Enhanced3DWellVisualization created and initialized';
+                
+                // Set initial water level after a short delay
+                setTimeout(() => {
+                    setWaterLevel(2.0);
+                }, 1000);
+                
+            } catch (error) {
+                document.getElementById('status').textContent = 'Status: ❌ Error initializing 3D Well';
+                document.getElementById('debug-info').textContent = 'Debug: ' + error.message;
+                console.error('Error initializing 3D well:', error);
+            }
+        }
+        
+        // Set water level
+        function setWaterLevel(level) {
+            if (!wellViz) {
+                alert('3D Well not initialized yet!');
+                return;
+            }
+            
+            try {
+                currentWaterLevel = level;
+                wellViz.updateWaterLevel(level);
+                
+                document.getElementById('water-info').textContent = `Water Level: ${level.toFixed(1)}m`;
+                document.getElementById('debug-info').textContent = `Debug: Water level updated to ${level.toFixed(1)}m`;
+                
+                console.log(`🌊 Water level set to: ${level}m`);
+            } catch (error) {
+                document.getElementById('debug-info').textContent = 'Debug: Error updating water level - ' + error.message;
+                console.error('Error setting water level:', error);
+            }
+        }
+        
+        // Animate water level
+        function animateWaterLevel() {
+            if (!wellViz) return;
+            
+            let targetLevel = Math.random() * 3 + 0.5; // Random level between 0.5 and 3.5
+            let startLevel = currentWaterLevel;
+            let duration = 2000; // 2 seconds
+            let startTime = Date.now();
+            
+            function animate() {
+                let elapsed = Date.now() - startTime;
+                let progress = Math.min(elapsed / duration, 1);
+                
+                // Smooth easing function
+                progress = 1 - Math.pow(1 - progress, 3);
+                
+                let currentLevel = startLevel + (targetLevel - startLevel) * progress;
+                setWaterLevel(currentLevel);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            
+            animate();
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', initWellViz);
+        
+        // Add some keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (!wellViz) return;
+            
+            switch(e.key) {
+                case '1': setWaterLevel(0.5); break;
+                case '2': setWaterLevel(1.0); break;
+                case '3': setWaterLevel(1.5); break;
+                case '4': setWaterLevel(2.0); break;
+                case '5': setWaterLevel(2.5); break;
+                case '6': setWaterLevel(3.0); break;
+                case '7': setWaterLevel(3.5); break;
+                case '8': setWaterLevel(4.0); break;
+                case ' ': animateWaterLevel(); break; // Spacebar
+            }
+        });
+    </script>
+</body>
+</html>
