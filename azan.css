@@ -1,0 +1,1078 @@
+/* Azan Device Management CSS */
+/* Matching Dashboard Design */
+
+/* CSS Variables for Theme Management */
+:root {
+    /* Light Theme Colors with Business Blue Gradient */
+    --bg-primary: linear-gradient(135deg, #4f46e5 0%, #667eea 25%, #764ba2 50%, #5b73e8 75%, #4338ca 100%);
+    --bg-secondary: rgba(255, 255, 255, 0.95);
+    --bg-tertiary: rgba(230, 240, 255, 0.8);
+    --text-primary: #2c3e50;
+    --text-secondary: #5a6c7d;
+    --text-muted: #95a5a6;
+    --border-color: rgba(102, 126, 234, 0.2);
+    --shadow-color: rgba(102, 126, 234, 0.15);
+    
+    /* Brand Colors - Business Blue Theme */
+    --primary-color: #4f46e5;
+    --secondary-color: #667eea;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --info-color: #3b82f6;
+    
+    /* Glassmorphism Effects - Enhanced Business Style */
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.25);
+    --glass-blur: 20px;
+    --glass-shadow: 0 12px 40px 0 rgba(102, 126, 234, 0.25);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #404040;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --text-muted: #808080;
+    --border-color: #404040;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    
+    --glass-bg: rgba(45, 45, 45, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Base Styles */
+body {
+    background: var(--bg-primary);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--text-primary);
+    font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: all 0.3s ease;
+    direction: rtl;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        rgba(79, 70, 229, 0.08) 0%, 
+        rgba(102, 126, 234, 0.04) 20%,
+        rgba(91, 115, 232, 0.06) 40%,
+        rgba(118, 75, 162, 0.08) 60%,
+        rgba(67, 56, 202, 0.05) 80%,
+        rgba(79, 70, 229, 0.07) 100%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Header Styles - Matching Dashboard */
+.navbar {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 0 0 20px 20px;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--text-primary) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    display: none;
+}
+
+.mobile-menu-toggle:hover {
+    background: var(--glass-border);
+    transform: translateY(-2px);
+}
+
+.navbar-toggler-icon {
+    font-size: 1.2rem;
+}
+
+/* Collapsible Menu */
+.navbar-collapse {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.device-management-menu {
+    display: flex;
+    align-items: center;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+    color: var(--primary-color) !important;
+}
+
+/* Device Management Dropdown */
+.device-management {
+    position: relative;
+}
+
+.device-management .dropdown-menu {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    box-shadow: var(--glass-shadow);
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+    min-width: 200px;
+}
+
+.device-management .dropdown-item {
+    color: var(--text-primary);
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    border: none;
+    background: transparent;
+}
+
+.device-management .dropdown-item:hover {
+    background: var(--glass-bg);
+    color: var(--primary-color);
+    transform: translateX(-5px);
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.theme-toggle:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* User Menu */
+.user-menu .dropdown-menu {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    box-shadow: var(--glass-shadow);
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+    min-width: 180px;
+}
+
+.user-menu .dropdown-item {
+    color: var(--text-primary);
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-menu .dropdown-item:hover {
+    background: var(--glass-bg);
+    color: var(--primary-color);
+    transform: translateX(-5px);
+}
+
+.user-menu .dropdown-item.text-danger:hover {
+    color: var(--danger-color) !important;
+}
+
+/* Secondary Header for Azan Tabs */
+.azan-header {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+.azan-header h2 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Tab Navigation */
+.nav-tabs {
+    border: none;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.nav-tabs .nav-link {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    color: var(--text-secondary);
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    margin-bottom: 0;
+}
+
+.nav-tabs .nav-link:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.nav-tabs .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Category Navigation */
+.category-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.category-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.category-btn:hover {
+    background: var(--info-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+.category-btn.active {
+    background: var(--info-color);
+    color: white;
+    border-color: var(--info-color);
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+/* Content Cards */
+.content-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+.content-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+}
+
+/* Form Controls */
+.form-control {
+    border-radius: 12px;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+/* Device Information Fields */
+#device_id, #device_name {
+    background: rgba(173, 216, 230, 0.2);
+    border: 2px solid rgba(173, 216, 230, 0.4);
+}
+
+/* Location Fields */
+#location_name, #location_id, #latitude, #longitude, #timezone, #timezone_name, #gps_mode {
+    background: rgba(144, 238, 144, 0.2);
+    border: 2px solid rgba(144, 238, 144, 0.4);
+}
+
+/* Prayer Calculation Fields */
+#calc_method, #asr_method, #high_lats_method {
+    background: rgba(255, 182, 193, 0.2);
+    border: 2px solid rgba(255, 182, 193, 0.4);
+}
+
+/* Master Volume Fields */
+#master_mic_volume, #master_playback_volume {
+    background: rgba(255, 215, 0, 0.2);
+    border: 2px solid rgba(255, 215, 0, 0.4);
+}
+
+/* Sobh Prayer Fields */
+#sobh_days_of_week, #sobh_volume, #sobh_pre_volume, #sobh_post_volume,
+#sobh_playlist, #sobh_pre_playlist, #sobh_post_playlist,
+#sobh_pre_days, #sobh_post_days, #sobh_random {
+    background: rgba(255, 160, 122, 0.2);
+    border: 2px solid rgba(255, 160, 122, 0.4);
+}
+
+/* Dhohr Prayer Fields */
+#dhohr_days_of_week, #dhohr_volume, #dhohr_pre_volume, #dhohr_post_volume,
+#dhohr_playlist, #dhohr_pre_playlist, #dhohr_post_playlist,
+#dhohr_pre_days, #dhohr_post_days, #dhohr_random {
+    background: rgba(221, 160, 221, 0.2);
+    border: 2px solid rgba(221, 160, 221, 0.4);
+}
+
+/* Asr Prayer Fields */
+#asr_days_of_week, #asr_volume, #asr_pre_volume, #asr_post_volume,
+#asr_playlist, #asr_pre_playlist, #asr_post_playlist,
+#asr_pre_days, #asr_post_days, #asr_random {
+    background: rgba(135, 206, 250, 0.2);
+    border: 2px solid rgba(135, 206, 250, 0.4);
+}
+
+/* Maghrib Prayer Fields */
+#maghrib_days_of_week, #maghrib_volume, #maghrib_pre_volume, #maghrib_post_volume,
+#maghrib_playlist, #maghrib_pre_playlist, #maghrib_post_playlist,
+#maghrib_pre_days, #maghrib_post_days, #maghrib_random {
+    background: rgba(255, 192, 203, 0.2);
+    border: 2px solid rgba(255, 192, 203, 0.4);
+}
+
+/* Isha Prayer Fields */
+#isha_days_of_week, #isha_volume, #isha_pre_volume, #isha_post_volume,
+#isha_playlist, #isha_pre_playlist, #isha_post_playlist,
+#isha_pre_days, #isha_post_days, #isha_random {
+    background: rgba(152, 251, 152, 0.2);
+    border: 2px solid rgba(152, 251, 152, 0.4);
+}
+
+/* Sunrise Prayer Fields */
+#sunrise_days_of_week, #sunrise_volume, #sunrise_pre_volume, #sunrise_post_volume,
+#sunrise_playlist, #sunrise_pre_playlist, #sunrise_post_playlist,
+#sunrise_pre_days, #sunrise_post_days, #sunrise_random {
+    background: rgba(255, 218, 185, 0.2);
+    border: 2px solid rgba(255, 218, 185, 0.4);
+}
+
+/* Sunset Prayer Fields */
+#sunset_days_of_week, #sunset_volume, #sunset_pre_volume, #sunset_post_volume,
+#sunset_playlist, #sunset_pre_playlist, #sunset_post_playlist,
+#sunset_pre_days, #sunset_post_days, #sunset_random {
+    background: rgba(240, 230, 140, 0.2);
+    border: 2px solid rgba(240, 230, 140, 0.4);
+}
+
+/* SIP Fields - Higher specificity */
+.form-control#sipEnabled, .form-control#sipUsername, .form-control#sipPassword, .form-control#sipDomain, 
+.form-control#sipServer, .form-control#sipPort, .form-control#sipTransport,
+.form-control#sipRegisterExpires, .form-control#sipAutoRegister, .form-control#sipCaptureDevice, 
+.form-control#sipPlaybackDevice, .form-control#sipMicrophoneVolume, .form-control#sipSpeakerVolume, 
+.form-control#sipEchoCancellation, .form-control#sipNoiseSuppression, .form-control#sipAdaptiveGainControl, 
+.form-control#sipAutoAnswer, .form-control#sipAutoAnswerDelay, .form-control#sipCallTimeout,
+.form-control#sipRingTimeout, .form-control#sipDtmfMode, .form-control#sipWhitelistEnabled, 
+.form-control#sipAllowAllNumbers, .form-control#sipRequireAuthentication, .form-control#sipAllowedNumbers, 
+.form-control#sipBlockedNumbers, .form-control#sipStunServer, .form-control#sipIceEnabled, 
+.form-control#sipUpnpEnabled, .form-control#sipNatPolicy, .form-control#sipFirewallPolicy, 
+.form-control#sipMediaEncryption, .form-select#sipEnabled, .form-select#sipTransport,
+.form-select#sipAutoRegister, .form-select#sipEchoCancellation, .form-select#sipNoiseSuppression,
+.form-select#sipAdaptiveGainControl, .form-select#sipAutoAnswer, .form-select#sipDtmfMode,
+.form-select#sipWhitelistEnabled, .form-select#sipAllowAllNumbers, .form-select#sipRequireAuthentication,
+.form-select#sipIceEnabled, .form-select#sipUpnpEnabled, .form-select#sipNatPolicy,
+.form-select#sipFirewallPolicy, .form-select#sipMediaEncryption {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 3px solid #808080 !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 1rem !important;
+    transition: all 0.3s ease !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+}
+
+/* PIMS Fields - Higher specificity */
+.form-control[id*="pims"], .form-select[id*="pims"] {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 3px solid #808080 !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 1rem !important;
+    transition: all 0.3s ease !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+}
+
+/* System Date/Time Fields */
+#systemDate, #systemTime {
+    background: rgba(221, 160, 221, 0.12);
+    border: 2px solid rgba(128, 128, 128, 0.3);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+
+
+/* Default for other fields */
+.form-control:not(#device_id):not(#device_name):not(#location_name):not(#location_id):not(#latitude):not(#longitude):not(#timezone):not(#timezone_name):not(#master_mic_volume):not(#master_playback_volume):not([id*="sobh"]):not([id*="dhohr"]):not([id*="asr"]):not([id*="maghrib"]):not([id*="isha"]):not([id*="sunrise"]):not([id*="sunset"]):not(#systemDate):not(#systemTime):not(#azanDuration):not(#azanRepeat):not(#holidayEnabled):not(#nightMode):not([id*="sip"]):not([id*="pims"]) {
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.18);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    color: var(--text-primary);
+}
+
+/* Focus states for different field types */
+#device_id:focus, #device_name:focus {
+    background: rgba(173, 216, 230, 0.35);
+}
+
+#location_name:focus, #location_id:focus, #latitude:focus, #longitude:focus, #timezone:focus, #timezone_name:focus, #gps_mode:focus {
+    background: rgba(144, 238, 144, 0.35);
+}
+
+#calc_method:focus, #asr_method:focus, #high_lats_method:focus {
+    background: rgba(255, 182, 193, 0.35);
+}
+
+/* Focus states for audio fields */
+#master_mic_volume:focus, #master_playback_volume:focus {
+    background: rgba(255, 215, 0, 0.35);
+}
+
+#sobh_days_of_week:focus, #sobh_volume:focus, #sobh_pre_volume:focus, #sobh_post_volume:focus,
+#sobh_playlist:focus, #sobh_pre_playlist:focus, #sobh_post_playlist:focus,
+#sobh_pre_days:focus, #sobh_post_days:focus, #sobh_random:focus {
+    background: rgba(255, 160, 122, 0.35);
+}
+
+#dhohr_days_of_week:focus, #dhohr_volume:focus, #dhohr_pre_volume:focus, #dhohr_post_volume:focus,
+#dhohr_playlist:focus, #dhohr_pre_playlist:focus, #dhohr_post_playlist:focus,
+#dhohr_pre_days:focus, #dhohr_post_days:focus, #dhohr_random:focus {
+    background: rgba(221, 160, 221, 0.35);
+}
+
+#asr_days_of_week:focus, #asr_volume:focus, #asr_pre_volume:focus, #asr_post_volume:focus,
+#asr_playlist:focus, #asr_pre_playlist:focus, #asr_post_playlist:focus,
+#asr_pre_days:focus, #asr_post_days:focus, #asr_random:focus {
+    background: rgba(135, 206, 250, 0.35);
+}
+
+#maghrib_days_of_week:focus, #maghrib_volume:focus, #maghrib_pre_volume:focus, #maghrib_post_volume:focus,
+#maghrib_playlist:focus, #maghrib_pre_playlist:focus, #maghrib_post_playlist:focus,
+#maghrib_pre_days:focus, #maghrib_post_days:focus, #maghrib_random:focus {
+    background: rgba(255, 192, 203, 0.35);
+}
+
+#isha_days_of_week:focus, #isha_volume:focus, #isha_pre_volume:focus, #isha_post_volume:focus,
+#isha_playlist:focus, #isha_pre_playlist:focus, #isha_post_playlist:focus,
+#isha_pre_days:focus, #isha_post_days:focus, #isha_random:focus {
+    background: rgba(152, 251, 152, 0.35);
+}
+
+#sunrise_days_of_week:focus, #sunrise_volume:focus, #sunrise_pre_volume:focus, #sunrise_post_volume:focus,
+#sunrise_playlist:focus, #sunrise_pre_playlist:focus, #sunrise_post_playlist:focus,
+#sunrise_pre_days:focus, #sunrise_post_days:focus, #sunrise_random:focus {
+    background: rgba(255, 218, 185, 0.35);
+}
+
+#sunset_days_of_week:focus, #sunset_volume:focus, #sunset_pre_volume:focus, #sunset_post_volume:focus,
+#sunset_playlist:focus, #sunset_pre_playlist:focus, #sunset_post_playlist:focus,
+#sunset_pre_days:focus, #sunset_post_days:focus, #sunset_random:focus {
+    background: rgba(240, 230, 140, 0.35);
+}
+
+/* SIP Fields Focus */
+/* SIP Fields Focus - Higher specificity */
+.form-control#sipEnabled:focus, .form-control#sipUsername:focus, .form-control#sipPassword:focus, 
+.form-control#sipDomain:focus, .form-control#sipServer:focus, .form-control#sipPort:focus, 
+.form-control#sipTransport:focus, .form-control#sipRegisterExpires:focus, .form-control#sipAutoRegister:focus, 
+.form-control#sipCaptureDevice:focus, .form-control#sipPlaybackDevice:focus, .form-control#sipMicrophoneVolume:focus, 
+.form-control#sipSpeakerVolume:focus, .form-control#sipEchoCancellation:focus, .form-control#sipNoiseSuppression:focus,
+.form-control#sipAdaptiveGainControl:focus, .form-control#sipAutoAnswer:focus, .form-control#sipAutoAnswerDelay:focus, 
+.form-control#sipCallTimeout:focus, .form-control#sipRingTimeout:focus, .form-control#sipDtmfMode:focus, 
+.form-control#sipWhitelistEnabled:focus, .form-control#sipAllowAllNumbers:focus, .form-control#sipRequireAuthentication:focus, 
+.form-control#sipAllowedNumbers:focus, .form-control#sipBlockedNumbers:focus, .form-control#sipStunServer:focus,
+.form-control#sipIceEnabled:focus, .form-control#sipUpnpEnabled:focus, .form-control#sipNatPolicy:focus, 
+.form-control#sipFirewallPolicy:focus, .form-control#sipMediaEncryption:focus, .form-select#sipEnabled:focus, 
+.form-select#sipTransport:focus, .form-select#sipAutoRegister:focus, .form-select#sipEchoCancellation:focus, 
+.form-select#sipNoiseSuppression:focus, .form-select#sipAdaptiveGainControl:focus, .form-select#sipAutoAnswer:focus, 
+.form-select#sipDtmfMode:focus, .form-select#sipWhitelistEnabled:focus, .form-select#sipAllowAllNumbers:focus, 
+.form-select#sipRequireAuthentication:focus, .form-select#sipIceEnabled:focus, .form-select#sipUpnpEnabled:focus, 
+.form-select#sipNatPolicy:focus, .form-select#sipFirewallPolicy:focus, .form-select#sipMediaEncryption:focus {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: 3px solid #808080 !important;
+    box-shadow: 0 0 0 0.2rem rgba(128, 128, 128, 0.5) !important;
+}
+
+/* PIMS Fields Focus - Higher specificity */
+.form-control[id*="pims"]:focus, .form-select[id*="pims"]:focus {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: 3px solid #808080 !important;
+    box-shadow: 0 0 0 0.2rem rgba(128, 128, 128, 0.5) !important;
+}
+
+/* System Date/Time Fields Focus */
+#systemDate:focus, #systemTime:focus {
+    background: rgba(221, 160, 221, 0.22);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+}
+
+/* General Settings Fields Focus */
+#azanDuration:focus, #azanRepeat:focus, #holidayEnabled:focus, #nightMode:focus {
+    background: rgba(255, 192, 203, 0.22);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+}
+
+.form-control:not(#device_id):not(#device_name):not(#location_name):not(#location_id):not(#latitude):not(#longitude):not(#timezone):not(#timezone_name):not(#master_mic_volume):not(#master_playback_volume):not([id*="sobh"]):not([id*="dhohr"]):not([id*="asr"]):not([id*="maghrib"]):not([id*="isha"]):not([id*="sunrise"]):not([id*="sunset"]):not(#systemDate):not(#systemTime):not(#azanDuration):not(#azanRepeat):not(#holidayEnabled):not(#nightMode):not([id*="sip"]):not([id*="pims"]):focus {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.form-select {
+    border-radius: 12px;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.form-select:not([id*="sip"]):not([id*="pims"]) {
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.18);
+}
+
+.form-select:not([id*="sip"]):not([id*="pims"]):focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.form-select:not([id*="sip"]):not([id*="pims"]):focus {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-success {
+    background: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.btn-warning {
+    background: var(--warning-color);
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.btn-info {
+    background: var(--info-color);
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.status-connected {
+    background: rgba(40, 167, 69, 0.2);
+    color: var(--success-color);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-disconnected {
+    background: rgba(220, 53, 69, 0.2);
+    color: var(--danger-color);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.status-reconnecting {
+    background: rgba(255, 193, 7, 0.2);
+    color: var(--warning-color);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    box-shadow: var(--glass-shadow);
+    padding: 1rem 1.5rem;
+    color: var(--text-primary);
+    z-index: 1050;
+    max-width: 400px;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--glass-border);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        border-radius: 0 0 15px 15px;
+        margin-bottom: 1rem;
+        padding: 0.75rem 0;
+        min-height: 70px;
+    }
+    
+    .navbar .container-fluid {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0 15px;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+        flex: 1;
+        min-width: 180px;
+    }
+    
+    /* Show mobile toggle button */
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    /* Hide menu by default on mobile */
+    .navbar-collapse {
+        display: none;
+        width: 100%;
+        margin-top: 10px;
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .navbar-collapse.show {
+        display: flex;
+    }
+    
+    .device-management-menu {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .device-menu-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 8px 15px;
+        font-size: 0.85rem;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .theme-toggle-container {
+        display: flex;
+        align-items: center;
+    }
+    
+    .theme-toggle-label {
+        font-size: 0.8rem;
+    }
+    
+    .theme-toggle-slider {
+        width: 45px;
+        height: 22px;
+    }
+    
+    .user-menu-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .dropdown-menu {
+        right: 0 !important;
+        left: auto !important;
+        min-width: 220px;
+    }
+    
+    .azan-header {
+        padding: 1rem;
+        border-radius: 15px;
+        margin: 0 10px 1.5rem 10px;
+    }
+    
+    .azan-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .content-card {
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin: 0 10px;
+    }
+    
+    .nav-tabs {
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .nav-tabs .nav-link {
+        text-align: center;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .category-nav {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        gap: 0.25rem;
+    }
+    
+    .category-nav .btn {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+        white-space: nowrap;
+    }
+    
+    .notification {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        font-size: 0.9rem;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.75rem;
+    }
+    
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.6rem 1.2rem;
+    }
+}
+
+/* Extra Small Devices (phones, less than 576px) */
+@media (max-width: 576px) {
+    .navbar {
+        border-radius: 0 0 12px 12px;
+        padding: 0.5rem 0;
+        min-height: 65px;
+    }
+    
+    .navbar .container-fluid {
+        padding: 0 10px;
+        gap: 8px;
+    }
+    
+    .navbar-brand {
+        font-size: 0.95rem;
+        min-width: 150px;
+    }
+    
+    .mobile-menu-toggle {
+        padding: 6px 10px;
+        font-size: 1rem;
+    }
+    
+    .navbar-collapse {
+        gap: 12px;
+    }
+    
+    .device-menu-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .header-actions {
+        gap: 12px;
+    }
+    
+    .theme-toggle-label {
+        font-size: 0.75rem;
+    }
+    
+    .theme-toggle-slider {
+        width: 40px;
+        height: 20px;
+    }
+    
+    .user-menu-btn {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+    
+    .dropdown-menu {
+        min-width: 200px;
+        font-size: 0.8rem;
+    }
+    
+    .dropdown-item {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .azan-header {
+        margin: 0 8px 1rem 8px;
+        padding: 0.75rem;
+        border-radius: 12px;
+    }
+    
+    .azan-header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .content-card {
+        margin: 0 8px;
+        padding: 1rem;
+        border-radius: 12px;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .category-nav .btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .form-group label {
+        font-size: 0.85rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.6rem;
+    }
+    
+    .btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .notification {
+        right: 8px;
+        left: 8px;
+        font-size: 0.85rem;
+        padding: 10px 15px;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Hide/Show Tab Content */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hide/Show Category Content */
+.category-content {
+    display: none;
+}
+
+.category-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
