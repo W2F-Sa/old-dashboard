@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Session Storage</title>
+    <link href="https://cdn.giot.ir/js/bootstrap.rtl.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .debug-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 50px auto;
+            max-width: 800px;
+            padding: 30px;
+        }
+        .session-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .missing {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .present {
+            background: #d1edff;
+            border-color: #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="debug-container">
+            <div class="text-center mb-4">
+                <h1><i class="fas fa-bug"></i> Debug Session Storage</h1>
+                <p class="text-muted">بررسی وضعیت Session Storage برای MQTT</p>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h3>وضعیت Session Storage:</h3>
+                    <div id="session-status"></div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h3>تنظیم مقادیر تست:</h3>
+                    <button class="btn btn-primary me-2" onclick="setTestValues()">تنظیم مقادیر تست</button>
+                    <button class="btn btn-secondary me-2" onclick="clearStorage()">پاک کردن Session Storage</button>
+                    <button class="btn btn-info" onclick="refreshStatus()">بروزرسانی</button>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h3>تنظیم دستی:</h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">mqttuser:</label>
+                            <input type="text" class="form-control" id="mqttuser" placeholder="نام کاربری">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">mqttpass:</label>
+                            <input type="password" class="form-control" id="mqttpass" placeholder="رمز عبور">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">mqtttopic:</label>
+                            <input type="text" class="form-control" id="mqtttopic" placeholder="تاپیک اصلی">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">mqttchattopic:</label>
+                            <input type="text" class="form-control" id="mqttchattopic" placeholder="تاپیک چت" value="chat">
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="setManualValues()">ذخیره در Session Storage</button>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <h3>تست Authentication:</h3>
+                    <button class="btn btn-warning" onclick="testAuthentication()">تست تابع checkAuthentication</button>
+                    <div id="auth-result" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <script>
+        function refreshStatus() {
+            const statusDiv = document.getElementById('session-status');
+            const requiredKeys = ['mqttuser', 'mqttpass', 'mqtttopic', 'mqttchattopic'];
+            
+            let html = '';
+            
+            requiredKeys.forEach(key => {
+                const value = sessionStorage.getItem(key);
+                const isPresent = value !== null && value !== '';
+                const cssClass = isPresent ? 'present' : 'missing';
+                
+                html += `
+                    <div class="session-item ${cssClass}">
+                        <strong>${key}:</strong> 
+                        ${isPresent ? 
+                            `<span class="text-success">✓ موجود</span> - مقدار: <code>${value}</code>` : 
+                            `<span class="text-danger">✗ موجود نیست</span>`
+                        }
+                    </div>
+                `;
+            });
+            
+            statusDiv.innerHTML = html;
+        }
+        
+        function setTestValues() {
+            sessionStorage.setItem('mqttuser', 'testuser');
+            sessionStorage.setItem('mqttpass', 'testpass');
+            sessionStorage.setItem('mqtttopic', 'testtopic');
+            sessionStorage.setItem('mqttchattopic', 'chat');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'موفق',
+                text: 'مقادیر تست در Session Storage ذخیره شد',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            
+            refreshStatus();
+        }
+        
+        function clearStorage() {
+            const keys = ['mqttuser', 'mqttpass', 'mqtttopic', 'mqttchattopic'];
+            keys.forEach(key => sessionStorage.removeItem(key));
+            
+            Swal.fire({
+                icon: 'info',
+                title: 'پاک شد',
+                text: 'Session Storage پاک شد',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            
+            refreshStatus();
+        }
+        
+        function setManualValues() {
+            const mqttuser = document.getElementById('mqttuser').value;
+            const mqttpass = document.getElementById('mqttpass').value;
+            const mqtttopic = document.getElementById('mqtttopic').value;
+            const mqttchattopic = document.getElementById('mqttchattopic').value;
+            
+            if (mqttuser) sessionStorage.setItem('mqttuser', mqttuser);
+            if (mqttpass) sessionStorage.setItem('mqttpass', mqttpass);
+            if (mqtttopic) sessionStorage.setItem('mqtttopic', mqtttopic);
+            if (mqttchattopic) sessionStorage.setItem('mqttchattopic', mqttchattopic);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'ذخیره شد',
+                text: 'مقادیر در Session Storage ذخیره شد',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            
+            refreshStatus();
+        }
+        
+        function testAuthentication() {
+            // Copy the checkAuthentication function from script.js
+            function checkAuthentication() {
+                const mqttUser = sessionStorage.getItem('mqttuser');
+                const mqttPass = sessionStorage.getItem('mqttpass');
+                const mqttTopic = sessionStorage.getItem('mqtttopic');
+                const chatTopic = sessionStorage.getItem('mqttchattopic');
+
+                if (!mqttUser || !mqttPass || !mqttTopic || !chatTopic) {
+                    return {
+                        success: false,
+                        missing: [
+                            !mqttUser ? 'mqttuser' : null,
+                            !mqttPass ? 'mqttpass' : null,
+                            !mqttTopic ? 'mqtttopic' : null,
+                            !chatTopic ? 'mqttchattopic' : null
+                        ].filter(x => x !== null)
+                    };
+                }
+                
+                return { success: true };
+            }
+            
+            const result = checkAuthentication();
+            const resultDiv = document.getElementById('auth-result');
+            
+            if (result.success) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>✓ تست موفق:</strong> تمام مقادیر مورد نیاز موجود است
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>✗ تست ناموفق:</strong> مقادیر زیر موجود نیست:<br>
+                        <ul>
+                            ${result.missing.map(key => `<li><code>${key}</code></li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load current values into form
+        function loadCurrentValues() {
+            document.getElementById('mqttuser').value = sessionStorage.getItem('mqttuser') || '';
+            document.getElementById('mqttpass').value = sessionStorage.getItem('mqttpass') || '';
+            document.getElementById('mqtttopic').value = sessionStorage.getItem('mqtttopic') || '';
+            document.getElementById('mqttchattopic').value = sessionStorage.getItem('mqttchattopic') || 'chat';
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshStatus();
+            loadCurrentValues();
+        });
+    </script>
+</body>
+</html>

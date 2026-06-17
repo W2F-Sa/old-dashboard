@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست MQTT5 - سامانه موقعیت‌یاب</title>
+    
+    <!-- کتابخانه‌های خارجی -->
+    <link href="https://cdn.giot.ir/js/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.giot.ir/js/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.giot.ir/js/mqtt.min.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .test-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 50px auto;
+            max-width: 800px;
+            padding: 30px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        
+        .status-connected { background-color: #28a745; }
+        .status-connecting { background-color: #ffc107; }
+        .status-disconnected { background-color: #dc3545; }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="test-container">
+            <div class="text-center mb-4">
+                <h1><i class="fas fa-satellite-dish me-2"></i>تست MQTT5</h1>
+                <p class="text-muted">آزمایش اتصال و ارسال/دریافت پیام با MQTT نسخه 5</p>
+            </div>
+            
+            <!-- وضعیت اتصال -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-plug me-2"></i>وضعیت اتصال
+                                <span class="status-indicator status-disconnected" id="status-indicator"></span>
+                                <span id="status-text">قطع</span>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تنظیمات اتصال -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="host" class="form-label">آدرس سرور:</label>
+                    <input type="text" class="form-control" id="host" value="mqttws.giot.ir">
+                </div>
+                <div class="col-md-6">
+                    <label for="port" class="form-label">پورت:</label>
+                    <input type="text" class="form-control" id="port" value="2087">
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="userName" class="form-label">نام کاربری:</label>
+                    <input type="text" class="form-control" id="userName" placeholder="نام کاربری MQTT">
+                </div>
+                <div class="col-md-6">
+                    <label for="password" class="form-label">رمز عبور:</label>
+                    <input type="password" class="form-control" id="password" placeholder="رمز عبور MQTT">
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="topic" class="form-label">تاپیک اصلی:</label>
+                    <input type="text" class="form-control" id="topic" placeholder="مثال: user123">
+                </div>
+                <div class="col-md-6">
+                    <label for="chat-topic" class="form-label">تاپیک چت:</label>
+                    <input type="text" class="form-control" id="chat-topic" value="chat" placeholder="chat">
+                </div>
+            </div>
+            
+            <!-- دکمه‌های کنترل -->
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <button class="btn btn-primary me-2" id="connectBtn">
+                        <i class="fas fa-plug me-1"></i>اتصال
+                    </button>
+                    <button class="btn btn-secondary me-2" id="disconnectBtn" disabled>
+                        <i class="fas fa-unlink me-1"></i>قطع اتصال
+                    </button>
+                    <button class="btn btn-success" id="loadFromSession">
+                        <i class="fas fa-download me-1"></i>بارگیری از Session Storage
+                    </button>
+                </div>
+            </div>
+            
+            <!-- ارسال پیام -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <label for="publish-topic" class="form-label">تاپیک ارسال:</label>
+                    <input type="text" class="form-control" id="publish-topic" placeholder="تاپیک مقصد">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-info w-100" id="publishBtn" disabled>
+                        <i class="fas fa-paper-plane me-1"></i>ارسال پیام تست
+                    </button>
+                </div>
+            </div>
+            
+            <!-- نمایش پیام‌ها -->
+            <div class="row">
+                <div class="col-12">
+                    <h5><i class="fas fa-comments me-2"></i>پیام‌های دریافتی:</h5>
+                    <div id="messages" style="height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 8px; background-color: #f8f9fa;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- کتابخانه‌های جاوااسکریپت -->
+    <script src="https://cdn.giot.ir/js/jquery.min.js"></script>
+    <script src="https://cdn.giot.ir/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    
+    <script>
+        // Global variable to store the MQTT client instance
+        let client = null;
+        const messagesDiv = document.getElementById('messages');
+        
+        // Get references to elements
+        const publishTopicInput = document.getElementById('publish-topic');
+        const publishBtn = document.getElementById('publishBtn');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        
+        // Utility function to display messages
+        function displayMessage(message) {
+            console.log("UI Update: " + message);
+            const messageElement = document.createElement('p');
+            const now = new Date();
+            messageElement.textContent = `[${now.toLocaleTimeString()}] ${message}`;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        // Update status indicator
+        function updateStatusIndicator(status, text) {
+            statusIndicator.className = `status-indicator status-${status}`;
+            statusText.textContent = text;
+        }
+        
+        // Function to start connection using MQTT.js
+        function startConnect() {
+            if (client && client.connected) {
+                displayMessage("Already connected. Please disconnect first.");
+                return;
+            }
+            if (client && client.connecting) {
+                displayMessage("Connection attempt already in progress.");
+                return;
+            }
+            
+            // Get connection parameters from form
+            const host = document.getElementById('host').value;
+            const port = document.getElementById('port').value;
+            const userName = document.getElementById('userName').value;
+            const password = document.getElementById('password').value;
+            const topic = document.getElementById('topic').value;
+            const chatTopic = document.getElementById('chat-topic').value;
+            
+            if (!host || !port || !userName || !password || !topic) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'اطلاعات ناقص',
+                    text: 'لطفاً تمام فیلدهای ضروری را پر کنید'
+                });
+                return;
+            }
+            
+            // MQTT.js Connection
+            const protocol = 'wss';
+            const connectUrl = `${protocol}://${host}:${port}`;
+            const clientId = 'mqttjs_' + Math.random().toString(16).substr(2, 8);
+            
+            displayMessage(`Connecting to ${connectUrl} as ${clientId} (MQTT v5)...`);
+            
+            if (connectBtn) connectBtn.disabled = true;
+            if (disconnectBtn) disconnectBtn.disabled = true;
+            if (publishBtn) publishBtn.disabled = true;
+            
+            updateStatusIndicator('connecting', 'در حال اتصال...');
+            
+            // MQTT.js Connection Options
+            const options = {
+                clientId: clientId,
+                protocolVersion: 5, // Specify MQTT version 5
+                clean: true,
+                keepalive: 60,
+                connectTimeout: 10000,
+                username: userName,
+                password: password,
+                reconnectPeriod: 1000,
+                
+                // Will message configuration
+                will: {
+                    topic: 'lwt/websocket/mqttwsuser/' + userName,
+                    payload: 'Client has disconnected',
+                    qos: 1,
+                    retain: false
+                }
+            };
+            
+            // Create and connect the client
+            client = mqtt.connect(connectUrl, options);
+            
+            // MQTT.js Event Handlers
+            client.on('connect', (connack) => {
+                console.log("Connect event fired. connack:", connack);
+                if (connack.reasonCode === 0) {
+                    displayMessage(`Connected successfully to ${host}:${port}!`);
+                    updateStatusIndicator('connected', 'متصل');
+                    if (connectBtn) connectBtn.disabled = true;
+                    if (disconnectBtn) disconnectBtn.disabled = false;
+                    if (publishBtn) publishBtn.disabled = false;
+                    
+                    const fullTopic = `${topic}/${chatTopic}`;
+                    subscribeToTopic(fullTopic);
+                    
+                    // Set default publish topic
+                    publishTopicInput.value = fullTopic;
+                } else {
+                    displayMessage(`Connection Failed! Reason: ${connack.reasonString || connack.reasonCode} (Code: ${connack.reasonCode})`);
+                    updateStatusIndicator('disconnected', `خطا: ${connack.reasonString || connack.reasonCode}`);
+                    if (connectBtn) connectBtn.disabled = false;
+                    if (disconnectBtn) disconnectBtn.disabled = true;
+                    if (publishBtn) publishBtn.disabled = true;
+                    client.end(true);
+                }
+            });
+            
+            // Called when a message arrives
+            client.on('message', (topic, payload, packet) => {
+                const messageString = payload.toString();
+                displayMessage(`Message from ${topic}: ${messageString}`);
+            });
+            
+            // Error handler
+            client.on('error', (error) => {
+                console.error('MQTT Error:', error);
+                displayMessage(`Connection Error: ${error.message}`);
+                updateStatusIndicator('disconnected', 'خطا');
+                if (connectBtn) connectBtn.disabled = false;
+                if (disconnectBtn) disconnectBtn.disabled = true;
+                if (publishBtn) publishBtn.disabled = true;
+            });
+            
+            // Close handler
+            client.on('close', () => {
+                displayMessage('Connection closed');
+                updateStatusIndicator('disconnected', 'قطع');
+                if (connectBtn) connectBtn.disabled = false;
+                if (disconnectBtn) disconnectBtn.disabled = true;
+                if (publishBtn) publishBtn.disabled = true;
+            });
+        }
+        
+        // Function to subscribe to topic
+        function subscribeToTopic(topic) {
+            if (client && client.connected) {
+                client.subscribe(topic, { qos: 1 }, (error) => {
+                    if (error) {
+                        displayMessage(`Subscription error: ${error.message}`);
+                    } else {
+                        displayMessage(`Successfully subscribed to: ${topic}`);
+                    }
+                });
+            }
+        }
+        
+        // Function to disconnect
+        function disconnect() {
+            if (client && client.connected) {
+                client.end();
+                displayMessage('Disconnected from MQTT broker');
+            }
+        }
+        
+        // Function to publish test message
+        function publishTestMessage() {
+            const topic = publishTopicInput.value;
+            if (!topic) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'تاپیک خالی',
+                    text: 'لطفاً تاپیک ارسال را مشخص کنید'
+                });
+                return;
+            }
+            
+            const testMessage = {
+                DeviceID: 'TEST001',
+                DevicenickName: 'دستگاه تست',
+                latitude: '32.4279',
+                longitude: '53.6880',
+                timestamp: Math.floor(Date.now() / 1000),
+                batterylevel: '85%',
+                speed: '0',
+                GPSFixStatus: '1'
+            };
+            
+            if (client && client.connected) {
+                client.publish(topic, JSON.stringify(testMessage), { qos: 1 }, (error) => {
+                    if (error) {
+                        displayMessage(`Publish error: ${error.message}`);
+                    } else {
+                        displayMessage(`Test message published to: ${topic}`);
+                    }
+                });
+            }
+        }
+        
+        // Function to load data from session storage
+        function loadFromSessionStorage() {
+            const mqttUser = sessionStorage.getItem('mqttuser');
+            const mqttPass = sessionStorage.getItem('mqttpass');
+            const mqttTopic = sessionStorage.getItem('mqtttopic');
+            const chatTopic = sessionStorage.getItem('mqttchattopic');
+            
+            if (mqttUser) document.getElementById('userName').value = mqttUser;
+            if (mqttPass) document.getElementById('password').value = mqttPass;
+            if (mqttTopic) document.getElementById('topic').value = mqttTopic;
+            if (chatTopic) document.getElementById('chat-topic').value = chatTopic;
+            
+            if (mqttUser && mqttPass && mqttTopic && chatTopic) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'بارگیری موفق',
+                    text: 'اطلاعات از Session Storage بارگیری شد',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'اطلاعات ناقص',
+                    text: 'برخی اطلاعات در Session Storage موجود نیست'
+                });
+            }
+        }
+        
+        // Event listeners
+        connectBtn.addEventListener('click', startConnect);
+        disconnectBtn.addEventListener('click', disconnect);
+        publishBtn.addEventListener('click', publishTestMessage);
+        document.getElementById('loadFromSession').addEventListener('click', loadFromSessionStorage);
+        
+        // Initial message
+        displayMessage('MQTT5 Test Client Ready');
+    </script>
+</body>
+</html>

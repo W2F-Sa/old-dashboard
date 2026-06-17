@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست پارسر CSV</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .test-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .result-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .success { border-color: #28a745; background-color: #d4edda; }
+        .error { border-color: #dc3545; background-color: #f8d7da; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2 class="text-center mb-4">
+            <i class="fas fa-code text-primary"></i>
+            تست پارسر داده‌های CSV
+        </h2>
+        
+        <div class="mb-4">
+            <label for="csvInput" class="form-label">داده CSV برای تست:</label>
+            <input type="text" class="form-control" id="csvInput" 
+                   value="{1,1,32.6485N,51.6398E,0.00,1586,131.02,156,-68}"
+                   placeholder="مثال: {1,1,32.6485N,51.6398E,0.00,1586,131.02,156,-68}">
+        </div>
+        
+        <div class="text-center mb-4">
+            <button class="btn btn-primary btn-lg" onclick="testParser()">
+                <i class="fas fa-play"></i>
+                تست پارسر
+            </button>
+            <button class="btn btn-secondary btn-lg ms-2" onclick="clearResults()">
+                <i class="fas fa-trash"></i>
+                پاک کردن
+            </button>
+        </div>
+        
+        <div id="results"></div>
+        
+        <div class="mt-4">
+            <h5>نمونه‌های تست:</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-outline-info btn-sm mb-2 w-100" 
+                            onclick="setTestData('{1,1,32.6485N,51.6398E,0.00,1586,131.02,156,-68}')">
+                        داده نمونه 1
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-outline-info btn-sm mb-2 w-100" 
+                            onclick="setTestData('{2,1,35.7219S,139.7414W,25.5,1587,98.5,180,-55}')">
+                        داده نمونه 2
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Parse CSV format data like: {1,1,32.6485N,51.6398E,0.00,1586,131.02,156,-68}
+        function parseCSVData(messageString) {
+            try {
+                // Remove curly braces and split by comma
+                const cleanMessage = messageString.replace(/[{}]/g, '').trim();
+                const parts = cleanMessage.split(',');
+                
+                if (parts.length < 4) {
+                    throw new Error('Invalid CSV format - not enough parts');
+                }
+                
+                // Parse the data based on expected format
+                // Format: {deviceId,status,latitude,longitude,speed,timestamp,battery,signal,rssi}
+                const deviceId = parts[0] ? parts[0].trim() : '1';
+                const status = parts[1] ? parts[1].trim() : '1';
+                const latitudeStr = parts[2] ? parts[2].trim() : '';
+                const longitudeStr = parts[3] ? parts[3].trim() : '';
+                const speed = parts[4] ? parseFloat(parts[4].trim()) : 0;
+                const timestamp = parts[5] ? parseInt(parts[5].trim()) : Math.floor(Date.now() / 1000);
+                const battery = parts[6] ? parseFloat(parts[6].trim()) : 0;
+                const signal = parts[7] ? parseInt(parts[7].trim()) : 0;
+                const rssi = parts[8] ? parseInt(parts[8].trim()) : 0;
+                
+                // Parse latitude with N/S indicator
+                let latitude;
+                if (latitudeStr.includes('N')) {
+                    latitude = parseFloat(latitudeStr.replace('N', ''));
+                } else if (latitudeStr.includes('S')) {
+                    latitude = -parseFloat(latitudeStr.replace('S', ''));
+                } else {
+                    latitude = parseFloat(latitudeStr);
+                }
+                
+                // Parse longitude with E/W indicator
+                let longitude;
+                if (longitudeStr.includes('E')) {
+                    longitude = parseFloat(longitudeStr.replace('E', ''));
+                } else if (longitudeStr.includes('W')) {
+                    longitude = -parseFloat(longitudeStr.replace('W', ''));
+                } else {
+                    longitude = parseFloat(longitudeStr);
+                }
+                
+                // Validate coordinates
+                if (isNaN(latitude) || isNaN(longitude)) {
+                    throw new Error('Invalid coordinates in CSV data');
+                }
+                
+                // Return parsed data in expected format
+                return {
+                    DeviceID: deviceId,
+                    DevicenickName: `دستگاه ${deviceId}`,
+                    latitude: latitude,
+                    longitude: longitude,
+                    lat: latitude,  // Alternative format
+                    lng: longitude, // Alternative format
+                    speed: speed,
+                    timestamp: timestamp,
+                    battery: battery,
+                    signal: signal,
+                    rssi: rssi,
+                    status: status,
+                    rawData: cleanMessage
+                };
+                
+            } catch (error) {
+                console.error('Error parsing CSV data:', error);
+                console.log('Raw CSV message:', messageString);
+                throw new Error(`خطا در تجزیه داده‌های CSV: ${error.message}`);
+            }
+        }
+        
+        function testParser() {
+            const input = document.getElementById('csvInput').value;
+            const resultsDiv = document.getElementById('results');
+            
+            if (!input.trim()) {
+                resultsDiv.innerHTML = '<div class="result-box error">لطفاً داده‌ای برای تست وارد کنید.</div>';
+                return;
+            }
+            
+            try {
+                const result = parseCSVData(input);
+                
+                let resultHtml = '<div class="result-box success">';
+                resultHtml += '<h6><i class="fas fa-check-circle text-success"></i> پارس موفق:</h6>';
+                resultHtml += '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                resultHtml += '</div>';
+                
+                // Show formatted coordinates
+                resultHtml += '<div class="result-box">';
+                resultHtml += '<h6><i class="fas fa-map-marker-alt text-info"></i> اطلاعات موقعیت:</h6>';
+                resultHtml += `<p><strong>عرض جغرافیایی:</strong> ${result.latitude}°</p>`;
+                resultHtml += `<p><strong>طول جغرافیایی:</strong> ${result.longitude}°</p>`;
+                resultHtml += `<p><strong>سرعت:</strong> ${result.speed} km/h</p>`;
+                resultHtml += `<p><strong>باتری:</strong> ${result.battery}%</p>`;
+                resultHtml += `<p><strong>سیگنال:</strong> ${result.signal}</p>`;
+                resultHtml += `<p><strong>RSSI:</strong> ${result.rssi} dBm</p>`;
+                
+                if (result.timestamp) {
+                    const date = new Date(result.timestamp * 1000);
+                    const iranTime = new Intl.DateTimeFormat('fa-IR', {
+                        year: 'numeric',
+                        month: 'numeric',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: 'numeric',
+                        second: 'numeric',
+                        timeZone: 'Asia/Tehran'
+                    }).format(date);
+                    resultHtml += `<p><strong>زمان:</strong> ${iranTime}</p>`;
+                }
+                resultHtml += '</div>';
+                
+                resultsDiv.innerHTML = resultHtml;
+                
+            } catch (error) {
+                let errorHtml = '<div class="result-box error">';
+                errorHtml += '<h6><i class="fas fa-exclamation-triangle text-danger"></i> خطا در پارس:</h6>';
+                errorHtml += `<p>${error.message}</p>`;
+                errorHtml += `<p><strong>داده ورودی:</strong> ${input}</p>`;
+                errorHtml += '</div>';
+                
+                resultsDiv.innerHTML = errorHtml;
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        function setTestData(data) {
+            document.getElementById('csvInput').value = data;
+        }
+        
+        // Auto test on page load
+        window.onload = function() {
+            testParser();
+        };
+    </script>
+</body>
+</html>
