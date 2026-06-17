@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ویرایش سطوح دسترسی | داشبورد اینترنت اشیاء</title>
+    
+    <script src="https://cdn.giot.ir/js/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.giot.ir/js/all.min.css">
+    <link href="https://my.giot.ir/fonts/css/fontiran.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.giot.ir/js/bootstrap.min.css">
+    <script src="https://cdn.giot.ir/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://my.giot.ir/dashboard/css/style.css">
+    <script src="https://my.giot.ir/js/config.min.js"></script>
+    <script src="https://my.giot.ir/dashboard/js/session-manager.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/fa.js"></script>
+    <audio id="OKnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_simple-02.ogg"></audio>
+    <audio id="AlarmnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_ambient.ogg"></audio>
+    <script src="https://cdn.giot.ir/js/Chart.js"></script>
+    <script src="https://my.giot.ir/dashboard/js/dashboard.js"></script>
+    
+    <style>
+        /* Glass Modal Styles */
+        .glass-modal {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-modal .modal-header {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .glass-modal .modal-footer {
+            background: rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0 0 15px 15px;
+        }
+
+        /* Dark theme adjustments for glass modal */
+        [data-bs-theme="dark"] .glass-modal {
+            background: rgba(33, 37, 41, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        [data-bs-theme="dark"] .glass-modal .modal-header,
+        [data-bs-theme="dark"] .glass-modal .modal-footer {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modal backdrop blur */
+        .modal.show {
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.3;
+        }
+        
+        /* Modern Button Styles */
+        .modern-btn {
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .modern-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .modern-btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-activate {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-activate:hover {
+            background: linear-gradient(135deg, #218838, #1ea085);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-deactivate {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+        
+        .btn-deactivate:hover {
+            background: linear-gradient(135deg, #e0a800, #e8590c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+        }
+        
+        .btn-schedule {
+            background: linear-gradient(135deg, #17a2b8, #6f42c1);
+            color: white;
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+        
+        .btn-schedule:hover {
+            background: linear-gradient(135deg, #138496, #5a2d91);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+        }
+        
+        .btn-delete {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-delete:hover {
+            background: linear-gradient(135deg, #c82333, #d91a72);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: #212529;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e0a800, #e8590c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+            color: #212529;
+        }
+        
+        /* Calendar Styles */
+        .calendar-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 20px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            width: 100%;
+            text-align: right;
+        }
+        
+        .calendar-display:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .calendar-display.has-date {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        
+        .calendar-emoji {
+            font-size: 1.2em;
+            margin-left: 10px;
+        }
+        
+        .flatpickr-calendar {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: none;
+        }
+        
+        /* Action buttons group */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons .modern-btn {
+            flex: 1;
+            min-width: 80px;
+        }
+        
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons .modern-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; z-index: 9999; font-weight: 500;">
+        <!-- Notification message will be inserted here -->
+    </div>
+
+    <header class="header navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-microchip me-2"></i>
+                داشبورد IoT شرکت ماهان الکترونیک پرنیا
+            </a>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button class="navbar-toggler mobile-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNavMenu" aria-controls="mobileNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon">
+                    <i class="fas fa-bars"></i>
+                </span>
+            </button>
+
+            <!-- Desktop Menu -->
+
+            
+            <div class="header-actions d-none d-md-flex">
+                <div class="theme-toggle-container">
+                    <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
+                    <label for="theme-toggle" class="theme-toggle-label">
+                        <span class="theme-toggle-slider">
+                            <i class="fas fa-sun theme-icon sun-icon"></i>
+                            <i class="fas fa-moon theme-icon moon-icon"></i>
+                        </span>
+                    </label>
+                </div>
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle user-menu-btn" href="#" id="mainMenuDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-bars me-1"></i> منوی اصلی
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end glass-dropdown" aria-labelledby="mainMenuDropdown">
+                        <h6 class="dropdown-header"><i class="fas fa-cogs me-2"></i>مدیریت دستگاه‌ها</h6>
+                        <a class="dropdown-item glass-item" href="add-device.html"><i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید</a>
+                        <a class="dropdown-item glass-item" href="devices-list.html"><i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها</a>
+                        <a class="dropdown-item glass-item" href="rename-device.html"><i class="fas fa-edit me-2"></i>تغییر نام دستگاه</a>
+                        <a class="dropdown-item glass-item text-danger" href="remove-device.html"><i class="fas fa-trash me-2"></i>حذف دستگاه</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header"><i class="fas fa-users-cog me-2"></i>مدیریت دسترسی</h6>
+                        <a class="dropdown-item glass-item" href="manage-access.html"><i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی</a>
+                        <a class="dropdown-item glass-item" href="edit-access.html"><i class="fas fa-user-edit me-2"></i>ویرایش سطوح دسترسی</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header"><i class="fas fa-headset me-2"></i>پشتیبانی</h6>
+                        <a class="dropdown-item glass-item" href="../crm/index.html"><i class="fas fa-ticket-alt me-2"></i>سامانه پشتیبانی و Crm</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header"><i class="fas fa-user me-2"></i>حساب کاربری</h6>
+                        <a class="dropdown-item glass-item" href="edit-profile.html"><i class="fas fa-user-edit me-2"></i>ویرایش کاربری</a>
+                        <a class="dropdown-item glass-item" href="changepassword.html"><i class="fas fa-key me-2"></i>تغییر رمز عبور</a>
+                        <a class="dropdown-item glass-item text-danger" id="signOut" href="#"><i class="fas fa-sign-out-alt me-2"></i>خروج</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collapsible Mobile Menu -->
+            <div class="collapse navbar-collapse" id="mobileNavMenu">
+                <!-- Mobile Menu Items (visible only on mobile) -->
+                <div class="mobile-menu-items d-lg-none">
+                    <!-- Device Management Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-cogs me-2"></i>مدیریت دستگاه‌ها</h6>
+                        <a href="add-device.html" class="mobile-menu-item">
+                            <i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید
+                        </a>
+                        <a href="devices-list.html" class="mobile-menu-item">
+                            <i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها
+                        </a>
+                        <a href="rename-device.html" class="mobile-menu-item">
+                            <i class="fas fa-edit me-2"></i>تغییر نام دستگاه
+                        </a>
+                        <a href="remove-device.html" class="mobile-menu-item text-danger">
+                            <i class="fas fa-trash me-2"></i>حذف دستگاه
+                        </a>
+                    </div>
+                    
+                    <!-- Access Management Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-users-cog me-2"></i>مدیریت دسترسی</h6>
+                        <a href="manage-access.html" class="mobile-menu-item">
+                            <i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی
+                        </a>
+                        <a href="edit-access.html" class="mobile-menu-item">
+                            <i class="fas fa-user-edit me-2"></i>ویرایش سطوح دسترسی
+                        </a>
+                    </div>
+                    
+                    <!-- Support Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-headset me-2"></i>پشتیبانی</h6>
+                        <a href="../crm/index.html" class="mobile-menu-item">
+                            <i class="fas fa-ticket-alt me-2"></i>سامانه پشتیبانی و Crm
+                        </a>
+                    </div>
+                    
+                    <!-- User Account Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-user me-2"></i>حساب کاربری</h6>
+                        <a href="edit-profile.html" class="mobile-menu-item">
+                            <i class="fas fa-user-edit me-2"></i>ویرایش کاربری
+                        </a>
+                        <a href="changepassword.html" class="mobile-menu-item">
+                            <i class="fas fa-key me-2"></i>تغییر رمز عبور
+                        </a>
+                        <a href="#" id="mobileSignOut" class="mobile-menu-item text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i>خروج
+                        </a>
+                    </div>
+                </div>
+                
+
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-header">
+                        <h1 class="page-title">
+                            <i class="fas fa-user-edit me-2"></i>
+                            ویرایش سطوح دسترسی
+                        </h1>
+                        <p class="page-description">ویرایش و مدیریت دسترسی‌های موجود کاربران به دستگاه‌های شما</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device Selection -->
+            <div class="row mb-4">
+                <!-- Device selection section removed as requested -->
+
+        <!-- Created Admins List Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users-cog me-2"></i>
+                            کاربران دارای دسترسی
+                        </h5>
+                        <button type="button" class="btn btn-light btn-sm" id="refreshAdminsBtn">
+                            <i class="fas fa-sync-alt me-1"></i>
+                            بروزرسانی
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Loading Message -->
+                        <div id="adminsLoadingMessage" class="text-center py-4" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">در حال بارگذاری...</span>
+                            </div>
+                            <p class="mt-2 text-muted">در حال دریافت اطلاعات کاربران...</p>
+                        </div>
+
+                        <!-- No Admins Message -->
+                        <div id="noAdminsMessage" class="text-center py-4" style="display: none;">
+                            <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">هیچ کاربری دسترسی ندارد</h6>
+                            <p class="text-muted small">هنوز هیچ دسترسی برای کاربران تعریف نشده است.</p>
+                        </div>
+
+                        <!-- Admins Content -->
+                        <div id="adminsContent" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>دستگاه</th>
+                                            <th>نام مستعار</th>
+                                            <th>نوع</th>
+                                            <th>تعداد دسترسی</th>
+                                            <th>عملیات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminsTableBody">
+                                        <!-- Dynamic content will be inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content glass-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteConfirmModalLabel">
+                                <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                                تأیید حذف دسترسی
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>آیا از حذف دسترسی کاربر <strong id="deleteUserName"></strong> اطمینان دارید؟</p>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-info-circle me-2"></i>
+                                این عمل قابل بازگشت نیست!
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>
+                                انصراف
+                            </button>
+                            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                                <i class="fas fa-trash me-2"></i>
+                                حذف دسترسی
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let selectedDevice = null;
+        let currentAccessList = [];
+        let editingAccess = null;
+        let deletingAccess = null;
+
+        $(document).ready(function() {
+            if (!checkSession()) {
+                return;
+            }
+            
+            loadUserDevices();
+            initializeEventHandlers();
+            initializeThemeToggle();
+            loadCreatedAdmins();
+        });
+
+        // Session validation
+        function checkSession() {
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                window.location.href = '../index.html';
+                return false;
+            }
+            
+            try {
+                $.ajax({
+                    url: window.GIoTapiBaseUrl + '/sessionvalidate',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    data: JSON.stringify({
+                        userid: userid,
+                        session: session
+                    }),
+                    async: false,
+                    success: function(response) {
+                        try {
+                            if (!response || response.status !== 'success') {
+                                console.log('Session validation failed:', response);
+                                sessionStorage.clear();
+                                localStorage.clear();
+                                window.location.href = '../index.html';
+                                return false;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing session validation response:', e);
+                            showNotification('خطا در تجزیه پاسخ سرور', 'error');
+                            return false;
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Session validation error:', error);
+                        showNotification('خطا در اعتبارسنجی جلسه: ' + error, 'error');
+                        return false;
+                    }
+                });
+            } catch (error) {
+                console.error('Session check failed:', error);
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Load user devices
+        function loadUserDevices() {
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                return;
+            }
+            
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/getuserdevices',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    userid: userid,
+                    session: session
+                }),
+                success: function(response) {
+                    try {
+                        if (response && response.status === 'success' && response.devices) {
+                            populateDeviceSelect(response.devices);
+                        } else {
+                            showNotification('خطا در دریافت اطلاعات دستگاه‌ها', 'error');
+                        }
+                    } catch (e) {
+                        console.error('Error parsing devices response:', e);
+                        showNotification('خطا در تجزیه پاسخ سرور', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Get devices request failed:', error);
+                    showNotification('خطا در برقراری ارتباط با سرور: ' + error, 'error');
+                }
+            });
+        }
+
+        // Populate device select dropdown
+        function populateDeviceSelect(devices) {
+            const deviceSelect = $('#deviceSelect');
+            deviceSelect.empty().append('<option value="">انتخاب کنید...</option>');
+            
+            // Only show devices where user is owner (accesslevel = 255)
+            const ownedDevices = devices.filter(device => device.accesslevel === 255);
+            
+            if (ownedDevices.length === 0) {
+                deviceSelect.append('<option value="" disabled>شما مالک هیچ دستگاهی نیستید</option>');
+                return;
+            }
+            
+            ownedDevices.forEach(device => {
+                deviceSelect.append(`<option value="${device.macaddress}">${device.devicenickname || device.macaddress}</option>`);
+            });
+        }
+
+        // Initialize event handlers
+        function initializeEventHandlers() {
+            // Device selection change
+            $('#deviceSelect').on('change', function() {
+                const selectedMac = $(this).val();
+                $('#loadAccessBtn').prop('disabled', !selectedMac);
+                
+                if (!selectedMac) {
+                    hideAccessSections();
+                }
+            });
+            
+            // Load access button
+            $('#loadAccessBtn').on('click', function() {
+                const selectedMac = $('#deviceSelect').val();
+                if (selectedMac) {
+                    selectedDevice = selectedMac;
+                    loadDeviceAccess(selectedMac);
+                }
+            });
+            
+            // Add new access button - redirect to manage access page
+            $('#addNewAccessBtn').on('click', function() {
+                window.location.href = 'manage-access.html';
+            });
+            
+            // Refresh admins button handler
+            $('#refreshAdminsBtn').on('click', function() {
+                loadCreatedAdmins();
+            });
+            
+            // Confirm delete button
+            $('#confirmDeleteBtn').on('click', function() {
+                if (deletingAccess) {
+                    deleteAccess(deletingAccess);
+                }
+            });
+        }
+
+        // Load device access list
+        function loadDeviceAccess(macaddress) {
+            $('#currentAccessSection').show();
+            
+            // Simulate loading access list (replace with actual API call)
+            // For demonstration, showing empty list
+            currentAccessList = [];
+            updateAccessTable();
+            
+            showNotification('لیست دسترسی‌ها بارگذاری شد', 'success');
+        }
+
+        // Update access table
+        function updateAccessTable() {
+            const tbody = $('#accessTableBody');
+            tbody.empty();
+            
+            if (currentAccessList.length === 0) {
+                $('#noAccessMessage').show();
+                return;
+            }
+            
+            $('#noAccessMessage').hide();
+            
+            currentAccessList.forEach(access => {
+                const row = createAccessRow(access);
+                tbody.append(row);
+            });
+        }
+
+        // Create access table row
+        function createAccessRow(access) {
+            const accessLevelText = getAccessLevelText(access.accesslevel);
+            const statusBadge = access.isactive ? 
+                '<span class="badge bg-success">فعال</span>' : 
+                '<span class="badge bg-danger">غیرفعال</span>';
+            
+            const expireText = access.ruleexpiretime ? 
+                new Date(access.ruleexpiretime * 1000).toLocaleDateString('fa-IR') : 
+                'بدون انقضا';
+            
+            return `
+                <tr>
+                    <td>${access.relateduser}</td>
+                    <td>${accessLevelText}</td>
+                    <td>${statusBadge}</td>
+                    <td>${expireText}</td>
+                    <td>${access.notes || '-'}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-danger" onclick="confirmDeleteAccess('${access.relateduser}')" title="حذف">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Get access level text
+        function getAccessLevelText(level) {
+            switch(level) {
+                case 1: return 'فقط خواندن';
+                case 2: return 'خواندن و نوشتن';
+                default: return 'نامشخص';
+            }
+        }
+
+
+
+        // Confirm delete access
+        function confirmDeleteAccess(relatedUser) {
+            deletingAccess = relatedUser;
+            $('#deleteUserName').text(relatedUser);
+            $('#deleteConfirmModal').modal('show');
+        }
+
+
+
+        // Delete access
+        function deleteAccess(relatedUser) {
+            // For delete, we can set isactive to false or use a different API
+            // Here we'll set isactive to false to "deactivate" the access
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session || !selectedDevice) {
+                showNotification('خطا در احراز هویت یا انتخاب دستگاه', 'error');
+                return;
+            }
+            
+            const access = currentAccessList.find(a => a.relateduser === relatedUser);
+            if (!access) {
+                showNotification('دسترسی مورد نظر یافت نشد', 'error');
+                return;
+            }
+            
+            const requestData = {
+                userid: userid,
+                session: session,
+                macaddress: selectedDevice,
+                relateduser: relatedUser,
+                accesslevel: access.accesslevel,
+                isactive: false // Deactivate the access
+            };
+            
+            // Add existing notes and expire time if they exist
+            if (access.notes) {
+                requestData.notes = access.notes;
+            }
+            if (access.ruleexpiretime) {
+                requestData.ruleexpiretime = access.ruleexpiretime;
+            }
+            
+            // Show loading state
+            const deleteBtn = $('#confirmDeleteBtn');
+            const originalText = deleteBtn.html();
+            deleteBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>در حال حذف...');
+            
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/setrelationship',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(requestData),
+                success: function(response) {
+                    try {
+                        if (response && response.status === 'success') {
+                            showNotification('دسترسی با موفقیت حذف شد', 'success');
+                            $('#deleteConfirmModal').modal('hide');
+                            loadDeviceAccess(selectedDevice); // Reload access list
+                        } else {
+                            showNotification(response.reason || 'خطا در حذف دسترسی', 'error');
+                        }
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                        showNotification('خطا در تجزیه پاسخ سرور', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Delete access request failed:', error);
+                    showNotification('خطا در برقراری ارتباط با سرور: ' + error, 'error');
+                },
+                complete: function() {
+                    // Restore button state
+                    deleteBtn.prop('disabled', false).html(originalText);
+                    deletingAccess = null;
+                }
+            });
+        }
+
+        // Hide access sections
+        function hideAccessSections() {
+            $('#currentAccessSection').hide();
+            selectedDevice = null;
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            // Add notification styles
+            const style = document.createElement('style');
+            style.textContent = `
+                .notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, ${type === 'success' ? '#28a745 0%, #20c997 100%' : type === 'error' ? '#dc3545 0%, #c82333 100%' : '#17a2b8 0%, #138496 100%'});
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(${type === 'success' ? '40, 167, 69' : type === 'error' ? '220, 53, 69' : '23, 162, 184'}, 0.3);
+                    z-index: 9999;
+                    transform: translateX(400px);
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                }
+                .notification.show {
+                    transform: translateX(0);
+                }
+                .notification-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-weight: 600;
+                }
+                .notification i {
+                    font-size: 1.2rem;
+                }
+            `;
+            
+            document.head.appendChild(style);
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Hide notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                    document.head.removeChild(style);
+                }, 300);
+            }, 5000);
+        }
+
+        // Theme toggle functionality
+        function initializeThemeToggle() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            
+            // Load saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                body.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            }
+            
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+        }
+
+        function updateThemeIcon(theme) {
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.checked = (theme === 'dark');
+            }
+        }
+
+        // Add logout event handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const signOutBtn = document.getElementById('signOut');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    SignOut();
+                });
+            }
+        });
+
+        // Load created admins using /getrelationship API
+        function loadCreatedAdmins() {
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                showNotification('خطا در احراز هویت', 'error');
+                return;
+            }
+            
+            // Show loading state
+            $('#adminsLoadingMessage').show();
+            $('#adminsContent').hide();
+            $('#noAdminsMessage').hide();
+            
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/getrelationship',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    userid: userid,
+                    session: session
+                }),
+                success: function(response) {
+                    try {
+                        if (response && response.status === 'success') {
+                            displayAdminsData(response);
+                        } else {
+                            showNotification('خطا در دریافت اطلاعات ادمین‌ها', 'error');
+                            showNoAdminsMessage();
+                        }
+                    } catch (e) {
+                        console.error('Error parsing admins response:', e);
+                        showNotification('خطا در تجزیه پاسخ سرور', 'error');
+                        showNoAdminsMessage();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Get admins request failed:', error);
+                    showNotification('خطا در برقراری ارتباط با سرور: ' + error, 'error');
+                    showNoAdminsMessage();
+                },
+                complete: function() {
+                    $('#adminsLoadingMessage').hide();
+                }
+            });
+        }
+        
+        // Display admins data
+        function displayAdminsData(response) {
+            const tbody = $('#adminsTableBody');
+            tbody.empty();
+            
+            if (!response.devices || response.devices.length === 0) {
+                showNoAdminsMessage();
+                return;
+            }
+            
+            // Filter devices that have relationships (admins)
+            const devicesWithAdmins = response.devices.filter(device => 
+                device.relationships && device.relationships.length > 0
+            );
+            
+            if (devicesWithAdmins.length === 0) {
+                showNoAdminsMessage();
+                return;
+            }
+            
+            devicesWithAdmins.forEach(device => {
+                const row = createAdminDeviceRow(device);
+                tbody.append(row);
+            });
+            
+            $('#adminsContent').show();
+            
+            // Store data globally for details modal
+            window.currentAdminsData = response;
+        }
+        
+        // Create admin device row with edit functionality
+        function createAdminDeviceRow(device) {
+            const deviceTypeText = getDeviceTypeText(device.devicetype);
+            const relationshipsCount = device.relationships.length;
+            
+            return `
+                <tr>
+                    <td>
+                        <code class="text-primary">${device.macaddress}</code>
+                    </td>
+                    <td>
+                        <strong>${device.devicenickname || 'نام تعریف نشده'}</strong>
+                    </td>
+                    <td>
+                        <span class="badge bg-info">${deviceTypeText}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-success">${relationshipsCount} دسترسی</span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="showDeviceDetails('${device.macaddress}')">
+                            <i class="fas fa-eye me-1"></i>
+                            مشاهده جزئیات
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-warning" onclick="editDeviceAccess('${device.macaddress}')">
+                            <i class="fas fa-edit me-1"></i>
+                            ویرایش
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // Get device type text
+        function getDeviceTypeText(deviceType) {
+            const types = {
+                1: 'سنسور',
+                2: 'کنترلر',
+                2001: 'سیستم دزدگیر پیشرفته',
+                3: 'دستگاه ترکیبی',
+                4: 'دستگاه هوشمند'
+            };
+            return types[deviceType] || 'نامشخص';
+        }
+        
+        // Show device details modal with blurred background
+        function showDeviceDetails(macaddress) {
+            // Find the device in the current data
+            const device = window.currentAdminsData?.devices?.find(d => d.macaddress === macaddress);
+            if (!device) {
+                showNotification('اطلاعات دستگاه یافت نشد', 'error');
+                return;
+            }
+            
+            let detailsHtml = `
+                <div class="modal fade" id="deviceDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content glass-modal">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    جزئیات دستگاه: ${device.devicenickname || device.macaddress}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <strong>MAC Address:</strong><br>
+                                        <code>${device.macaddress}</code>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>نوع دستگاه:</strong><br>
+                                        ${getDeviceTypeText(device.devicetype)}
+                                    </div>
+                                </div>
+                                <h6 class="mt-4 mb-3">دسترسی‌های تعریف شده:</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>کاربر</th>
+                                                <th>سطح دسترسی</th>
+                                                <th>وضعیت</th>
+                                                <th>تاریخ انقضا</th>
+                                                <th>یادداشت</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+            `;
+            
+            device.relationships.forEach(rel => {
+                const accessLevelText = getAccessLevelText(rel.accesslevel);
+                const statusBadge = rel.isactive ? 
+                    '<span class="badge bg-success">فعال</span>' : 
+                    '<span class="badge bg-danger">غیرفعال</span>';
+                const expireDate = rel.ruleexpiretime > 0 ? 
+                    new Date(rel.ruleexpiretime * 1000).toLocaleDateString('fa-IR') : 
+                    'بدون انقضا';
+                
+                detailsHtml += `
+                    <tr>
+                        <td><code>${rel.relateduser}</code></td>
+                        <td><span class="badge bg-primary">${accessLevelText}</span></td>
+                        <td>${statusBadge}</td>
+                        <td>${expireDate}</td>
+                        <td>${rel.notes || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            detailsHtml += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>
+                                    بستن
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            $('#deviceDetailsModal').remove();
+            
+            // Add modal to body and show
+            $('body').append(detailsHtml);
+            $('#deviceDetailsModal').modal('show');
+            
+            // Remove modal from DOM when hidden
+            $('#deviceDetailsModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        }
+        
+        // Edit device access modal
+        function editDeviceAccess(macaddress) {
+            // Find the device in the current data
+            const device = window.currentAdminsData?.devices?.find(d => d.macaddress === macaddress);
+            if (!device) {
+                showNotification('اطلاعات دستگاه یافت نشد', 'error');
+                return;
+            }
+            
+            let editHtml = `
+                <div class="modal fade" id="editAccessModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content glass-modal">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-edit me-2"></i>
+                                    ویرایش دسترسی‌های دستگاه: ${device.devicenickname || device.macaddress}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>کاربر</th>
+                                                <th>سطح دسترسی</th>
+                                                <th>وضعیت</th>
+                                                <th>تاریخ انقضا</th>
+                                                <th>یادداشت</th>
+                                                <th>عملیات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+            `;
+            
+            device.relationships.forEach((rel, index) => {
+                const accessLevelText = getAccessLevelText(rel.accesslevel);
+                const statusBadge = rel.isactive ? 
+                    '<span class="badge bg-success">فعال</span>' : 
+                    '<span class="badge bg-danger">غیرفعال</span>';
+                const expireDate = rel.ruleexpiretime > 0 ? 
+                    new Date(rel.ruleexpiretime * 1000).toLocaleDateString('fa-IR') : 
+                    'بدون انقضا';
+                
+                editHtml += `
+                    <tr>
+                        <td><code>${rel.relateduser}</code></td>
+                        <td><span class="badge bg-primary">${accessLevelText}</span></td>
+                        <td>${statusBadge}</td>
+                        <td>${expireDate}</td>
+                        <td>${rel.notes || '-'}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button type="button" class="modern-btn ${rel.isactive ? 'btn-deactivate' : 'btn-activate'}" 
+                                        onclick="toggleAccessStatus('${device.macaddress}', '${rel.relateduser}', ${!rel.isactive})">
+                                    <i class="fas ${rel.isactive ? 'fa-pause' : 'fa-play'} me-1"></i>
+                                    ${rel.isactive ? 'غیرفعال' : 'فعال'}
+                                </button>
+                                <button type="button" class="modern-btn btn-schedule" 
+                                        onclick="editAccessTime('${device.macaddress}', '${rel.relateduser}', ${rel.ruleexpiretime})">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    زمان‌بندی
+                                </button>
+                                <button type="button" class="modern-btn btn-warning" 
+                                        onclick="changeAccessLevel('${device.macaddress}', '${rel.relateduser}', ${rel.accesslevel})">
+                                    <i class="fas fa-key me-1"></i>
+                                    تغییر سطح
+                                </button>
+                                <button type="button" class="modern-btn btn-delete" 
+                                        onclick="removeAccess('${device.macaddress}', '${rel.relateduser}')">
+                                    <i class="fas fa-trash me-1"></i>
+                                    حذف
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            editHtml += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>
+                                    بستن
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            $('#editAccessModal').remove();
+            
+            // Add modal to body and show
+            $('body').append(editHtml);
+            $('#editAccessModal').modal('show');
+            
+            // Remove modal from DOM when hidden
+            $('#editAccessModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        }
+        
+        // Toggle access status (activate/deactivate)
+        function toggleAccessStatus(macaddress, relateduser, newStatus) {
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                showNotification('خطا در احراز هویت', 'error');
+                return;
+            }
+            
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/setrelationship',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    userid: userid,
+                    session: session,
+                    macaddress: macaddress,
+                    relateduser: relateduser,
+                    accesslevel: 1, // Default access level
+                    ruleexpiretime: 0, // Keep existing time
+                    notes: '', // Default empty notes
+                    isactive: newStatus
+                }),
+                success: function(response) {
+                    if (response && response.status === 'success') {
+                        showNotification(`دسترسی با موفقیت ${newStatus ? 'فعال' : 'غیرفعال'} شد`, 'success');
+                        $('#editAccessModal').modal('hide');
+                        loadCreatedAdmins(); // Refresh the list
+                    } else {
+                        showNotification('خطا در تغییر وضعیت دسترسی', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Toggle access status failed:', error);
+                    showNotification('خطا در برقراری ارتباط با سرور: ' + error, 'error');
+                }
+            });
+        }
+        
+        // Edit access time with modern calendar
+        function editAccessTime(macaddress, relateduser, currentExpireTime) {
+            const currentDate = currentExpireTime > 0 ? 
+                new Date(currentExpireTime * 1000).toLocaleDateString('fa-IR') : '';
+            
+            let timeEditHtml = `
+                <div class="modal fade" id="timeEditModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content glass-modal">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-calendar-alt me-2"></i>
+                                    زمان‌بندی دسترسی
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="calendar-container">
+                                    <label class="form-label">انتخاب تاریخ انقضا:</label>
+                                    <button type="button" class="calendar-display" id="calendarDisplay">
+                                        <span class="calendar-emoji">📅</span>
+                                        <span id="selectedDateText">${currentDate || 'انتخاب تاریخ انقضا'}</span>
+                                    </button>
+                                    <input type="hidden" id="selectedDateValue" value="">
+                                    <div class="form-text mt-2">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        برای حذف محدودیت زمانی، تاریخ را انتخاب نکنید
+                                    </div>
+                                </div>
+                                <!-- Time input hidden and defaulted to 1 AM as requested -->
+                                <input type="hidden" id="newExpireTime" value="01:00">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>
+                                    انصراف
+                                </button>
+                                <button type="button" class="modern-btn btn-activate" onclick="saveAccessTime('${macaddress}', '${relateduser}')">
+                                    <i class="fas fa-save me-2"></i>
+                                    ذخیره تاریخ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            $('#timeEditModal').remove();
+            
+            // Add modal to body and show
+            $('body').append(timeEditHtml);
+            $('#timeEditModal').modal('show');
+            
+            // Initialize Flatpickr calendar
+            let calendarInstance = null;
+            
+            $('#calendarDisplay').on('click', function() {
+                if (calendarInstance) {
+                    calendarInstance.open();
+                } else {
+                    calendarInstance = flatpickr('#calendarDisplay', {
+                        locale: 'fa',
+                        dateFormat: 'Y-m-d',
+                        minDate: 'today',
+                        allowInput: false,
+                        clickOpens: true,
+                        onChange: function(selectedDates, dateStr, instance) {
+                            if (selectedDates.length > 0) {
+                                const persianDate = selectedDates[0].toLocaleDateString('fa-IR');
+                                $('#selectedDateText').text(persianDate);
+                                $('#selectedDateValue').val(dateStr);
+                                $('#calendarDisplay').addClass('has-date');
+                                
+                                // Close calendar and show success feedback
+                                setTimeout(() => {
+                                    instance.close();
+                                    showNotification('تاریخ انتخاب شد: ' + persianDate, 'success');
+                                }, 300);
+                            }
+                        },
+                        onClose: function() {
+                            // Calendar closed
+                        }
+                    });
+                    calendarInstance.open();
+                }
+            });
+            
+            // Set current date if exists
+            if (currentExpireTime > 0) {
+                const currentDateISO = new Date(currentExpireTime * 1000).toISOString().split('T')[0];
+                $('#selectedDateValue').val(currentDateISO);
+                $('#calendarDisplay').addClass('has-date');
+            }
+            
+            // Remove modal from DOM when hidden
+            $('#timeEditModal').on('hidden.bs.modal', function() {
+                if (calendarInstance) {
+                    calendarInstance.destroy();
+                }
+                $(this).remove();
+            });
+        }
+        
+        // Save access time
+        function saveAccessTime(macaddress, relateduser) {
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            const expireDate = $('#selectedDateValue').val();
+            const expireTime = $('#newExpireTime').val() || '01:00';
+            
+            if (!userid || !session) {
+                showNotification('خطا در احراز هویت', 'error');
+                return;
+            }
+            
+            let ruleexpiretime = 0;
+            if (expireDate) {
+                const dateTimeString = expireDate + 'T' + expireTime;
+                ruleexpiretime = Math.floor(new Date(dateTimeString).getTime() / 1000);
+            }
+            
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/setrelationship',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    userid: userid,
+                    session: session,
+                    macaddress: macaddress,
+                    relateduser: relateduser,
+                    accesslevel: 1, // Default access level
+                    ruleexpiretime: ruleexpiretime,
+                    notes: '', // Default empty notes
+                    isactive: true // Default active status
+                }),
+                success: function(response) {
+                    if (response && response.status === 'success') {
+                        showNotification('زمان انقضا با موفقیت تغییر یافت', 'success');
+                        $('#timeEditModal').modal('hide');
+                        $('#editAccessModal').modal('hide');
+                        loadCreatedAdmins(); // Refresh the list
+                    } else {
+                        showNotification('خطا در تغییر زمان انقضا', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Save access time failed:', error);
+                    showNotification('خطا در برقراری ارتباط با سرور: ' + error, 'error');
+                }
+            });
+        }
+        
+        // Remove access using new API
+        function removeAccess(macaddress, relateduser) {
+            // Show modern confirmation dialog
+            const confirmHtml = `
+                <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content glass-modal">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                                    تأیید حذف دسترسی
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center">
+                                    <i class="fas fa-trash fa-3x text-danger mb-3"></i>
+                                    <h6>آیا از حذف دسترسی کاربر زیر اطمینان دارید؟</h6>
+                                    <p class="text-muted">کاربر: <code>${relateduser}</code></p>
+                                    <p class="text-muted">دستگاه: <code>${macaddress}</code></p>
+                                    <div class="alert alert-warning mt-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        این عمل قابل بازگشت نیست!
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>
+                                    انصراف
+                                </button>
+                                <button type="button" class="modern-btn btn-delete" onclick="confirmRemoveAccess('${macaddress}', '${relateduser}')">
+                                    <i class="fas fa-trash me-2"></i>
+                                    حذف دسترسی
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            $('#confirmDeleteModal').remove();
+            
+            // Add modal to body and show
+            $('body').append(confirmHtml);
+            $('#confirmDeleteModal').modal('show');
+            
+            // Remove modal from DOM when hidden
+            $('#confirmDeleteModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        }
+        
+        // Confirm remove access with new API
+        function confirmRemoveAccess(macaddress, relateduser) {
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                showNotification('خطا در احراز هویت', 'error');
+                return;
+            }
+            
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/removerelationship',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    userid: userid,
+                    session: session,
+                    macaddress: macaddress,
+                    relateduser: relateduser
+                }),
+                success: function(response) {
+                    if (response && response.status === 'success') {
+                        showNotification('دسترسی با موفقیت حذف شد', 'success');
+                        $('#confirmDeleteModal').modal('hide');
+                        $('#editAccessModal').modal('hide');
+                        loadCreatedAdmins(); // Refresh the list
+                        
+                        // Show success details if available
+                        if (response.removal_timestamp) {
+                            const removeDate = new Date(response.removal_timestamp * 1000).toLocaleDateString('fa-IR');
+                            setTimeout(() => {
+                                showNotification('دسترسی در تاریخ ' + removeDate + ' حذف شد', 'info');
+                            }, 2000);
+                        }
+                    } else {
+                        showNotification('خطا در حذف دسترسی: ' + (response.message || 'خطای نامشخص'), 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Remove access failed:', error);
+                    let errorMessage = 'خطا در برقراری ارتباط با سرور';
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                        
+                        // Check if error is related to inactive user
+                        if (errorMessage.includes('inactive') || errorMessage.includes('غیرفعال') || 
+                            errorMessage.includes('deactivated') || errorMessage.includes('disabled')) {
+                            // Show specific message for inactive users
+                            showActivationSuggestionModal(macaddress, relateduser);
+                            return;
+                        }
+                    } else if (error) {
+                        errorMessage += ': ' + error;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
+                }
+            });
+        }
+        
+        // Show activation suggestion modal for inactive users
+        function showActivationSuggestionModal(macaddress, relateduser) {
+            const suggestionHtml = `
+                <div class="modal fade" id="activationSuggestionModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content glass-modal">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-exclamation-circle me-2 text-warning"></i>
+                                    کاربر غیرفعال است
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center">
+                                    <i class="fas fa-user-slash fa-3x text-warning mb-3"></i>
+                                    <h6>برای حذف دسترسی، ابتدا کاربر را فعال کنید</h6>
+                                    <p class="text-muted">کاربر: <code>${relateduser}</code></p>
+                                    <p class="text-muted">دستگاه: <code>${macaddress}</code></p>
+                                    <div class="alert alert-info mt-3">
+                                        <i class="fas fa-lightbulb me-2"></i>
+                                        ابتدا کاربر را از حالت غیرفعال به فعال تبدیل کنید، سپس دوباره حذف کنید.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>
+                                    بستن
+                                </button>
+                                <button type="button" class="modern-btn btn-activate" onclick="activateUserBeforeDelete('${macaddress}', '${relateduser}')">
+                                    <i class="fas fa-user-check me-2"></i>
+                                    فعال کردن کاربر
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            $('#activationSuggestionModal').remove();
+            $('#confirmDeleteModal').modal('hide');
+            
+            // Add modal to body and show
+            $('body').append(suggestionHtml);
+            $('#activationSuggestionModal').modal('show');
+            
+            // Remove modal from DOM when hidden
+            $('#activationSuggestionModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        }
+        
+        // Activate user before deletion
+        function activateUserBeforeDelete(macaddress, relateduser) {
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                showNotification('خطا در احراز هویت', 'error');
+                return;
+            }
+            
+            // First activate the user
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/setrelationship',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    userid: userid,
+                    session: session,
+                    macaddress: macaddress,
+                    relateduser: relateduser,
+                    accesslevel: 1, // Default access level
+                    ruleexpiretime: 0,
+                    notes: '',
+                    isactive: true // Activate the user
+                }),
+                success: function(response) {
+                    if (response && response.status === 'success') {
+                        showNotification('کاربر با موفقیت فعال شد. اکنون می‌توانید حذف کنید.', 'success');
+                        $('#activationSuggestionModal').modal('hide');
+                        
+                        // Wait a moment then show delete confirmation again
+                        setTimeout(() => {
+                            removeAccess(macaddress, relateduser);
+                        }, 1500);
+                    } else {
+                        showNotification('خطا در فعال‌سازی کاربر', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Activate user failed:', error);
+                    showNotification('خطا در فعال‌سازی کاربر: ' + error, 'error');
+                }
+            });
+        }
+        
+        // Change access level function
+        function changeAccessLevel(macaddress, relateduser, currentAccessLevel) {
+            const accessLevels = [
+                { value: 1, text: 'فقط خواندن', icon: 'fa-eye' },
+                { value: 2, text: 'خواندن و نوشتن', icon: 'fa-edit' }
+            ];
+            
+            let optionsHtml = '';
+            accessLevels.forEach(level => {
+                const selected = level.value === currentAccessLevel ? 'selected' : '';
+                optionsHtml += `<option value="${level.value}" ${selected}>
+                    ${level.text}
+                </option>`;
+            });
+            
+            const modalHtml = `
+                <div class="modal fade" id="changeAccessLevelModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content glass-modal">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-key me-2 text-warning"></i>
+                                    تغییر سطح دسترسی
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">کاربر:</label>
+                                    <div class="form-control-plaintext"><code>${relateduser}</code></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">دستگاه:</label>
+                                    <div class="form-control-plaintext"><code>${macaddress}</code></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="newAccessLevel" class="form-label">سطح دسترسی جدید:</label>
+                                    <select class="form-select" id="newAccessLevel">
+                                        ${optionsHtml}
+                                    </select>
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    تغییر سطح دسترسی بلافاصله اعمال خواهد شد.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>
+                                    انصراف
+                                </button>
+                                <button type="button" class="btn btn-warning" onclick="confirmChangeAccessLevel('${macaddress}', '${relateduser}')">
+                                    <i class="fas fa-save me-2"></i>
+                                    تغییر سطح دسترسی
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            $('#changeAccessLevelModal').remove();
+            
+            // Add modal to body and show
+            $('body').append(modalHtml);
+            $('#changeAccessLevelModal').modal('show');
+            
+            // Remove modal from DOM when hidden
+            $('#changeAccessLevelModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        }
+        
+        // Confirm change access level
+        function confirmChangeAccessLevel(macaddress, relateduser) {
+            const newAccessLevel = parseInt($('#newAccessLevel').val());
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                showNotification('خطا در احراز هویت', 'error');
+                return;
+            }
+            
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/setrelationship',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    userid: userid,
+                    session: session,
+                    macaddress: macaddress,
+                    relateduser: relateduser,
+                    accesslevel: newAccessLevel,
+                    ruleexpiretime: 0,
+                    notes: '',
+                    isactive: true
+                }),
+                success: function(response) {
+                    if (response && response.status === 'success') {
+                        const accessLevelText = newAccessLevel === 1 ? 'فقط خواندن' : 'خواندن و نوشتن';
+                        showNotification(`سطح دسترسی به "${accessLevelText}" تغییر یافت`, 'success');
+                        $('#changeAccessLevelModal').modal('hide');
+                        $('#editAccessModal').modal('hide');
+                        loadCreatedAdmins(); // Refresh the list
+                    } else {
+                        showNotification('خطا در تغییر سطح دسترسی: ' + (response.message || 'خطای نامشخص'), 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Change access level failed:', error);
+                    let errorMessage = 'خطا در برقراری ارتباط با سرور';
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    } else if (error) {
+                        errorMessage += ': ' + error;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
+                }
+            });
+        }
+        
+        // Show no admins message
+        function showNoAdminsMessage() {
+            $('#adminsContent').hide();
+            $('#noAdminsMessage').show();
+        }
+        
+        // Set username in header
+        $(document).ready(function() {
+            const username = sessionStorage.getItem('username') || sessionStorage.getItem('userid') || 'کاربر';
+            $('#username').text(username);
+        });
+        
+        // Add logout event handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const signOutBtn = document.getElementById('signOut');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (typeof SignOut === 'function') {
+                        SignOut();
+                    } else {
+                        console.error('SignOut function not found');
+                    }
+                });
+            }
+            
+            const mobileSignOutBtn = document.getElementById('mobileSignOut');
+            if (mobileSignOutBtn) {
+                mobileSignOutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (typeof SignOut === 'function') {
+                        SignOut();
+                    } else {
+                        console.error('SignOut function not found');
+                    }
+                });
+            }
+                });
+        
+    </script>
+
+    <footer class="footer mt-auto">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-sm-12 col-md-6 mb-3 mb-md-0 text-center text-md-start">
+                    <div class="footer-brand">
+                        <i class="fas fa-microchip me-2"></i>
+                        <span class="footer-company">© 2025 شرکت دانش بنیان ماهان الکترونیک پرنیا</span>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6 text-center text-md-end">
+                    <div class="footer-links">
+                        <a href="https://giot.ir/#contact" class="footer-link">
+                            <i class="fas fa-headset me-2"></i>
+                            پشتیبانی
+                        </a>
+                        <a href="https://giot.ir/#contact" class="footer-link">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            حریم خصوصی
+                        </a>
+                        <a href="https://giot.ir/#contact" class="footer-link">
+                            <i class="fas fa-envelope me-2"></i>
+                            تماس با ما
+                        </a>
+                        <a href="http://giot.ir" target="_blank" class="footer-link">
+                            <i class="fas fa-globe me-2"></i>
+                            وب‌سایت
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <style>
+        /* Mobile Menu Styles */
+        .mobile-menu-toggle {
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+        }
+        
+        .mobile-menu-toggle:focus {
+            box-shadow: none;
+        }
+        
+        .mobile-menu-items {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .mobile-menu-section {
+            margin-bottom: 25px;
+        }
+        
+        .mobile-menu-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .mobile-menu-section h6 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+            font-size: 14px;
+        }
+        
+        .mobile-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: #333;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin-bottom: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .mobile-menu-item:hover {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+            transform: translateX(5px);
+            text-decoration: none;
+        }
+        
+        .mobile-menu-item.text-danger {
+            color: #dc3545;
+        }
+        
+        .mobile-menu-item.text-danger:hover {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .mobile-menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Responsive design for mobile */
+        @media (max-width: 768px) {
+            /* Hide desktop dropdown menu */
+            .dropdown {
+                display: none !important;
+            }
+            
+            /* Show mobile menu toggle */
+            .mobile-menu-toggle {
+                display: block !important;
+            }
+        }
+        
+        /* Desktop styles */
+        @media (min-width: 769px) {
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+        }
+    </style>
+</body>
+</html>

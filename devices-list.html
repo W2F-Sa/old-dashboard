@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نمایش تمامی دستگاه‌ها | داشبورد اینترنت اشیاء</title>
+    
+    <script src="https://cdn.giot.ir/js/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.giot.ir/js/all.min.css">
+    <link href="https://my.giot.ir/fonts/css/fontiran.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.giot.ir/js/bootstrap.min.css">
+    <script src="https://cdn.giot.ir/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://my.giot.ir/dashboard/css/style.css">
+    <script src="https://my.giot.ir/js/config.min.js"></script>
+    <script src="https://my.giot.ir/dashboard/js/session-manager.js"></script>
+    <script src="https://my.giot.ir/dashboard/js/dashboard.js"></script>
+    <audio id="OKnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_simple-02.ogg"></audio>
+    <audio id="AlarmnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_ambient.ogg"></audio>
+</head>
+<body>
+    <div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; z-index: 9999; font-weight: 500;">
+        <!-- Notification message will be inserted here -->
+    </div>
+
+    <header class="header navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-microchip me-2"></i>
+                داشبورد IoT شرکت ماهان الکترونیک پرنیا
+            </a>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button class="navbar-toggler mobile-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNavMenu" aria-controls="mobileNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon">
+                    <i class="fas fa-bars"></i>
+                </span>
+            </button>
+
+            <!-- Collapsible Mobile Menu -->
+            <div class="collapse navbar-collapse" id="mobileNavMenu">
+                <!-- Mobile Menu Items (visible only on mobile) -->
+                <div class="mobile-menu-items d-lg-none">
+                    <!-- Device Management Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-cogs me-2"></i>مدیریت دستگاه‌ها</h6>
+                        <a href="add-device.html" class="mobile-menu-item">
+                            <i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید
+                        </a>
+                        <a href="devices-list.html" class="mobile-menu-item">
+                            <i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها
+                        </a>
+                        <a href="rename-device.html" class="mobile-menu-item">
+                            <i class="fas fa-edit me-2"></i>تغییر نام دستگاه
+                        </a>
+                        <a href="remove-device.html" class="mobile-menu-item text-danger">
+                            <i class="fas fa-trash me-2"></i>حذف دستگاه
+                        </a>
+                    </div>
+                    
+                    <!-- Access Management Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-users-cog me-2"></i>مدیریت دسترسی</h6>
+                        <a href="manage-access.html" class="mobile-menu-item">
+                            <i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی
+                        </a>
+                        <a href="edit-access.html" class="mobile-menu-item">
+                            <i class="fas fa-user-edit me-2"></i>ویرایش سطوح دسترسی
+                        </a>
+                    </div>
+                    
+                    <!-- Support Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-headset me-2"></i>پشتیبانی</h6>
+                        <a href="../crm/index.html" class="mobile-menu-item">
+                            <i class="fas fa-ticket-alt me-2"></i>سامانه پشتیبانی و Crm
+                        </a>
+                    </div>
+                    
+                    <!-- User Account Section -->
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-user me-2"></i>حساب کاربری</h6>
+                        <a href="edit-profile.html" class="mobile-menu-item">
+                            <i class="fas fa-user-edit me-2"></i>ویرایش کاربری
+                        </a>
+                        <a href="changepassword.html" class="mobile-menu-item">
+                            <i class="fas fa-key me-2"></i>تغییر رمز عبور
+                        </a>
+                        <a href="#" id="mobileSignOut" class="mobile-menu-item text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i>خروج
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Desktop Menu (visible only on desktop) -->
+                <div class="d-none d-lg-flex ms-auto">
+
+                    
+                    <div class="header-actions">
+                        <div class="theme-toggle-container">
+                            <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
+                            <label for="theme-toggle" class="theme-toggle-label">
+                                <span class="theme-toggle-slider">
+                                    <i class="fas fa-sun theme-icon sun-icon"></i>
+                                    <i class="fas fa-moon theme-icon moon-icon"></i>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle user-menu-btn" href="#" id="mainMenuDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-bars me-1"></i> منوی اصلی
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end glass-dropdown" aria-labelledby="mainMenuDropdown">
+                                <h6 class="dropdown-header"><i class="fas fa-cogs me-2"></i>مدیریت دستگاه‌ها</h6>
+                                <a class="dropdown-item glass-item" href="add-device.html"><i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید</a>
+                                <a class="dropdown-item glass-item" href="devices-list.html"><i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها</a>
+                                <a class="dropdown-item glass-item" href="rename-device.html"><i class="fas fa-edit me-2"></i>تغییر نام دستگاه</a>
+                                <a class="dropdown-item glass-item text-danger" href="remove-device.html"><i class="fas fa-trash me-2"></i>حذف دستگاه</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header"><i class="fas fa-users-cog me-2"></i>مدیریت دسترسی</h6>
+                                <a class="dropdown-item glass-item" href="manage-access.html"><i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی</a>
+                                <a class="dropdown-item glass-item" href="edit-access.html"><i class="fas fa-user-edit me-2"></i>ویرایش سطوح دسترسی</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header"><i class="fas fa-headset me-2"></i>پشتیبانی</h6>
+                                <a class="dropdown-item glass-item" href="../crm/index.html"><i class="fas fa-ticket-alt me-2"></i>سامانه پشتیبانی و Crm</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header"><i class="fas fa-user me-2"></i>حساب کاربری</h6>
+                                <a class="dropdown-item glass-item" href="edit-profile.html"><i class="fas fa-user-edit me-2"></i>ویرایش کاربری</a>
+                                <a class="dropdown-item glass-item" href="changepassword.html"><i class="fas fa-key me-2"></i>تغییر رمز عبور</a>
+                                <a class="dropdown-item glass-item text-danger" id="signOut" href="#"><i class="fas fa-sign-out-alt me-2"></i>خروج</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="page-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="page-title">
+                                <i class="fas fa-list me-2"></i>
+                                لیست تمامی دستگاه‌ها
+                            </h1>
+                            <p class="page-description">مشاهده و مدیریت تمامی دستگاه‌های متصل به حساب کاربری شما</p>
+                        </div>
+                        <button id="refreshDevicesBtn" class="btn btn-outline-primary btn-sm" title="بروزرسانی لیست دستگاه‌ها">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="devicesContainer">
+                <!-- Loading state -->
+                <div class="col-12" id="loadingState">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">در حال بارگذاری...</span>
+                        </div>
+                        <p class="mt-3">در حال دریافت اطلاعات دستگاه‌ها...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer mt-auto">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-sm-12 col-md-6 mb-3 mb-md-0 text-center text-md-start">
+                    <div class="footer-brand">
+                        <i class="fas fa-microchip me-2"></i>
+                        <span class="footer-company">© 2025 شرکت دانش بنیان ماهان الکترونیک پرنیا</span>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6 text-center text-md-end">
+                    <div class="footer-links">
+                        <a href="https://giot.ir/#contact" class="footer-link">
+                            <i class="fas fa-headset me-2"></i>
+                            پشتیبانی
+                        </a>
+                        <a href="https://giot.ir/#contact" class="footer-link">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            حریم خصوصی
+                        </a>
+                        <a href="https://giot.ir/#contact" class="footer-link">
+                            <i class="fas fa-envelope me-2"></i>
+                            تماس با ما
+                        </a>
+                        <a href="http://giot.ir" target="_blank" class="footer-link">
+                            <i class="fas fa-globe me-2"></i>
+                            وب‌سایت
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        $(document).ready(function() {
+            checkSession();
+            initializeThemeToggle();
+            
+            // Refresh devices button event handler
+            $('#refreshDevicesBtn').click(function() {
+                const $btn = $(this);
+                const $icon = $btn.find('i');
+                
+                // Add loading state
+                $btn.prop('disabled', true);
+                $icon.addClass('fa-spin');
+                
+                // Show loading state
+                $('#loadingState').show();
+                $('#devicesContainer .col-12:not(#loadingState)').remove();
+                
+                // Call loadDevices function
+                loadDevices();
+                
+                // Remove loading state after a delay
+                setTimeout(function() {
+                    $btn.prop('disabled', false);
+                    $icon.removeClass('fa-spin');
+                }, 1000);
+            });
+        });
+
+        // Check if user is logged in
+        function checkSession() {
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                window.location.href = '../index.html';
+                return false;
+            }
+            
+            let isValid = false;
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/sessionvalidate',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    userid: userid,
+                    session: session
+                }),
+                async: false,
+                success: function(response) {
+                    if (response && response.status === 'success') {
+                        isValid = true;
+                    }
+                },
+                error: function() {
+                    isValid = false;
+                }
+            });
+            
+            
+            // Call getuserdevices and store in localStorage
+            let devicesResponse = null;
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/getuserdevices',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    userid: userid,
+                    session: session
+                }),
+                async: false,
+                success: function(response) {
+                    if (response && response.status === 'success') {
+                        devicesResponse = response;
+                    }
+                },
+                error: function() {
+                    // Continue without storing if error
+                }
+            });
+            
+            if (devicesResponse) {
+                localStorage.setItem('userDevices', JSON.stringify(devicesResponse));
+                displayDevices(devicesResponse.devices, devicesResponse.count);
+            } else {
+                showError('خطا در دریافت اطلاعات دستگاه‌ها');
+            }
+            
+            return true;
+        }
+
+        // Load devices from API
+        function loadDevices() {
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                return;
+            }
+            
+            const requestData = {
+                userid: userid,
+                session: session
+            };
+            
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/getuserdevices',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(requestData),
+                success: function(response) {
+                    if (response && response.status === 'success') {
+                        // Store API response in localStorage
+                        localStorage.setItem('userDevicesResponse', JSON.stringify(response));
+                        displayDevices(response.devices, response.count);
+                    } else {
+                        showError('خطا در دریافت اطلاعات دستگاه‌ها');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Get devices request failed:', error);
+                    showError('خطا در برقراری ارتباط با سرور');
+                }
+            });
+        }
+
+        // Display devices in cards
+        function displayDevices(devices, count) {
+            $('#loadingState').hide();
+            
+            if (!devices || devices.length === 0) {
+                $('#devicesContainer').html(`
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            هیچ دستگاهی یافت نشد. برای شروع، دستگاه جدیدی اضافه کنید.
+                        </div>
+                    </div>
+                `);
+                return;
+            }
+            
+            let devicesHtml = '';
+            
+            devices.forEach(device => {
+                const deviceTypeName = getDeviceTypeName(device.devicetype);
+                const accessLevelText = device.accesslevel === 255 ? 'مالک' : (device.accesslevel === 2 ? 'خواندن و نوشتن' : (device.accesslevel === 1 ? 'فقط خواندن' : 'اشتراکی'));
+                const onlineStatusClass = device.onlinestatus ? 'text-success' : 'text-danger';
+                const onlineStatusText = device.onlinestatus ? 'آنلاین' : 'آفلاین';
+                const onlineStatusIcon = device.onlinestatus ? 'fa-circle' : 'fa-circle';
+                
+                devicesHtml += `
+                    <div class="col-xl-6 col-lg-8 col-md-10 mb-4">
+                        <div class="device-card">
+                            <div class="device-card-header">
+                                <div class="device-icon">
+                                    <i class="fas fa-microchip"></i>
+                                </div>
+                                <div class="device-status">
+                                    <i class="fas ${onlineStatusIcon} ${onlineStatusClass}"></i>
+                                    <span class="${onlineStatusClass}">${onlineStatusText}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="device-card-body">
+                                <h5 class="device-name">${device.devicenickname || 'بدون نام'}</h5>
+                                <p class="device-type">${deviceTypeName}</p>
+                                
+                                <div class="device-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">MAC Address:</span>
+                                        <span class="detail-value">${device.macaddress}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">سطح دسترسی:</span>
+                                        <span class="detail-value">${accessLevelText}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">کد ملی مالک:</span>
+                                        <span class="detail-value">${device.ownercodemelli}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="device-card-footer">
+                                <div class="device-actions">
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewDevice('${device.macaddress}', ${device.devicetype})">
+                                        <i class="fas fa-eye me-1"></i>
+                                        مشاهده
+                                    </button>
+                                    ${device.accesslevel >= 2 ? `
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editDevice('${device.macaddress}', '${device.devicenickname}')">
+                                            <i class="fas fa-edit me-1"></i>
+                                            ویرایش
+                                        </button>
+                                    ` : ''}
+                                    ${device.accesslevel === 255 ? `
+                                        <button class="btn btn-sm btn-outline-danger" onclick="removeDevice('${device.macaddress}')">
+                                            <i class="fas fa-trash me-1"></i>
+                                            حذف
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            $('#devicesContainer').html(`
+                <div class="col-12 mb-3">
+                    <div class="devices-summary">
+                        <h6><i class="fas fa-info-circle me-2"></i>تعداد کل دستگاه‌ها: ${count}</h6>
+                    </div>
+                </div>
+                ${devicesHtml}
+            `);
+        }
+
+        // Get device type name
+        function getDeviceTypeName(deviceType) {
+            const deviceTypes = {
+                1: 'ردیاب GPS',
+                2: 'دزدگیر هوشمند',
+                2001: 'سیستم دزدگیر پیشرفته',
+                3: 'سیستم صوتی شبکه',
+                4: 'دستگاه اذان هوشمند',
+                5: 'سرور زمان ماهواره‌ای',
+                6: 'گیت‌وی LoRaWAN',
+                7: 'ردیاب بی‌سیم LoRaWAN',
+                8: 'دزدگیر آتش LoRaWAN',
+                9: 'برد توسعه لینوکس',
+                10: 'گجت‌های هوشمند IoT',
+                1003: 'دستگاه کشاورزی هوشمند'
+            };
+            
+            return deviceTypes[deviceType] || `نوع ${deviceType}`;
+        }
+
+        // Edit device function - Auto-fill device ID
+        function editDevice(macaddress, currentName) {
+            // Store device info for auto-fill
+            sessionStorage.setItem('editDeviceId', macaddress);
+            sessionStorage.setItem('editDeviceName', currentName || '');
+            window.location.href = 'rename-device.html';
+        }
+
+        // View device function
+        function viewDevice(macaddress, devicetype) {
+            if (devicetype === 1) {
+                // GPS Tracker - store MAC address in sessionStorage and redirect to tracker page
+                sessionStorage.setItem('macaddress', macaddress);
+                sessionStorage.setItem('selectedDeviceMacAddress', macaddress);
+                sessionStorage.setItem('selectedDeviceType', devicetype.toString());
+                showNotification('در حال اتصال به ردیاب GPS...', 'info');
+                setTimeout(() => {
+                    window.open('../tracker/', '_blank');
+                }, 1000);
+            } else if (devicetype === 4 || devicetype === 100) {
+                // Azan Device - store MAC address in sessionStorage and redirect to azan page
+                sessionStorage.setItem('selectedDeviceMacAddress', macaddress);
+                sessionStorage.setItem('azanserial', macaddress); // Store deviceid in sessionStorage
+                sessionStorage.setItem('selectedDeviceType', devicetype.toString());
+                showNotification('در حال اتصال به دستگاه اذان...', 'info');
+                setTimeout(() => {
+                    window.open('../azan/', '_blank');
+                }, 1000);
+            } else if (devicetype === 1003) {
+                // Agriculture Device - store MAC address in sessionStorage and redirect to agriculture page
+                sessionStorage.setItem('selectedDeviceMacAddress', macaddress);
+                sessionStorage.setItem('agricultureserial', macaddress); // Store deviceid in sessionStorage
+                sessionStorage.setItem('selectedDeviceType', devicetype.toString());
+                showNotification('در حال اتصال به دستگاه کشاورزی...', 'info');
+                setTimeout(() => {
+                    window.open('../agriculture/', '_blank');
+                }, 1000);
+            } else if (devicetype === 2 || devicetype === 2001) {
+                // Security System Device - store MAC address in sessionStorage and redirect to SecSystem page
+                sessionStorage.setItem('selectedDeviceMacAddress', macaddress);
+                sessionStorage.setItem('deviceMac', macaddress); // Store MAC address for security system
+                sessionStorage.setItem('selectedDeviceType', devicetype.toString());
+                showNotification('در حال اتصال به سیستم دزدگیر...', 'info');
+                setTimeout(() => {
+                    window.open('../SecSystem/', '_blank');
+                }, 1000);
+            } else {
+                // Other devices - show placeholder notification
+                showNotification('صفحه مشاهده این دستگاه در حال توسعه است', 'info');
+            }
+        }
+
+        // Remove device function - Automated with confirmation modal
+        function removeDevice(macaddress) {
+            // Show confirmation modal
+            showConfirmationModal(
+                'تایید حذف دستگاه',
+                `آیا از حذف دستگاه با شناسه <strong>${macaddress}</strong> اطمینان دارید؟<br><span class="text-danger">این عمل قابل بازگشت نیست.</span>`,
+                () => {
+                    performDeviceRemoval(macaddress);
+                }
+            );
+        }
+
+        // Perform actual device removal
+        function performDeviceRemoval(macaddress) {
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                showNotification('خطا در احراز هویت', 'error');
+                return;
+            }
+            
+            const requestData = {
+                userid: userid,
+                session: session,
+                deviceid: macaddress
+            };
+            
+            // Show loading notification
+            showNotification('در حال حذف دستگاه...', 'info');
+            
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/removedevice',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(requestData),
+                success: function(response) {
+                    if (response && response.status === 'success') {
+                        showNotification(response.reason || 'دستگاه با موفقیت حذف شد', 'success');
+                        // Reload devices list after successful removal
+                        setTimeout(() => {
+                            loadDevices();
+                        }, 1500);
+                    } else {
+                        let errorMessage = 'خطا در حذف دستگاه';
+                        if (response && response.reason) {
+                            errorMessage = response.reason;
+                        }
+                        showNotification(errorMessage, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Remove device request failed:', error);
+                    showNotification('خطا در برقراری ارتباط با سرور', 'error');
+                }
+            });
+        }
+
+        // Show confirmation modal
+        function showConfirmationModal(title, message, onConfirm) {
+            // Remove existing modal if any
+            $('#confirmationModal').remove();
+            
+            const modalHtml = `
+                <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content modern-modal">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title" id="confirmationModalLabel">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    ${title}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-0">${message}</p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>انصراف
+                                </button>
+                                <button type="button" class="btn btn-danger rounded-pill" id="confirmButton">
+                                    <i class="fas fa-check me-2"></i>تایید حذف
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('body').append(modalHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            modal.show();
+            
+            // Handle confirm button click
+            $('#confirmButton').on('click', function() {
+                modal.hide();
+                onConfirm();
+            });
+            
+            // Remove modal from DOM when hidden
+            $('#confirmationModal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        }
+
+        // Show error message
+        function showError(message) {
+            $('#loadingState').hide();
+            $('#devicesContainer').html(`
+                <div class="col-12">
+                    <div class="alert alert-danger text-center">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ${message}
+                        <br>
+                        <button class="btn btn-outline-danger btn-sm mt-2" onclick="loadDevices()">
+                            <i class="fas fa-redo me-1"></i>
+                            تلاش مجدد
+                        </button>
+                    </div>
+                </div>
+            `);
+        }
+
+        // Beautiful notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            // Add notification styles
+            const style = document.createElement('style');
+            style.textContent = `
+                .notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, ${type === 'success' ? '#28a745 0%, #20c997 100%' : type === 'error' ? '#dc3545 0%, #c82333 100%' : '#17a2b8 0%, #138496 100%'});
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(${type === 'success' ? '40, 167, 69' : type === 'error' ? '220, 53, 69' : '23, 162, 184'}, 0.3);
+                    z-index: 9999;
+                    transform: translateX(400px);
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                }
+                .notification.show {
+                    transform: translateX(0);
+                }
+                .notification-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-weight: 600;
+                }
+                .notification i {
+                    font-size: 1.2rem;
+                }
+            `;
+            
+            document.head.appendChild(style);
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Hide notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                    document.head.removeChild(style);
+                }, 300);
+            }, 5000);
+        }
+
+        // Theme toggle functionality
+        function initializeThemeToggle() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            
+            // Load saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.checked = true;
+            }
+            
+            // Theme toggle event listener
+            themeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    showNotification('حالت شب فعال شد', 'success');
+                } else {
+                    body.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    showNotification('حالت روز فعال شد', 'success');
+                }
+            });
+        }
+
+        // Logout functionality
+        $('#signOut').on('click', function(e) {
+            e.preventDefault();
+            
+            const userid = sessionStorage.getItem('userid');
+            const session = sessionStorage.getItem('session');
+            
+            if (!userid || !session) {
+                sessionStorage.clear();
+                localStorage.clear();
+                window.location.href = '../index.html';
+                return;
+            }
+            
+            const requestData = {
+                userid: userid,
+                session: session
+            };
+            
+            $.ajax({
+                url: window.GIoTapiBaseUrl + '/signout',
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(requestData),
+                success: function(response) {
+                    showNotification('با موفقیت از سامانه خارج شدید', 'success');
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    setTimeout(() => {
+                        window.location.href = '../index.html';
+                    }, 1500);
+                },
+                error: function() {
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    window.location.href = '../index.html';
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* Modern Modal Styling */
+        .modern-modal {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modern-modal .modal-header {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem;
+        }
+        
+        .modern-modal .modal-body {
+            padding: 2rem;
+            color: var(--text-primary);
+        }
+        
+        .modern-modal .modal-footer {
+            padding: 1.5rem 2rem;
+            background: rgba(var(--glass-bg-rgb), 0.5);
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .modern-modal .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modern-modal .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .device-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .device-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            border-color: var(--accent-color);
+        }
+        
+        .device-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .device-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .device-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .device-card-body {
+            flex: 1;
+        }
+        
+        .device-name {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .device-type {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .device-details {
+            margin-bottom: 1rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.85rem;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            text-align: left;
+            direction: ltr;
+        }
+        
+        .device-card-footer {
+            margin-top: auto;
+        }
+        
+        .device-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        .device-actions .btn {
+            flex: 1;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .device-actions .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .device-actions .btn-outline-primary:hover {
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.3);
+        }
+        
+        .device-actions .btn-outline-danger:hover {
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+        }
+        
+        .devices-summary {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .devices-summary h6 {
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .device-card {
+                padding: 1rem;
+            }
+            
+            .device-actions {
+                flex-direction: column;
+            }
+            
+            .device-actions .btn {
+                flex: none;
+            }
+        }
+        
+        /* Mobile Menu Styles */
+        .mobile-menu-toggle {
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+        }
+        
+        .mobile-menu-toggle:focus {
+            box-shadow: none;
+        }
+        
+        .mobile-menu-items {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .mobile-menu-section {
+            margin-bottom: 25px;
+        }
+        
+        .mobile-menu-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .mobile-menu-section h6 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+            font-size: 14px;
+        }
+        
+        .mobile-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: #333;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin-bottom: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .mobile-menu-item:hover {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+            transform: translateX(5px);
+            text-decoration: none;
+        }
+        
+        .mobile-menu-item.text-danger {
+            color: #dc3545;
+        }
+        
+        .mobile-menu-item.text-danger:hover {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .mobile-menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Responsive design for mobile */
+        @media (max-width: 768px) {
+            /* Hide desktop dropdown menu */
+            .dropdown {
+                display: none !important;
+            }
+            
+            /* Show mobile menu toggle */
+            .mobile-menu-toggle {
+                display: block !important;
+            }
+        }
+        
+        /* Desktop styles */
+        @media (min-width: 769px) {
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+        }
+    </style>
+    
+    <script>
+        // Handle logout button click
+        document.addEventListener('DOMContentLoaded', function() {
+            const signOutBtn = document.getElementById('signOut');
+            const mobileSignOutBtn = document.getElementById('mobileSignOut');
+            
+            function handleSignOut(e) {
+                e.preventDefault();
+                console.log('SignOut button clicked');
+                if (typeof SignOut === 'function') {
+                    SignOut();
+                } else {
+                    console.error('SignOut function not found');
+                    showNotification('خطا: تابع خروج یافت نشد', 'Alarm');
+                }
+            }
+            
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', handleSignOut);
+            }
+            
+            if (mobileSignOutBtn) {
+                mobileSignOutBtn.addEventListener('click', handleSignOut);
+            }
+        });
+    </script>
+</body>
+</html>
