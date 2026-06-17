@@ -1,161 +1,375 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سامانه موقعیت‌یاب ماهان الکترونیک پرنیا</title>
-    
-    <!-- کتابخانه‌های خارجی -->
-    <link href="https://cdn.giot.ir/js/bootstrap.rtl.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
-    <link rel="stylesheet" href="https://cdn.giot.ir/js/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.css">
-    <script src="https://cdn.giot.ir/js/mqtt.min.js"></script>
-    <!-- استایل سفارشی -->
-    <link rel="stylesheet" href="styles.css">
+    <title>سیستم مدیریت تیکت‌ها - شرکت ماهان الکترونیک پرنیا</title>
+	<script src="https://cdn.giot.ir/js/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.giot.ir/js/all.min.css">
+	<link href="https://my.giot.ir/fonts/css/fontiran.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.giot.ir/js/bootstrap.min.css">
+	<script src="https://cdn.giot.ir/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://my.giot.ir/crm/css/crm-style.css">
+	<script src="https://my.giot.ir/js/config.min.js"></script>
+	<script src="https://my.giot.ir/crm/js/crm.js"></script>
+	<audio id="OKnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_simple-02.ogg"></audio>
+	<audio id="AlarmnotificationSound" src="https://my.giot.ir/sounds/alerts/notification_ambient.ogg"></audio>
 </head>
 <body>
-    <div class="main-container container">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="control-panel">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h1 class="mb-0">
-                                <i class="fas fa-satellite-dish me-2"></i>
-                                سامانه موقعیت‌یاب
-                            </h1>
-                            <p class="text-muted mb-0">ماهان الکترونیک پرنیا</p>
+    <div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; z-index: 9999; font-weight: 500;">
+		<!-- Notification message will be inserted here -->
+	</div>
+    
+    <header class="header navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-microchip me-2"></i>
+                داشبورد IoT شرکت ماهان الکترونیک پرنیا
+            </a>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button class="navbar-toggler mobile-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNavMenu" aria-controls="mobileNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon">
+                    <i class="fas fa-bars"></i>
+                </span>
+            </button>
+
+            <!-- Collapsible Mobile Menu -->
+            <div class="collapse navbar-collapse" id="mobileNavMenu">
+                <!-- Mobile Menu Items (Only visible on mobile) -->
+                <div class="mobile-menu-items d-lg-none">
+                    
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-cogs me-2"></i>مدیریت دستگاه‌ها</h6>
+                        <a href="../dashboard/add-device.html" class="mobile-menu-item">
+                            <i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید
+                        </a>
+                        <a href="../dashboard/devices-list.html" class="mobile-menu-item">
+                            <i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها
+                        </a>
+                        <a href="../dashboard/rename-device.html" class="mobile-menu-item">
+                            <i class="fas fa-edit me-2"></i>تغییر نام دستگاه
+                        </a>
+                        <a href="../dashboard/remove-device.html" class="mobile-menu-item text-danger">
+                            <i class="fas fa-trash me-2"></i>حذف دستگاه
+                        </a>
+                    </div>
+                    
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-users-cog me-2"></i>مدیریت دسترسی</h6>
+                        <a href="../dashboard/manage-access.html" class="mobile-menu-item">
+                            <i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی
+                        </a>
+                        <a href="../dashboard/edit-access.html" class="mobile-menu-item">
+                            <i class="fas fa-user-edit me-2"></i>ویرایش سطوح دسترسی
+                        </a>
+                    </div>
+                    
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-home me-2"></i>ناوبری</h6>
+                        <a href="../dashboard/devices-list.html" class="mobile-menu-item">
+                            <i class="fas fa-arrow-left me-2"></i>بازگشت به داشبورد
+                        </a>
+                    </div>
+                    
+                    <div class="mobile-menu-section">
+                        <h6><i class="fas fa-user me-2"></i>حساب کاربری</h6>
+                        <a href="../dashboard/edit-profile.html" class="mobile-menu-item">
+                            <i class="fas fa-user-edit me-2"></i>ویرایش کاربری
+                        </a>
+                        <a href="../dashboard/changepassword.html" class="mobile-menu-item">
+                            <i class="fas fa-key me-2"></i>تغییر رمز عبور
+                        </a>
+                        <a href="#" class="mobile-menu-item text-danger" id="mobileSignOut">
+                            <i class="fas fa-sign-out-alt me-2"></i>خروج
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Desktop Menu (visible only on desktop) -->
+                <div class="d-none d-lg-flex ms-auto">
+                    <div class="header-actions">
+                    <div class="theme-toggle-container">
+                        <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
+                        <label for="theme-toggle" class="theme-toggle-label">
+                            <span class="theme-toggle-slider">
+                                <i class="fas fa-sun theme-icon sun-icon"></i>
+                                <i class="fas fa-moon theme-icon moon-icon"></i>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle user-menu-btn" href="#" id="mainMenuDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-bars me-1"></i> منوی اصلی
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end glass-dropdown" aria-labelledby="mainMenuDropdown">
+                            <h6 class="dropdown-header"><i class="fas fa-cogs me-2"></i>مدیریت دستگاه‌ها</h6>
+                            <a class="dropdown-item glass-item" href="../dashboard/add-device.html"><i class="fas fa-plus-circle me-2"></i>افزودن دستگاه جدید</a>
+                            <a class="dropdown-item glass-item" href="../dashboard/devices-list.html"><i class="fas fa-list me-2"></i>مشاهده همه دستگاه‌ها</a>
+                            <a class="dropdown-item glass-item" href="../dashboard/rename-device.html"><i class="fas fa-edit me-2"></i>تغییر نام دستگاه</a>
+                            <a class="dropdown-item glass-item text-danger" href="../dashboard/remove-device.html"><i class="fas fa-trash me-2"></i>حذف دستگاه</a>
+                            <div class="dropdown-divider"></div>
+                            <h6 class="dropdown-header"><i class="fas fa-users-cog me-2"></i>مدیریت دسترسی</h6>
+                            <a class="dropdown-item glass-item" href="../dashboard/manage-access.html"><i class="fas fa-users-cog me-2"></i>مدیریت سطوح دسترسی</a>
+                            <a class="dropdown-item glass-item" href="../dashboard/edit-access.html"><i class="fas fa-user-edit me-2"></i>ویرایش سطوح دسترسی</a>
+                            <div class="dropdown-divider"></div>
+                            <h6 class="dropdown-header"><i class="fas fa-home me-2"></i>ناوبری</h6>
+                            <a class="dropdown-item glass-item" href="../dashboard/devices-list.html"><i class="fas fa-arrow-left me-2"></i>بازگشت به داشبورد</a>
+                            <div class="dropdown-divider"></div>
+                            <h6 class="dropdown-header"><i class="fas fa-user me-2"></i>حساب کاربری</h6>
+                            <a class="dropdown-item glass-item" href="../dashboard/edit-profile.html"><i class="fas fa-user-edit me-2"></i>ویرایش کاربری</a>
+                            <a class="dropdown-item glass-item" href="../dashboard/changepassword.html"><i class="fas fa-key me-2"></i>تغییر رمز عبور</a>
+                            <a class="dropdown-item glass-item text-danger" id="signOut" href="#"><i class="fas fa-sign-out-alt me-2"></i>خروج</a>
                         </div>
-                        <div class="col-md-6 toggle-group">
-                            <div class="toggle-wrapper">
-                                <label class="custom-toggle">
-                                    <input type="checkbox" id="darkModeSwitch">
-                                    <span class="slider"></span>
-                                </label>
-                                <small>حالت شب</small>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <!-- Main content -->
+        <main role="main" class="px-4" style="margin-top: 10px;">
+            
+            <!-- CRM Stats -->
+            <div class="row mb-4">
+                <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-muted">تیکت‌های باز</h6>
+                                    <h2 class="mb-0" id="openTicketsCount">0</h2>
+                                </div>
+                                <div class="stat-icon bg-primary">
+                                    <i class="fas fa-ticket-alt"></i>
+                                </div>
                             </div>
-                            <div class="toggle-wrapper">
-                                <label class="custom-toggle">
-                                    <input type="checkbox" id="historySwitchSwitch">
-                                    <span class="slider"></span>
-                                </label>
-                                <small>نمایش سوابق</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-muted">تیکت‌های بسته</h6>
+                                    <h2 class="mb-0" id="closedTicketsCount">0</h2>
+                                </div>
+                                <div class="stat-icon bg-success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
                             </div>
-                            <div class="toggle-wrapper">
-                                <label class="custom-toggle">
-                                    <input type="checkbox" id="mapTypeSwitch">
-                                    <span class="slider"></span>
-                                </label>
-                                <small>نقشه ماهواره‌ای</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-muted">در انتظار پاسخ</h6>
+                                    <h2 class="mb-0" id="pendingTicketsCount">0</h2>
+                                </div>
+                                <div class="stat-icon bg-warning">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-3 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-muted">کل تیکت‌ها</h6>
+                                    <h2 class="mb-0" id="totalTicketsCount">0</h2>
+                                </div>
+                                <div class="stat-icon bg-info">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+            
+            <!-- Tickets Management Section -->
+            <div class="row mb-4">
+                <!-- Create New Ticket Form -->
+                <div class="col-12" id="newTicketSection" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                ایجاد تیکت جدید
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="newTicketForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ticketTitle" class="form-label">عنوان تیکت *</label>
+                                        <input type="text" class="form-control" id="ticketTitle" required maxlength="500">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="ticketCategory" class="form-label">دسته‌بندی</label>
+                                        <select class="form-select" id="ticketCategory">
+                                            <option value="general">عمومی</option>
+                                            <option value="technical">فنی</option>
+                                            <option value="billing">مالی</option>
+                                            <option value="account">حساب کاربری</option>
+                                            <option value="feature_request">درخواست ویژگی</option>
+                                            <option value="bug_report">گزارش باگ</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="ticketPriority" class="form-label">اولویت</label>
+                                        <select class="form-select" id="ticketPriority">
+                                            <option value="low">کم</option>
+                                            <option value="normal" selected>متوسط</option>
+                                            <option value="high">بالا</option>
+                                            <option value="urgent">فوری</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ticketDescription" class="form-label">توضیحات تیکت *</label>
+                                    <textarea class="form-control" id="ticketDescription" rows="5" required maxlength="10000" placeholder="لطفاً مشکل یا درخواست خود را به تفصیل شرح دهید..."></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ticketTags" class="form-label">برچسب‌ها (اختیاری)</label>
+                                    <input type="text" class="form-control" id="ticketTags" placeholder="برچسب‌ها را با کاما جدا کنید">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ticketAttachment" class="form-label attachment-label">
+                                        <i class="fas fa-paperclip me-2"></i>
+                                        فایل ضمیمه (اختیاری)
+                                    </label>
+                                    
+                                    <!-- File Upload Area -->
+                                    <div class="file-upload-area" id="fileUploadArea">
+                                        <div class="file-upload-content">
+                                            <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                            <h6 class="file-upload-title">فایل خود را اینجا بکشید یا کلیک کنید</h6>
+                                            <p class="file-upload-subtitle">حداکثر حجم: 1MB | فرمت‌های مجاز: JPG, PNG, WebP, PDF</p>
+                                            <input type="file" class="file-input" id="ticketAttachment" accept="image/jpeg,image/png,image/webp,application/pdf">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- File Compression Tools -->
+                                     <div class="compression-tools mt-2">
+                                         <div class="compression-header">
+                                             <i class="fas fa-compress-alt me-1"></i>
+                                             <small class="text-muted">ابزارهای کاهش حجم فایل:</small>
+                                         </div>
+                                         <div class="compression-links mt-1">
+                                             <a href="https://tinypng.com" target="_blank" class="compression-link">
+                                                 <i class="fas fa-image"></i> TinyPNG
+                                             </a>
+                                             <a href="https://compressjpeg.com" target="_blank" class="compression-link">
+                                                 <i class="fas fa-file-image"></i> CompressJPEG
+                                             </a>
+                                             <a href="https://smallpdf.com/compress-pdf" target="_blank" class="compression-link">
+                                                 <i class="fas fa-file-pdf"></i> SmallPDF
+                                             </a>
+                                             <a href="https://www.ilovepdf.com/compress_pdf" target="_blank" class="compression-link">
+                                                 <i class="fas fa-heart"></i> ILovePDF
+                                             </a>
+                                         </div>
+                                         
 
-        <!-- Historical Data Panel -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="historical-data-card" id="historicalDataPanel">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-history"></i>
-                            مشاهده داده‌های تاریخی
-                        </h5>
+                                     </div>
+                                    
+                                    <!-- File Preview -->
+                                    <div id="attachmentPreview" class="attachment-preview mt-3" style="display: none;">
+                                        <div class="attachment-preview-card">
+                                            <div class="attachment-preview-header">
+                                                <div class="attachment-preview-icon">
+                                                    <i class="fas fa-file" id="attachmentIcon"></i>
+                                                </div>
+                                                <div class="attachment-preview-info">
+                                                    <div class="attachment-preview-name" id="attachmentName"></div>
+                                                    <div class="attachment-preview-size" id="attachmentSize"></div>
+                                                </div>
+                                                <button type="button" class="attachment-remove-btn" id="removeAttachment">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                            <div class="attachment-preview-progress" id="uploadProgress" style="display: none;">
+                                                <div class="progress">
+                                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                                </div>
+                                                <small class="progress-text">در حال آپلود...</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane me-2"></i>
+                                        ارسال تیکت
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="cancelNewTicket">
+                                        <i class="fas fa-times me-2"></i>
+                                        انصراف
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="date-input-group">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="startDateTime" class="form-label">
-                                        <i class="fas fa-calendar-plus me-1"></i>
-                                        تاریخ و زمان شروع:
-                                    </label>
-                                    <input type="datetime-local" class="form-control" id="startDateTime">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="endDateTime" class="form-label">
-                                        <i class="fas fa-calendar-minus me-1"></i>
-                                        تاریخ و زمان پایان:
-                                    </label>
-                                    <input type="datetime-local" class="form-control" id="endDateTime">
-                                </div>
+                </div>
+                
+                <!-- My Tickets List -->
+                <div class="col-12" id="myTicketsSection">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-list me-2"></i>
+                                تیکت‌های من
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary btn-sm" id="refreshTicketsBtn">
+                                    <i class="fas fa-sync-alt me-1"></i>
+                                    بروزرسانی
+                                </button>
+                                <button class="btn btn-success btn-sm" id="showNewTicketBtn">
+                                    <i class="fas fa-plus me-1"></i>
+                                    تیکت جدید
+                                </button>
                             </div>
                         </div>
-                        
-                        <div class="quick-actions">
-                            <button type="button" class="btn btn-primary" onclick="loadHistoricalData()">
-                                <i class="fas fa-search me-1"></i>
-                                جستجو
-                            </button>
-                            <button type="button" class="btn btn-info" onclick="loadTodayData()">
-                                <i class="fas fa-calendar-day me-1"></i>
-                                امروز
-                            </button>
-                            <button type="button" class="btn btn-warning" onclick="loadLastDaysData(7)">
-                                <i class="fas fa-calendar-week me-1"></i>
-                                ۷ روز گذشته
-                            </button>
-                            <button type="button" class="btn btn-secondary" onclick="loadLastDaysData(30)">
-                                <i class="fas fa-calendar-alt me-1"></i>
-                                ۳۰ روز گذشته
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="showReceivedDataHistory()">
-                                <i class="fas fa-history me-1"></i>
-                                نمایش سوابق دریافتی تاریخی
-                            </button>
-                        </div>
-                        
-                        <div id="historicalDataResults" style="display: none;">
-                            <div id="historicalSummary" class="historical-summary">
-                                <h6><i class="fas fa-chart-line me-2"></i>خلاصه نتایج</h6>
-                                <div id="summaryContent"></div>
+                        <div class="card-body">
+                            <!-- Loading Spinner -->
+                            <div id="ticketsLoading" class="text-center py-4" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">در حال بارگذاری...</span>
+                                </div>
+                                <p class="mt-2">در حال بارگذاری تیکت‌ها...</p>
                             </div>
-                            <div class="table-responsive">
-                                <table class="table historical-data-table" id="historicalDataTable">
-                                    <thead>
-                                        <tr>
-                                            <th><i class="fas fa-clock me-1"></i>زمان</th>
-                                            <th><i class="fas fa-eye me-1"></i>پیش‌نمایش داده</th>
-                                            <th><i class="fas fa-compass me-1"></i>جهت</th>
-                                            <th><i class="fas fa-cogs me-1"></i>عملیات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
+                            
+                            <!-- Tickets List -->
+                            <div id="ticketsList">
+                                <!-- Tickets will be loaded here -->
                             </div>
+                            
+                            <!-- Pagination -->
+                            <nav aria-label="صفحه‌بندی تیکت‌ها" id="ticketsPagination" style="display: none;">
+                                <ul class="pagination justify-content-center">
+                                    <!-- Pagination will be generated here -->
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-                <div id="mapid" class="map-container"></div>
-            </div>
-        </div>
-
-        <div class="location-details text-center">
-            <div id="locationInfo"></div>
-        </div>
+            
+        </main>
     </div>
 
-    <footer class="footer-copyright">
-        © 1404 تمامی حقوق متعلق به شرکت ماهان الکترونیک پرنیا
-    </footer>
 
-    <!-- کتابخانه‌های جاوااسکریپت -->
-    <script src="https://cdn.giot.ir/js/jquery.min.js"></script>
-    <script src="https://cdn.giot.ir/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
-    
-    <!-- اسکریپت سفارشی -->
-    <script src="script.js"></script>
+
 </body>
 </html>

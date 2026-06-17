@@ -1,0 +1,517 @@
+body {
+    font-family: IRANSans, sans-serif;
+    background-color: #f8f9fa;
+    direction: rtl;
+    background-image: url('https://my.giot.ir/photo/background.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    padding-top: 30px;
+}
+
+/* Header Styling */
+header {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 24px;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+/* Panel Styling */
+.panel-login {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    margin: auto;
+    overflow: hidden;
+}
+
+.panel-login > .panel-heading {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    color: #2c3e50;
+    padding: 20px 15px;
+    border-bottom: 1px solid #eaeaea;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Fix for RTL tab order */
+.panel-login > .panel-heading .row {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.panel-login > .panel-heading a {
+    text-decoration: none;
+    color: #495057;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 10px 15px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.panel-login > .panel-heading a:hover {
+    color: #2c3e50;
+    background-color: rgba(44, 62, 80, 0.05);
+}
+
+.panel-login > .panel-heading a.active {
+    color: #2c3e50;
+    font-weight: bold;
+    background-color: rgba(44, 62, 80, 0.1);
+}
+
+.panel-login > .panel-heading hr {
+    margin-top: 15px;
+    margin-bottom: 0;
+    border-top: 1px solid #eaeaea;
+}
+
+.panel-login > .panel-body {
+    padding: 25px;
+}
+
+/* Form Controls */
+.panel-login input[type="text"],
+.panel-login input[type="email"],
+.panel-login input[type="password"] {
+    height: 45px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    padding: 10px 15px;
+    text-align: right;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.panel-login input:hover,
+.panel-login input:focus {
+    border-color: #2c3e50;
+    box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+.form-group label {
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Button Styling */
+.btn-login,
+.btn-register,
+.btn-recover,
+.btn-finalreg {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: #fff;
+    font-weight: 500;
+    text-transform: uppercase;
+    border-radius: 5px;
+    border: none;
+    width: 100%;
+    text-align: center;
+    height: 45px;
+    padding: 0 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-login:hover,
+.btn-register:hover,
+.btn-recover:hover,
+.btn-finalreg:hover {
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Password Toggle Buttons */
+.password-container-login,
+.password-container1,
+.password-container2 {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-container-login input,
+.password-container1 input,
+.password-container2 input {
+    padding-right: 40px;
+}
+
+#toggleLoginPassword,
+#toggleRegisterPassword1,
+#toggleRegisterPassword2 {
+    position: absolute;
+    right: 10px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #495057;
+    transition: color 0.3s ease;
+}
+
+#toggleLoginPassword:hover,
+#toggleRegisterPassword1:hover,
+#toggleRegisterPassword2:hover {
+    color: #2c3e50;
+}
+
+/* Forgot Password Link */
+.forgot-password,
+.forgot-password:hover {
+    text-decoration: none;
+    color: #2c3e50;
+    transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+    color: #34495e;
+    text-decoration: underline;
+}
+
+/* Custom Row for OTP */
+.left-to-right-row {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+@media (max-width: 576px) {
+    .left-to-right-row {
+        flex-direction: column-reverse;
+    }
+    
+    .left-to-right-row > div {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .left-to-right-row > div:first-child {
+        margin-bottom: 0;
+    }
+}
+
+/* API Data Section */
+.api-data {
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #2c3e50;
+    font-family: IRANSans, sans-serif;
+    text-align: right;
+    direction: rtl;
+    border-right: 4px solid #2c3e50;
+    transition: all 0.3s ease;
+    border-top: 1px solid #eaeaea;
+    margin-bottom: 0;
+}
+
+.api-data i {
+    margin-left: 0.75rem;
+    color: #2c3e50;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(44, 62, 80, 0.1);
+    border-radius: 50%;
+    padding: 12px;
+    font-size: 14px;
+}
+
+.api-data p {
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: right;
+    direction: rtl;
+    font-size: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(44, 62, 80, 0.05);
+    transition: all 0.3s ease;
+}
+
+.api-data p:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.api-data p:hover {
+    background-color: rgba(44, 62, 80, 0.02);
+    transform: translateX(-5px);
+}
+
+.api-data-label {
+    font-weight: 600;
+    margin-right: 5px;
+    color: #2c3e50;
+}
+
+/* Footer Styling */
+footer {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: #fff;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 14px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    width: 100%;
+}
+
+/* Notification Styling */
+#notification {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .login-container {
+        padding: 1.5rem 0;
+    }
+    
+    .panel-login {
+        margin: 0 15px;
+    }
+    
+    .panel-body {
+        padding: 1.25rem;
+    }
+    
+    #apiDataDisplay {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+    
+    header {
+        font-size: 18px;
+        padding: 15px 0;
+    }
+    
+    .panel-login {
+        margin: 0 10px;
+    }
+    
+    .panel-login > .panel-heading a {
+        font-size: 14px;
+        padding: 8px 10px;
+    }
+    
+    .panel-body {
+        padding: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .user-greeting {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        top: 5px;
+        right: 10px;
+    }
+    
+    .left-to-right-row {
+        flex-direction: column;
+    }
+    
+    .left-to-right-row .col-sm-6 {
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .panel-login > .panel-heading .row {
+        flex-wrap: nowrap;
+    }
+    
+    .panel-login > .panel-heading a {
+        font-size: 12px;
+        padding: 6px 5px;
+        white-space: nowrap;
+    }
+    
+    .btn-login,
+    .btn-register,
+    .btn-recover,
+    .btn-finalreg {
+        height: 40px;
+        padding: 0.5rem 1rem;
+    }
+    
+    .panel-login input[type="text"],
+    .panel-login input[type="email"],
+    .panel-login input[type="password"] {
+        height: 40px;
+        font-size: 14px;
+    }
+    
+    .form-label {
+        font-size: 14px;
+    }
+    
+    .api-data p {
+        font-size: 13px;
+    }
+    
+    footer {
+        font-size: 12px;
+        padding: 10px 0;
+    }
+    
+    .col-sm-6.offset-sm-3 {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    /* Fix for mobile display issues */
+    .container.login-container {
+        padding-left: 10px;
+        padding-right: 10px;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    body {
+        padding-left: 0;
+        padding-right: 0;
+        overflow-x: hidden;
+    }
+    
+    .panel-login {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    /* Ensure form elements don't overflow */
+    .form-control {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Improve tab navigation on small screens */
+    .panel-heading .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 400px) {
+    header {
+        font-size: 16px;
+        padding: 12px 0;
+    }
+    
+    .panel-login > .panel-heading a {
+        font-size: 11px;
+        padding: 5px 2px;
+    }
+    
+    .form-label {
+        font-size: 13px;
+    }
+    
+    /* Additional fixes for very small screens */
+    .panel-body {
+        padding: 0.75rem;
+    }
+    
+    .form-group {
+        margin-bottom: 10px;
+    }
+    
+    /* Ensure password toggle buttons don't overlap with input text */
+    #toggleLoginPassword,
+    #toggleRegisterPassword1,
+    #toggleRegisterPassword2 {
+        right: 5px;
+    }
+    
+    .password-container-login input,
+    .password-container1 input,
+    .password-container2 input {
+        padding-right: 30px;
+    }
+    
+    /* Fix notification positioning */
+    #notification {
+        max-width: 85%;
+        font-size: 12px;
+        right: 7.5%;
+        left: 7.5%;
+    }
+    
+    /* Ensure no horizontal scrolling */
+    html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+}
+
+/* Specific fixes for Xiaomi Mi 9 Lite and similar devices */
+@media (max-width: 393px) {
+    .panel-login > .panel-heading a {
+        font-size: 10px;
+        padding: 4px 2px;
+    }
+    
+    .panel-login > .panel-heading .row {
+        margin: 0 -5px;
+    }
+    
+    .panel-login > .panel-heading .col-4 {
+        padding: 0 2px;
+    }
+    
+    /* Adjust form controls for better touch interaction */
+    .form-control {
+        font-size: 16px; /* Prevent zoom on focus in iOS */
+    }
+    
+    /* Ensure buttons are easily tappable */
+    .btn-login,
+    .btn-register,
+    .btn-recover,
+    .btn-finalreg {
+        min-height: 44px; /* Apple's recommended minimum touch target size */
+    }
+    
+    /* Fix for potential input field issues */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        -webkit-appearance: none;
+        border-radius: 5px;
+    }
+}
