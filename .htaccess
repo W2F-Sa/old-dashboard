@@ -1,0 +1,40 @@
+RewriteEngine On
+DirectoryIndex index.html
+Header set X-XSS-Protection "1; mode=block"
+
+# protect .htaccess
+<Files ~ "^.*\.([Hh][Tt][Aa])">
+	Order allow,deny
+	Deny from all
+	Satisfy all
+</Files>
+
+# protect .htpasswd
+<Files ~ "^.*\.([Hh][Tt][Pp])">
+	Order allow,deny
+	Deny from all
+	Satisfy all
+</Files>
+
+# protect files beginning with .
+RedirectMatch 403 /\.(.*)
+
+#redirect http to https
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+
+Options -Indexes
+Options -ExecCGI
+RewriteRule ^.*\.php$ - [F,L]
+
+<FilesMatch "(?i)\.(php5|php4|php|php3|php2|phtml|pl|py|jsp|asp|htm|shtml|sh|cgi)$">
+    Order Deny,Allow
+	Deny from All
+</FilesMatch>
+
+# Blank User Agent and Referer
+RewriteCond %{HTTP_REFERER} ^$ [NC] 
+RewriteCond %{HTTP_USER_AGENT} ^$ [NC] 
+RewriteRule .* – [F,L]

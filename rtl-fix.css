@@ -1,0 +1,168 @@
+/* اصلاح مشکلات تراز بندی RTL و مرکز کردن محتوا */
+
+/* اصلاح مشکلات Bootstrap RTL */
+.container-fluid {
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+    max-width: 100% !important;
+}
+
+.row.justify-content-center {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+}
+
+.col-12.col-lg-8.col-xl-6 {
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+    display: block !important;
+}
+
+/* اصلاح مشکل جابجایی به راست */
+.main-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+}
+
+/* اطمینان از مرکز بودن کارت اصلی */
+.main-card {
+    margin-right: auto !important;
+    margin-left: auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+.glass-card {
+    margin-right: auto !important;
+    margin-left: auto !important;
+    position: relative !important;
+}
+
+/* اصلاح ناوبری */
+.glass-nav {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+
+/* اصلاح برای موبایل */
+@media (max-width: 768px) {
+    .main-container {
+        padding-right: 10px !important;
+        padding-left: 10px !important;
+        width: 100% !important;
+    }
+    
+    .container-fluid {
+        padding-right: 10px !important;
+        padding-left: 10px !important;
+    }
+    
+    .col-12.col-lg-8.col-xl-6 {
+        padding-right: 10px !important;
+        padding-left: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .glass-card {
+        margin-right: 5px !important;
+        margin-left: 5px !important;
+        width: calc(100% - 10px) !important;
+    }
+    
+    .glass-nav {
+        width: calc(100% - 20px) !important;
+        min-width: auto !important;
+        max-width: calc(100% - 20px) !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+}
+
+/* اصلاح برای تبلت */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .col-12.col-lg-8.col-xl-6 {
+        max-width: 80% !important;
+        margin-right: auto !important;
+        margin-left: auto !important;
+    }
+}
+
+/* اصلاح برای دسکتاپ */
+@media (min-width: 1025px) {
+    .col-12.col-lg-8.col-xl-6 {
+        max-width: 60% !important;
+        margin-right: auto !important;
+        margin-left: auto !important;
+    }
+}
+
+/* اصلاح مشکل direction و text-align */
+body[dir="rtl"] .row.justify-content-center {
+    direction: ltr !important;
+    text-align: center !important;
+}
+
+body[dir="rtl"] .row.justify-content-center > * {
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* اطمینان از عدم تداخل با سایر استایل‌ها */
+.glass-card.main-card {
+    position: relative !important;
+    z-index: 10 !important;
+    display: block !important;
+    float: none !important;
+}
+
+/* حذف margin و padding اضافی که ممکن است مشکل ایجاد کند */
+.animate__animated {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* اصلاح فلکس باکس */
+.d-flex.justify-content-center {
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.d-flex.align-items-center {
+    align-items: center !important;
+}
+
+/* اصلاح گرید سیستم Bootstrap */
+.row {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+
+.row > * {
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+}
+
+/* اصلاح نهایی برای مرکز کردن */
+.justify-content-center {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+
+.justify-content-center > .col-12.col-lg-8.col-xl-6 {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+}
