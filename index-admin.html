@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت - GIOT</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@200;300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>در حال بارگذاری...</p>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal active">
+        <div class="modal-content glass-card">
+            <div class="login-header">
+                <h2><i class="fas fa-user-shield"></i> ورود به پنل مدیریت</h2>
+            </div>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="userid">کد ملی</label>
+                    <input type="text" id="userid" name="userid" placeholder="کد ملی 10 رقمی" maxlength="10" required>
+                    <i class="fas fa-id-card input-icon"></i>
+                </div>
+                <div class="input-group">
+                    <label for="password">رمز عبور</label>
+                    <input type="password" id="password" name="password" placeholder="رمز عبور" autocomplete="current-password" required>
+                    <i class="fas fa-lock input-icon"></i>
+                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    ورود
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="dashboard hidden">
+        <!-- Header -->
+        <header class="header glass-card">
+            <div class="header-content">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h1><i class="bi bi-shield-shaded"></i> پنل مدیریت GIOT</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <span class="user-name" id="user-name">مدیر سیستم</span>
+                        <button class="logout-btn" onclick="logout()">
+                            <i class="bi bi-box-arrow-right"></i>
+                            خروج
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar glass-card" id="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-section="overview">
+                        <a href="#">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>داشبورد</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="admins">
+                        <a href="#">
+                            <i class="bi bi-shield-check"></i>
+                            <span>مدیریت ادمین‌ها</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="sms">
+                        <a href="#">
+                            <i class="bi bi-chat-dots"></i>
+                            <span>ارسال پیامک</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="users">
+                        <a href="#">
+                            <i class="bi bi-people"></i>
+                            <span>مدیریت کاربران</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="crm">
+                        <a href="#">
+                            <i class="bi bi-headset"></i>
+                            <span>مدیریت تیکت‌ها</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="settings">
+                        <a href="#">
+                            <i class="bi bi-gear"></i>
+                            <span>تنظیمات</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section id="overview-section" class="content-section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-pie"></i> داشبورد کلی</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon users">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-users">0</h3>
+                            <p>کل کاربران</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon admin">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-admins">0</h3>
+                            <p>تعداد ادمین‌ها</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon sms">
+                            <i class="bi bi-chat-dots-fill"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="sent-sms">0</h3>
+                            <p>پیامک‌های ارسالی</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon mqtt">
+                            <i class="bi bi-wifi"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="mqtt-status">آنلاین</h3>
+                            <p>وضعیت MQTT</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Health Section -->
+                <div class="system-health-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-heartbeat"></i> وضعیت سلامت سیستم</h3>
+                        <button class="refresh-btn" onclick="adminPanel.refreshSystemHealth()">
+                            <i class="fas fa-sync-alt"></i>
+                            بروزرسانی
+                        </button>
+                    </div>
+                    <div class="health-grid">
+                        <div class="health-card glass-card">
+                            <div class="health-header">
+                                <i class="fas fa-microchip"></i>
+                                <span>پردازنده (CPU)</span>
+                            </div>
+                            <div class="health-content">
+                                <div class="progress-circle" id="cpu-progress">
+                                    <div class="progress-value" id="cpu-value">0%</div>
+                                </div>
+                                <div class="health-details">
+                                    <span class="health-status" id="cpu-status">در حال بارگذاری...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="health-card glass-card">
+                            <div class="health-header">
+                                <i class="fas fa-memory"></i>
+                                <span>حافظه (RAM)</span>
+                            </div>
+                            <div class="health-content">
+                                <div class="progress-circle" id="memory-progress">
+                                    <div class="progress-value" id="memory-value">0%</div>
+                                </div>
+                                <div class="health-details">
+                                    <span class="health-status" id="memory-status">در حال بارگذاری...</span>
+                                    <div class="memory-info">
+                                        <small>استفاده: <span id="memory-used">0</span> / <span id="memory-total">0</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="health-card glass-card">
+                            <div class="health-header">
+                                <i class="fas fa-hdd"></i>
+                                <span>فضای ذخیره‌سازی</span>
+                            </div>
+                            <div class="health-content">
+                                <div class="progress-circle" id="disk-progress">
+                                    <div class="progress-value" id="disk-value">0%</div>
+                                </div>
+                                <div class="health-details">
+                                    <span class="health-status" id="disk-status">در حال بارگذاری...</span>
+                                    <div class="disk-info">
+                                        <small>استفاده: <span id="disk-used">0</span> / <span id="disk-total">0</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="health-card glass-card system-info">
+                            <div class="health-header">
+                                <i class="fas fa-server"></i>
+                                <span>اطلاعات سیستم</span>
+                            </div>
+                            <div class="health-content">
+                                <div class="system-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">وضعیت کلی:</span>
+                                        <span class="detail-value" id="system-status">در حال بررسی...</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">آخرین بروزرسانی:</span>
+                                        <span class="detail-value" id="last-update">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">زمان سرور:</span>
+                                        <span class="detail-value" id="server-time">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admins Section -->
+            <section id="admins-section" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-users-cog"></i> مدیریت ادمین‌ها</h2>
+                    <button class="btn btn-primary" onclick="refreshAdminList()">
+                        <i class="fas fa-sync-alt"></i>
+                        بروزرسانی
+                    </button>
+                </div>
+                <!-- Admin Management Forms -->
+                <div class="admin-management">
+                    <div class="admin-form glass-card">
+                        <h3><i class="fas fa-user-plus"></i> تعریف مدیر جدید</h3>
+                        <form id="add-admin-form">
+                            <div class="input-group">
+                                <label for="new-admin-userid">کد ملی</label>
+                                <input type="text" id="new-admin-userid" placeholder="کد ملی 10 رقمی" maxlength="10">
+                            </div>
+                            <div class="input-group">
+                                <label for="new-admin-phone">شماره تلفن</label>
+                                <input type="text" id="new-admin-phone" placeholder="09xxxxxxxxx" maxlength="11">
+                            </div>
+                            <div class="input-group">
+                                <label for="new-admin-level">سطح دسترسی</label>
+                                <select id="new-admin-level" required>
+                                    <option value="">انتخاب کنید</option>
+                                    <option value="1">کاربر عادی (1)</option>
+                                    <option value="10">کاربر ویژه (10)</option>
+                                    <option value="50">ناظر (50)</option>
+                                    <option value="100">مدیر پایه (100)</option>
+                                    <option value="200">مدیر میانی (200)</option>
+                                    <option value="240">مدیر ارشد (240)</option>
+                                    <option value="255">مدیر کل - تمام دسترسی‌ها (255)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus"></i>
+                                افزودن مدیر
+                            </button>
+                        </form>
+                    </div>
+                    <div class="admin-form glass-card">
+                        <h3><i class="fas fa-user-minus"></i> حذف مدیر</h3>
+                        <form id="remove-admin-form">
+                            <div class="input-group">
+                                <label for="remove-admin-userid">کد ملی</label>
+                                <input type="text" id="remove-admin-userid" placeholder="کد ملی 10 رقمی" maxlength="10">
+                            </div>
+                            <div class="input-group">
+                                <label for="remove-admin-phone">شماره تلفن</label>
+                                <input type="text" id="remove-admin-phone" placeholder="09xxxxxxxxx" maxlength="11">
+                            </div>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                                حذف دسترسی مدیریت
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="admin-list glass-card">
+                    <div class="table-container">
+                        <table id="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>نام</th>
+                                    <th>نام خانوادگی</th>
+                                    <th>کد ملی</th>
+                                    <th>شماره تلفن</th>
+                                    <th>ایمیل</th>
+                                    <th>سطح دسترسی</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-body">
+                                <!-- Admin data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SMS Section -->
+            <section id="sms-section" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-sms"></i> ارسال پیامک</h2>
+                </div>
+                <div class="sms-container">
+                    <div class="sms-card glass-card">
+                        <h3><i class="fas fa-broadcast-tower"></i> ارسال گروهی</h3>
+                        <form id="bulk-sms-form">
+                            <div class="input-group">
+                                <label for="bulk-message">متن پیام</label>
+                                <textarea id="bulk-message" name="message" placeholder="متن پیام خود را وارد کنید..." maxlength="500" required></textarea>
+                                <div class="char-counter">
+                                    <span id="bulk-char-count">0</span>/500
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                ارسال به همه کاربران
+                            </button>
+                        </form>
+                    </div>
+                    <div class="sms-card glass-card">
+                        <h3><i class="fas fa-user"></i> ارسال به کاربر خاص</h3>
+                        <form id="single-sms-form">
+                            <div class="input-group">
+                                <label for="target-user">کد ملی کاربر</label>
+                                <input type="text" id="target-user" name="targetuser" placeholder="کد ملی 10 رقمی" maxlength="10">
+                            </div>
+                            <div class="input-group">
+                                <label for="target-phone">شماره تلفن</label>
+                                <input type="text" id="target-phone" name="targetphonenumber" placeholder="09xxxxxxxxx" maxlength="11">
+                            </div>
+                            <div class="input-group">
+                                <label for="single-message">متن پیام</label>
+                                <textarea id="single-message" name="message" placeholder="متن پیام خود را وارد کنید..." maxlength="500" required></textarea>
+                                <div class="char-counter">
+                                    <span id="single-char-count">0</span>/500
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                ارسال پیام
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users-section" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-users"></i> مدیریت کاربران</h2>
+                    <button class="btn btn-primary" onclick="refreshUserList()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        بروزرسانی لیست
+                    </button>
+                </div>
+                
+                <!-- User Search and Management -->
+                <div class="user-management">
+                    <div class="user-search glass-card">
+                        <h3><i class="fas fa-search"></i> جستجوی کاربر</h3>
+                        <form id="user-search-form">
+                            <div class="search-inputs">
+                                <div class="input-group">
+                                    <label for="search-user-id">کد ملی</label>
+                                    <input type="text" id="search-user-id" placeholder="کد ملی 10 رقمی" maxlength="10">
+                                </div>
+                                <div class="input-group">
+                                    <label for="search-user-phone">شماره تلفن</label>
+                                    <input type="text" id="search-user-phone" placeholder="09xxxxxxxxx" maxlength="11">
+                                </div>
+                            </div>
+                            <div class="search-actions">
+                                <button type="button" class="btn btn-primary" onclick="searchUserInfo()">
+                                    <i class="bi bi-person"></i>
+                                    اطلاعات کاربر
+                                </button>
+                                <button type="button" class="btn btn-outline" onclick="searchUserDevices()">
+                                    <i class="bi bi-cpu"></i>
+                                    دستگاه‌های کاربر
+                                </button>
+                                <button type="button" class="btn btn-outline" onclick="searchUserRelationships()">
+                                    <i class="bi bi-people"></i>
+                                    روابط کاربر
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- User Actions -->
+                    <div class="user-actions glass-card">
+                        <h3><i class="fas fa-cogs"></i> عملیات کاربر</h3>
+                        <form id="user-actions-form">
+                            <div class="action-inputs">
+                                <div class="input-group">
+                                    <label for="action-user-id">کد ملی</label>
+                                    <input type="text" id="action-user-id" placeholder="کد ملی 10 رقمی" maxlength="10">
+                                </div>
+                                <div class="input-group">
+                                    <label for="action-user-phone">شماره تلفن</label>
+                                    <input type="text" id="action-user-phone" placeholder="09xxxxxxxxx" maxlength="11">
+                                </div>
+
+                            </div>
+                            <div class="action-buttons">
+                                <button type="button" class="btn btn-success" onclick="enableUserAccount()">
+                                    <i class="bi bi-person-check"></i>
+                                    فعال‌سازی حساب
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="disableUserAccount()">
+                                    <i class="bi bi-person-x"></i>
+                                    غیرفعال‌سازی حساب
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Financial Management -->
+                    <div class="financial-management glass-card">
+                        <h3><i class="fas fa-money-bill-wave"></i> مدیریت مالی</h3>
+                        <form id="financial-form">
+                            <div class="financial-inputs">
+                                <div class="input-group">
+                                    <label for="financial-user-id">کد ملی</label>
+                                    <input type="text" id="financial-user-id" placeholder="کد ملی 10 رقمی" maxlength="10">
+                                </div>
+                                <div class="input-group">
+                                    <label for="financial-user-phone">شماره تلفن</label>
+                                    <input type="text" id="financial-user-phone" placeholder="09xxxxxxxxx" maxlength="11">
+                                </div>
+                                <div class="input-group">
+                                    <label for="charge-amount">مبلغ شارژ (تومان)</label>
+                                    <input type="number" id="charge-amount" placeholder="مبلغ به تومان" min="1000" step="1000">
+                                </div>
+
+                            </div>
+                            <div class="financial-actions">
+                                <button type="button" class="btn btn-primary" onclick="getUserBill()">
+                                    <i class="bi bi-receipt"></i>
+                                    مشاهده موجودی
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="chargeUserBill()">
+                                    <i class="bi bi-plus-circle"></i>
+                                    شارژ حساب
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- MQTT Management -->
+                    <div class="mqtt-management glass-card">
+                        <h3><i class="fas fa-wifi"></i> مدیریت MQTT</h3>
+                        <form id="mqtt-form">
+                            <div class="mqtt-inputs">
+                                <div class="input-group">
+                                    <label for="mqtt-user-id">کد ملی</label>
+                                    <input type="text" id="mqtt-user-id" placeholder="کد ملی 10 رقمی" maxlength="10">
+                                </div>
+                                <div class="input-group">
+                                    <label for="mqtt-user-phone">شماره تلفن</label>
+                                    <input type="text" id="mqtt-user-phone" placeholder="09xxxxxxxxx" maxlength="11">
+                                </div>
+                                <div class="input-group">
+                                    <label for="mqtt-months">تعداد ماه</label>
+                                    <select id="mqtt-months" required>
+                                        <option value="">انتخاب کنید</option>
+                                        <option value="1">1 ماه</option>
+                                        <option value="3">3 ماه</option>
+                                        <option value="6">6 ماه</option>
+                                        <option value="12">12 ماه</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="renewMqttExpiration()">
+                                <i class="bi bi-clock"></i>
+                                تمدید MQTT
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- User List -->
+                <div class="user-list glass-card">
+                    <div class="section-header">
+                        <h3><i class="fas fa-list"></i> لیست کاربران</h3>
+                        <div class="list-controls">
+                            <input type="text" id="user-filter" placeholder="جستجو در لیست..." class="filter-input">
+                            <button class="btn btn-outline" onclick="exportUserList()">
+                                <i class="bi bi-download"></i>
+                                دانلود لیست
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="user-table">
+                            <thead>
+                                <tr>
+                                    <th>نام</th>
+                                    <th>نام خانوادگی</th>
+                                    <th>کد ملی</th>
+                                    <th>شماره تلفن</th>
+                                    <th>ایمیل</th>
+                                    <th>وضعیت حساب</th>
+                                    <th>سطح دسترسی</th>
+                                    <th>موجودی</th>
+                                    <th>انقضای MQTT</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body">
+                                <!-- User data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- User Details Modal -->
+                <div id="user-details-modal" class="modal">
+                    <div class="modal-content glass-card user-details-content">
+                        <div class="modal-header">
+                            <h3><i class="bi bi-person"></i> جزئیات کاربر</h3>
+                            <button class="close-modal" onclick="closeUserDetailsModal()">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                        <div id="user-details-content">
+                            <!-- User details will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Devices Modal -->
+                <div id="user-devices-modal" class="modal">
+                    <div class="modal-content glass-card">
+                        <div class="modal-header">
+                            <h3><i class="bi bi-router"></i> دستگاه‌های کاربر</h3>
+                            <button class="close-modal" onclick="closeUserDevicesModal()">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                        <div id="user-devices-content">
+                            <!-- User devices will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Relationships Modal -->
+                <div id="user-relationships-modal" class="modal">
+                    <div class="modal-content glass-card">
+                        <div class="modal-header">
+                            <h3><i class="bi bi-people"></i> روابط کاربر</h3>
+                            <button class="close-modal" onclick="closeUserRelationshipsModal()">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                        <div id="user-relationships-content">
+                            <!-- User relationships will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CRM Section -->
+            <section id="crm-section" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-headset"></i> مدیریت تیکت‌ها</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="refreshTickets()">
+                            <i class="fas fa-sync-alt"></i>
+                            بروزرسانی
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ticket Filters -->
+                <div class="ticket-filters glass-card">
+                    <div class="filter-group">
+                        <label for="ticket-status-filter">فیلتر وضعیت:</label>
+                        <select id="ticket-status-filter" onchange="filterTickets()">
+                            <option value="all">همه تیکت‌ها</option>
+                            <option value="open">باز</option>
+                            <option value="closed">بسته</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="ticket-search">جستجو:</label>
+                        <input type="text" id="ticket-search" placeholder="جستجو در تیکت‌ها..." oninput="searchTickets()">
+                    </div>
+                </div>
+
+                <!-- Tickets List -->
+                <div class="tickets-container glass-card">
+                    <div class="tickets-header">
+                        <h3><i class="fas fa-list"></i> لیست تیکت‌ها</h3>
+                        <div class="pagination-info">
+                            <span id="tickets-count">0 تیکت</span>
+                        </div>
+                    </div>
+                    <div class="tickets-table-container">
+                        <table class="tickets-table">
+                            <thead>
+                                <tr>
+                                    <th>شناسه</th>
+                                    <th>کاربر</th>
+                                    <th>موضوع</th>
+                                    <th>وضعیت</th>
+                                    <th>تاریخ ایجاد</th>
+                                    <th>آخرین بروزرسانی</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tickets-table-body">
+                                <!-- Tickets will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container">
+                        <button class="btn btn-outline" id="prev-page" onclick="changePage(-1)" disabled>
+                            <i class="fas fa-chevron-right"></i>
+                            قبلی
+                        </button>
+                        <span class="page-info">
+                            صفحه <span id="current-page">1</span> از <span id="total-pages">1</span>
+                        </span>
+                        <button class="btn btn-outline" id="next-page" onclick="changePage(1)" disabled>
+                            بعدی
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings-section" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-cog"></i> تنظیمات</h2>
+                </div>
+                <div class="settings-container">
+                    <div class="settings-card glass-card">
+                        <h3><i class="bi bi-database"></i> مدیریت داده‌ها</h3>
+                        <div class="settings-actions">
+                            <button class="btn btn-outline" onclick="exportData()">
+                                <i class="bi bi-download"></i>
+                                دانلود داده‌ها
+                            </button>
+                            <button class="btn btn-danger" onclick="clearLocalStorage()">
+                                <i class="bi bi-trash"></i>
+                                پاک کردن حافظه محلی
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Ticket Details Modal -->
+    <div id="ticket-details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-ticket-alt"></i> جزئیات تیکت</h3>
+                <span class="close" onclick="closeTicketDetailsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="ticket-info">
+                    <div class="ticket-meta">
+                        <div class="meta-item">
+                            <strong>شناسه تیکت:</strong>
+                            <span id="ticket-detail-id">-</span>
+                        </div>
+                        <div class="meta-item">
+                            <strong>کاربر:</strong>
+                            <span id="ticket-detail-user">-</span>
+                        </div>
+                        <div class="meta-item">
+                            <strong>وضعیت:</strong>
+                            <span id="ticket-detail-status" class="status-badge">-</span>
+                        </div>
+                        <div class="meta-item">
+                            <strong>تاریخ ایجاد:</strong>
+                            <span id="ticket-detail-created">-</span>
+                        </div>
+                    </div>
+                    <div class="ticket-subject">
+                        <h4>موضوع:</h4>
+                        <p id="ticket-detail-subject">-</p>
+                    </div>
+                    <div class="ticket-message">
+                        <h4>پیام اصلی:</h4>
+                        <div id="ticket-detail-message" class="message-content">-</div>
+                    </div>
+                    <div class="ticket-attachments" id="ticket-detail-attachments" style="display: none;">
+                        <h4><i class="fas fa-paperclip"></i> پیوست‌های تیکت</h4>
+                        <div class="attachments-container">
+                            <!-- Ticket attachments will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ticket-replies">
+                    <h4><i class="fas fa-comments"></i> پاسخ‌ها</h4>
+                    <div id="ticket-replies-container">
+                        <!-- Replies will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="reply-form" id="reply-form-container">
+                    <h4><i class="fas fa-reply"></i> ارسال پاسخ</h4>
+                    <textarea id="reply-message" placeholder="پاسخ خود را بنویسید..." rows="4"></textarea>
+                    <div class="file-upload-section">
+                        <label for="reply-attachment" class="file-upload-label">
+                            <i class="fas fa-paperclip"></i>
+                            انتخاب فایل پیوست (اختیاری)
+                        </label>
+                        <input type="file" id="reply-attachment" accept=".jpg,.jpeg,.png,.webp,.pdf" style="display: none;">
+                        <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                            <span id="selected-file-name"></span>
+                            <button type="button" class="remove-file-btn" onclick="removeSelectedFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <small class="file-help-text">فرمت‌های مجاز: JPG, PNG, WebP, PDF - حداکثر حجم: 1MB</small>
+                    </div>
+                    <div class="reply-actions">
+                        <button class="btn btn-primary" onclick="sendReply()">
+                            <i class="fas fa-paper-plane"></i>
+                            ارسال پاسخ
+                        </button>
+                        <button class="btn btn-success" id="reopen-ticket-btn" onclick="reopenTicket()" style="display: none;">
+                            <i class="fas fa-unlock"></i>
+                            بازگشایی تیکت
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
